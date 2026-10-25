@@ -1,5 +1,54 @@
 # Replikrazy — restart handoff
 
+## ChatGPT local continuation — 2026-10-25
+
+Current continuation branch: `chatgpt/lean-reliability-20261025`, based on
+`3233bb4a88fb254ba16ffc32c6e157aeb85750f5`. This section supersedes the older
+session's ownership and "all pushed" statements below for this continuation.
+No pushes, PR changes, merges, research publication or provider writes were made.
+Live refs and draft PR #1 were inspected before changes; refs were unchanged
+at the final check. No AGENTS.md or local skill files were present.
+
+Completed bounded reliability batch:
+- Separate intake/comparison worker ownership; replacing a job terminates it,
+  and queued messages cannot affect its replacement.
+- 60-second worker budget, including a wall-clock deadline check on messages
+  after tab suspension. Worker creation failure now fails closed instead of
+  doing uninterruptible work on the page thread.
+- New intake clears previous artifact/export/comparison state immediately and
+  resets public-data review. Identity hashes and asynchronous exports cannot
+  commit stale results after their inputs change.
+- Comparisons pin their reference inventory, reject intake errors rather than
+  comparing a valid subset, and discard stale results/progress.
+- Export handlers recheck rights/intended-use/public-data gates.
+
+Verification in this environment:
+- Baseline: 11 test files / 137 tests passed; typecheck and build passed.
+- Changed: 12 test files / 144 tests passed; typecheck and build passed.
+  Existing fuzz, hostile regex budgets, fixtures and thresholds are unchanged.
+- Chromium via Playwright against production preview: 8 assertions covering
+  valid comparison, malformed-copy rejection, export invalidation, public-data
+  reset, hostile-script nonexecution and worker-unavailable failure. Zero page
+  errors and zero external requests. Smoke script retained outside git at
+  `/workspace/scratch/replikrazy-validation/check.mjs`; its Playwright tooling
+  is in `/tmp/replikrazy-browser` (import resolution needs that directory).
+- Initial npm ci failed because its default cache could not be created;
+  `npm ci --cache /tmp/replikrazy-npm-cache` succeeded without lockfile changes.
+- `git diff --check` passed.
+
+Private specs blocker: Library preparation resolved version 13, but the
+supported executor-local materialization helper returned exactly
+`library file transfer failed: download failed`. No bytes were recovered or
+hash-verified; no invented URL/fallback or publication was attempted. The
+contract-shaped ScanReport and Diagnostic keys remain deferred pending specs.
+
+Remaining: exact same-size input-change detection (not proved by immutable
+Blob metadata), contract records, manual workflow/RTL review, manual screen
+reader and independent security review. Deadline tests use controlled workers;
+real browser suspension and cross-browser testing remain open. No live-browser
+publishing is verified. Continue from this local branch, preserving this batch;
+source publication still requires owner authorization.
+
 _Last updated: 2026-10-25 ~11:15 UTC, after milestone 2 (Claude Code cloud session `01YP9ZPr`)._
 
 ## Ownership

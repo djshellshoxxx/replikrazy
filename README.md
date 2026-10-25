@@ -27,7 +27,7 @@ deployment or production readiness is claimed.
 
 | Area | State |
 | --- | --- |
-| ZIP / folder intake with bounded, validating reader; runs in a Web Worker with progress and cancel | implemented, unit-tested, browser smoke-tested |
+| ZIP / folder intake with bounded, validating reader; runs in a Web Worker with progress, cancel and a 60-second budget | implemented, unit-tested, browser smoke-tested |
 | Path safety (traversal, absolute, drive letters, reserved names, case collisions) | implemented, unit-tested |
 | Byte-preserving inventory, SHA-256, file-list checksum | implemented, unit-tested |
 | Contract `ArtifactManifest` (owner app id + entry page), RFC 8785 canonical JSON, `artifactId` (folder and ZIP give the same id) | implemented, unit-tested, browser smoke-tested |

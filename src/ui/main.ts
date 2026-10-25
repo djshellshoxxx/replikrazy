@@ -8,11 +8,11 @@ import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
 import type { BundleFile, IntakeIssue, IntakeOptions, IntakeResult } from "../core/intake";
 import { compareInventories, isIdentical } from "../core/compare";
-import { runAnalysis, type AnalysisInput, type AnalysisResult, type Progress } from "../core/pipeline";
+import { type AnalysisInput, type Progress } from "../core/pipeline";
 import type { Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, transition, type DryRunPlan } from "../core/plan";
 import type { ScanReport } from "../core/scan";
-import { DEFAULT_ZIP_LIMITS } from "../core/zip";
+import { AnalysisStopped, AnalysisTask } from "./analysis-task";
 import { filterCatalogue, getProvider } from "../providers/catalogue";
 import type { MethodId, ProviderAdapter } from "../providers/types";
 
@@ -83,41 +83,56 @@ function restoreStatuses(plan: DryRunPlan): DryRunPlan {
 
 const fmtBytes = (n: number) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KiB` : `${(n / 1048576).toFixed(1)} MiB`);
 
-class Cancelled extends Error {}
-let cancelActive: (() => void) | null = null;
+const workerFactory = () => new Worker(new URL("./analysis-worker.ts", import.meta.url), { type: "module" });
+const intakeTask = new AnalysisTask(workerFactory);
+const compareTask = new AnalysisTask(workerFactory);
 let generation = 0;
+let compareGeneration = 0;
+let identityGeneration = 0;
 
-// Runs the pipeline in a module worker so large inputs keep the page
-// responsive and can be cancelled (T-ART-06). Falls back to the page thread
-// where workers are unavailable.
-function analyzeOffThread(input: AnalysisInput, opts: IntakeOptions, onProgress: Progress): Promise<AnalysisResult> {
-  if (typeof Worker === "undefined") return runAnalysis(input, opts, onProgress);
-  return new Promise((resolve, reject) => {
-    const w = new Worker(new URL("./analysis-worker.ts", import.meta.url), { type: "module" });
-    const finish = () => { w.terminate(); cancelActive = null; };
-    cancelActive = () => { finish(); reject(new Cancelled()); };
-    w.onmessage = (ev: MessageEvent) => {
-      const m = ev.data as { type: string; stage?: Parameters<Progress>[0]; done?: number; total?: number; result?: AnalysisResult };
-      if (m.type === "progress") onProgress(m.stage!, m.done!, m.total!);
-      else if (m.type === "done") { finish(); resolve(m.result!); }
-      else { finish(); reject(new Error("analysis failed")); }
-    };
-    w.onerror = () => { finish(); reject(new Error("analysis failed")); };
-    w.postMessage({ input, opts });
-  });
+function failureMessage(e: unknown): string {
+  if (e instanceof AnalysisStopped) {
+    if (e.reason === "cancelled") return "Cancelled. Nothing was kept; select the input again to retry.";
+    if (e.reason === "timeout") return "Analysis exceeded the 60 second limit. Nothing was kept; try a smaller input.";
+    if (e.reason === "unavailable") return "Analysis requires Web Worker support. Nothing was kept.";
+  }
+  return "Could not read this input.";
+}
+
+function clearArtifact() {
+  ++identityGeneration;
+  ++compareGeneration;
+  compareTask.cancel();
+  state.files = [];
+  state.inv = null;
+  state.scan = null;
+  state.manifest = null;
+  state.artifactId = null;
+  state.plan = null;
+  state.hasErrors = true;
+  state.selected.clear();
+  state.publicDataReviewed = false;
+  ($("use-public") as HTMLInputElement).checked = false;
+  for (const id of ["inventory", "compat", "plan"]) $(id).hidden = true;
+  $("root-choice").replaceChildren();
+  $("compare-result").replaceChildren();
+  $("artifact-id").textContent = "Artifact id: not available until the identity is valid.";
+  ($("export-btn") as HTMLButtonElement).disabled = true;
+  ($("payload-btn") as HTMLButtonElement).disabled = true;
 }
 
 async function loadBundle(input: AnalysisInput, stripRoot = false) {
   const status = $("intake-status");
   const cancelBtn = $("cancel-btn") as HTMLButtonElement;
-  cancelActive?.();
+  intakeTask.cancel();
+  clearArtifact();
   const gen = ++generation;
   status.textContent = "Reading…";
   cancelBtn.hidden = false;
   state.input = input;
   state.stripRoot = stripRoot;
   try {
-    const { intake: r, inv, scan } = await analyzeOffThread(input, { stripRoot }, (stage, done, total) => {
+    const { intake: r, inv, scan } = await intakeTask.run(input, { stripRoot }, (stage, done, total) => {
       if (gen === generation) status.textContent = `${stage[0]!.toUpperCase()}${stage.slice(1)}… ${done} / ${total}`;
     });
     if (gen !== generation) return; // a newer selection replaced this one
@@ -136,7 +151,8 @@ async function loadBundle(input: AnalysisInput, stripRoot = false) {
   } catch (e) {
     if (gen !== generation) return;
     // Do not echo exception text: it could contain imported names/contents.
-    status.textContent = e instanceof Cancelled ? "Cancelled. Nothing was kept; select the input again to retry." : "Could not read this input.";
+    state.input = null;
+    status.textContent = failureMessage(e);
   } finally {
     if (gen === generation) cancelBtn.hidden = true;
   }
@@ -145,16 +161,21 @@ async function loadBundle(input: AnalysisInput, stripRoot = false) {
 // Recomputes facts, manifest and artifactId from the current appId/entrypoint.
 async function refreshIdentity() {
   if (!state.inv || !state.scan) return;
+  const revision = ++identityGeneration;
   const inv = state.inv;
   const facts = analyze(inv.entries, state.entrypoint);
   const issues: { severity: string; path?: string; message: string }[] = [...state.intakeIssues, ...factIssues(facts)];
   state.manifest = null;
   state.artifactId = null;
+  state.hasErrors = true;
+  rebuildPlan();
   if (facts.entrypoint) {
     const m = buildManifest(state.appId, inv.entries, facts.entrypoint);
     if (m.ok) {
+      const id = await artifactId(m.manifest);
+      if (revision !== identityGeneration) return;
       state.manifest = m.manifest;
-      state.artifactId = await artifactId(m.manifest);
+      state.artifactId = id;
     } else issues.push(...m.errors.map((message) => ({ severity: "error", message: `manifest: ${message}` })));
   }
   // Suspected live credentials block export just like intake errors.
@@ -322,17 +343,20 @@ function renderPlan() {
 }
 
 async function download() {
-  if (!state.plan || !state.inv) return;
+  if (!state.plan || !state.inv || state.hasErrors || !state.publicDataReviewed || validateIntendedUse(state.use).length) return;
+  const plan = state.plan, inv = state.inv, use = state.use;
+  const revision = identityGeneration;
   const providers = state.plan.destinations.map((d) => getProvider(d.providerId)!);
   if (!state.manifest || !state.artifactId) return;
   const id = state.artifactId as `sha256:${string}`;
   const pp = await buildPublishPlan(state.manifest, id, state.use, state.plan, providers, state.scan ?? undefined, Date.now());
+  if (revision !== identityGeneration || state.plan !== plan || state.inv !== inv || state.use !== use || !state.publicDataReviewed || state.hasErrors) return;
   saveZip(buildExport(state.files, state.inv, state.manifest, state.plan, providers, state.scan ?? undefined, pp), `replikrazy-handoff-${state.artifactId.slice(7, 19)}.zip`);
 }
 
 function downloadPayload() {
   if (!state.inv || state.hasErrors) return;
-  if (!state.artifactId || !state.publicDataReviewed) return;
+  if (!state.artifactId || !state.publicDataReviewed || validateIntendedUse(state.use).length) return;
   saveZip(buildPayloadZip(state.files), `replikrazy-app-${state.artifactId.slice(7, 19)}.zip`);
 }
 
@@ -348,11 +372,6 @@ function saveZip(zip: Uint8Array, name: string) {
 $("zip-input").addEventListener("change", (ev) => {
   const f = (ev.target as HTMLInputElement).files?.[0];
   if (!f) return;
-  // Refuse oversized archives from metadata, before reading them into memory.
-  if (f.size > DEFAULT_ZIP_LIMITS.maxArchiveBytes) {
-    $("intake-status").textContent = `Archive is larger than the ${DEFAULT_ZIP_LIMITS.maxArchiveBytes / 1048576} MiB limit.`;
-    return;
-  }
   void loadBundle({ kind: "zip", file: f });
 });
 $("dir-input").addEventListener("change", (ev) => {
@@ -361,7 +380,7 @@ $("dir-input").addEventListener("change", (ev) => {
 });
 for (const id of ["f-text", "f-noacct", "f-domain", "f-method"]) $(id).addEventListener("input", renderProviders);
 $("export-btn").addEventListener("click", () => void download());
-$("cancel-btn").addEventListener("click", () => cancelActive?.());
+$("cancel-btn").addEventListener("click", () => intakeTask.cancel());
 // Research catalogue: loaded only when first opened.
 $("research").addEventListener("toggle", async (ev) => {
   const d = ev.target as HTMLDetailsElement;
@@ -381,16 +400,23 @@ $("research").addEventListener("toggle", async (ev) => {
 async function compareCopy(input: AnalysisInput) {
   const out = $("compare-result");
   if (!state.inv) { out.textContent = "Load the original site first."; return; }
+  const reference = state.inv;
+  const gen = ++compareGeneration;
+  compareTask.cancel();
   out.textContent = "Reading the copy…";
   try {
-    const progress: Progress = (stage, done, total) => { out.textContent = `Copy: ${stage} ${done} / ${total}`; };
+    const progress: Progress = (stage, done, total) => { if (gen === compareGeneration) out.textContent = `Copy: ${stage} ${done} / ${total}`; };
     // A copy may or may not be wrapped in one folder; keep whichever reading
     // matches more of the original.
-    const plain = await analyzeOffThread(input, { stripRoot: false }, progress);
-    let best = compareInventories(state.inv.entries, plain.inv.entries);
+    const plain = await compareTask.run(input, { stripRoot: false }, progress);
+    if (gen !== compareGeneration) return;
+    if (plain.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
+    let best = compareInventories(reference.entries, plain.inv.entries);
     if (plain.intake.candidateRoot) {
-      const stripped = await analyzeOffThread(input, { stripRoot: true }, progress);
-      const c = compareInventories(state.inv.entries, stripped.inv.entries);
+      const stripped = await compareTask.run(input, { stripRoot: true }, progress);
+      if (gen !== compareGeneration) return;
+      if (stripped.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
+      const c = compareInventories(reference.entries, stripped.inv.entries);
       if (c.matching.length > best.matching.length) best = c;
     }
     const list = (title: string, items: string[]) => {
@@ -412,7 +438,7 @@ async function compareCopy(input: AnalysisInput) {
       list("Extra in the copy", best.extra),
     );
   } catch (e) {
-    out.textContent = e instanceof Cancelled ? "Cancelled." : "Could not read the copy.";
+    if (gen === compareGeneration) out.textContent = failureMessage(e);
   }
 }
 $("cmp-zip").addEventListener("change", (ev) => {
