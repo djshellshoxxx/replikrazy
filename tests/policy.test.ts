@@ -110,3 +110,10 @@ describe("untrusted saved plan statuses", () => {
     expect(restorePlanStatuses(blocked, { netlify: "verified-by-user" }).destinations[0]!.status).toBe("blocked");
   });
 });
+
+it("restores a later attestation when the fresh assessment is already ready", () => {
+  const plan = buildPlan("sha256:test", facts, false, [getProvider("netlify")!], undefined, use("personal"));
+  const ready = { ...plan, destinations: plan.destinations.map((d) => ({ ...d, status: "ready-for-manual-export" as const, baseStatus: "ready-for-manual-export" as const })) };
+  expect(restorePlanStatuses(ready, { netlify: "uploaded-by-user" }).destinations[0]!.status).toBe("uploaded-by-user");
+  expect(restorePlanStatuses(ready, { netlify: "needs-review" })).toEqual(ready);
+});

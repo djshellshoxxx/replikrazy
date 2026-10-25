@@ -1,19 +1,20 @@
 // Optional local Chromium checks. Install playwright-core and axe-core@4.10.2
 // outside this repo, set BROWSER_TEST_TOOLS to that directory, build, then run
 // against `vite preview`. No provider access or imported content execution.
-import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
+import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { zipSync } from 'fflate';
-const requireTools = createRequire(resolve(process.env.BROWSER_TEST_TOOLS ?? '.', 'package.json'));
-const { chromium } = requireTools('playwright-core');
-const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH ?? '/usr/bin/chromium', args: ['--no-sandbox'] });
+import { browserEngine, launchBrowser } from './browser-tools.mjs';
+const browser = await launchBrowser();
 const origin = 'http://127.0.0.1:4173';
 const errors = [], external = [];
 let checks = 0;
 const check = (value, expected) => { assert.deepEqual(value, expected); checks++; };
 const zip = files => ({ name: 'site.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync(Object.fromEntries(Object.entries(files).map(([k, v]) => [k, new TextEncoder().encode(v)])))) });
 const site = zip({ 'index.html': '<script>globalThis.pwned=true</script><h1>Hello</h1>' });
+const fixtureDir = await mkdtemp(join(tmpdir(), 'replikrazy-picker-'));
 const page = await browser.newPage();
 page.on('pageerror', e => errors.push(e.message));
 page.on('request', r => { if (!r.url().startsWith(origin + '/')) external.push(r.url()); });
@@ -27,6 +28,34 @@ async function selectNetlify() {
 try {
   await page.goto(origin);
   await load();
+  // Exercise the real folder picker, explicit root choice, and ZIP identity parity.
+  const zipArtifact = await page.locator('#artifact-id').textContent();
+  await writeFile(join(fixtureDir, 'index.html'), '<script>globalThis.pwned=true</script><h1>Hello</h1>');
+  await page.locator('#dir-input').setInputFiles(fixtureDir);
+  await page.waitForFunction(() => document.querySelector('#root-choice input'));
+  await page.locator('#root-choice input').check();
+  await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('site root') && document.querySelector('#artifact-id').textContent.includes('sha256:'));
+  check(await page.locator('#artifact-id').textContent(), zipArtifact);
+  // Hold main-thread identity hashes and release them newest-first. Worker
+  // hashing is untouched; only the UI identity race is under test.
+  await page.evaluate(() => {
+    window.realDigest = crypto.subtle.digest.bind(crypto.subtle);
+    window.pendingIdentity = [];
+    crypto.subtle.digest = (...args) => window.realDigest(...args).then(bytes => new Promise(resolve => window.pendingIdentity.push(() => resolve(bytes))));
+  });
+  await page.locator('#app-id').fill('older');
+  await page.locator('#app-id').dispatchEvent('change');
+  await page.waitForFunction(() => window.pendingIdentity.length === 1);
+  await page.locator('#app-id').fill('newer');
+  await page.locator('#app-id').dispatchEvent('change');
+  await page.waitForFunction(() => window.pendingIdentity.length === 2);
+  await page.evaluate(() => window.pendingIdentity[1]());
+  await page.waitForFunction(() => document.querySelector('#app-id').value === 'newer' && document.querySelector('#artifact-id').textContent.includes('sha256:'));
+  const latestArtifact = await page.locator('#artifact-id').textContent();
+  await page.evaluate(async () => { window.pendingIdentity[0](); await new Promise(resolve => setTimeout(resolve, 0)); crypto.subtle.digest = window.realDigest; });
+  check(await page.locator('#artifact-id').textContent(), latestArtifact);
+  check(await page.locator('#app-id').inputValue(), 'newer');
+  check(latestArtifact !== zipArtifact, true);
   await selectNetlify();
   await page.locator('#use-public').check();
   check(await page.locator('#payload-btn').isEnabled(), false);
@@ -85,5 +114,5 @@ try {
   check(await page.locator('#export-btn').isEnabled(), false);
   check(errors, []);
   check(external, []);
-  console.log(JSON.stringify({ checks, pageErrors: errors.length, externalRequests: external.length }));
-} finally { await browser.close(); }
+  console.log(JSON.stringify({ browserEngine, checks, pageErrors: errors.length, externalRequests: external.length }));
+} finally { await browser.close(); await rm(fixtureDir, { recursive: true, force: true }); }

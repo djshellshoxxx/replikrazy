@@ -89,16 +89,22 @@ export function restorePlanStatuses(plan: DryRunPlan, saved: unknown): DryRunPla
     if (!Object.prototype.hasOwnProperty.call(saved, d.providerId)) continue;
     const want: unknown = (saved as Record<string, unknown>)[d.providerId];
     if (!["needs-review", "ready-for-manual-export", "uploaded-by-user", "verified-by-user", "skipped"].includes(want as string)) continue;
-    for (const step of ["ready-for-manual-export", "uploaded-by-user", "verified-by-user"] as const) {
-      const current = restored.destinations.find((x) => x.providerId === d.providerId)!;
-      if (current.status === want) break;
-      if (want === "skipped") {
-        if (allowedTransitions(current).includes("skipped")) restored = transition(restored, d.providerId, "skipped");
-        break;
-      }
-      // A saved earlier status cannot advance a more-ready current status.
-      if (want === "needs-review" || !allowedTransitions(current).includes(step)) break;
-      restored = transition(restored, d.providerId, step);
+    let current = restored.destinations.find((x) => x.providerId === d.providerId)!;
+    if (want === "skipped") {
+      if (allowedTransitions(current).includes("skipped")) restored = transition(restored, d.providerId, "skipped");
+      continue;
+    }
+    const progression = ["needs-review", "ready-for-manual-export", "uploaded-by-user", "verified-by-user"] as const;
+    const target = progression.indexOf(want as typeof progression[number]);
+    let at = progression.indexOf(current.status as typeof progression[number]);
+    // Blocked/skipped and already-later states cannot be advanced by a stale
+    // saved attestation. Start from the current state, not the first step.
+    while (at >= 0 && at < target) {
+      const next = progression[at + 1]!;
+      if (!allowedTransitions(current).includes(next)) break;
+      restored = transition(restored, d.providerId, next);
+      current = restored.destinations.find((x) => x.providerId === d.providerId)!;
+      at++;
     }
   }
   return restored;

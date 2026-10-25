@@ -1,13 +1,10 @@
 // Optional local checks; same external tooling setup as browser-regressions.mjs.
 // This checks layout, keyboard reachability and automated rules, not screen-reader usability.
-import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 import { zipSync } from 'fflate';
-const requireTools = createRequire(resolve(process.env.BROWSER_TEST_TOOLS ?? '.', 'package.json'));
-const { chromium } = requireTools('playwright-core');
+import { browserEngine, launchBrowser, requireTools } from './browser-tools.mjs';
 const axe = requireTools('axe-core');
-const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH ?? '/usr/bin/chromium', args: ['--no-sandbox'] });
+const browser = await launchBrowser();
 const origin = 'http://127.0.0.1:4173';
 const errors = [], external = [];
 let scans = 0, layouts = 0, keyboardControls = 0;
@@ -70,5 +67,5 @@ try {
   }
   assert.deepEqual(errors, []);
   assert.deepEqual(external, []);
-  console.log(JSON.stringify({ axeScans: scans, reflowChecks: layouts, keyboardControls, pageErrors: errors.length, externalRequests: external.length }));
+  console.log(JSON.stringify({ browserEngine, axeScans: scans, reflowChecks: layouts, keyboardControls, pageErrors: errors.length, externalRequests: external.length }));
 } finally { await browser.close(); }

@@ -102,7 +102,10 @@ BROWSER_TEST_TOOLS=/path/to/tools node scripts/browser-regressions.mjs
 BROWSER_TEST_TOOLS=/path/to/tools node scripts/browser-accessibility.mjs
 ```
 
-These are local automated checks, not a full accessibility or security audit.
+Runners accept `BROWSER_ENGINE=chromium|firefox|webkit` and optional
+`BROWSER_EXECUTABLE`; they never install a browser. Only Chromium has been run
+in this environment; the additional browser download was denied by the network
+policy. These are local automated checks, not a full accessibility or security audit.
 
 ## Licence
 

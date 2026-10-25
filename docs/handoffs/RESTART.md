@@ -1,5 +1,58 @@
 # Replikrazy — restart handoff
 
+## Latest local browser/transfer follow-up — 2026-10-25
+
+Continuation remains `chatgpt/lean-reliability-20261025`; inspect local `git log`
+for the latest tip after `78bc63c`. No source pushes or remote mutations. Final
+live refs remain unchanged, including Claude at `3233bb4`.
+
+New verified slice:
+- Chromium real folder picker + explicit root selection produces the same
+  artifact identity as the equivalent ZIP.
+- Browser test holds two identity hashes and releases newest first, proving
+  the older completion cannot overwrite the latest identity.
+- Fixed a saved-status restoration edge case when a fresh plan is already
+  ready for manual export. Original regression failed with expected
+  `uploaded-by-user`, received `ready-for-manual-export`; retained test now
+  passes. Restoration still cannot override policy blockers or unknown values.
+- Browser runners share an explicit `BROWSER_ENGINE` selector (chromium,
+  firefox, webkit) and optional `BROWSER_EXECUTABLE`. They never download
+  browsers. Chromium uses the existing executable by default.
+
+Results: **158 tests / 12 files**, typecheck, build and diff check pass.
+Chromium: **28 regression checks**, **16 axe scans**, **16 reflow checks**,
+**156 visible keyboard controls**; zero violations/page errors/external requests.
+No fixture oracle, threshold or original failure was weakened.
+
+### Exact remaining external blockers
+
+1. **Library retry exhausted.** Parent authorized one retry after the original
+   transfer error. Refreshed current resolved-reference documentation/helpers;
+   pinned prior returned file id plus Library id/name. `prepare_materialize`
+   succeeded for v13, size 2,573,317, using executor-local destination
+   `/workspace/library-files/replikrazy-private-retry`. Passed the complete
+   returned transfer object unchanged to the supported helper, targeting
+   `checkpoint.zip` there. Helper exited 1 with exactly:
+   `library file transfer failed: download failed`.
+   No archive exists, no bytes or SHA-256 verified, no schemas read. This is a
+   **transfer error, not an explicit access denial**. Complete structured
+   preparation result is privately preserved outside git in that directory
+   as `transfer-result.json` (mode 0600); do not publish it. Total helper
+   attempts across this continuation: initial attempt plus **one retry**.
+   **Stop further transfer attempts.** No routes were mixed or URLs invented.
+2. **Additional browser installation denied.** Neither Firefox nor WebKit was
+   installed. A single standard Playwright `install firefox webkit` invocation
+   targeted `/workspace/scratch/replikrazy-browsers`. Firefox download returned
+   HTTP **403 `Domain forbidden`**. The installer automatically tried its
+   mirrors five times and exited 1 before a termination attempt found a live
+   process. No separate retry/fallback/environment change followed; WebKit
+   installation was not reached. Cross-browser execution remains **blocked**,
+   not passed. Do not retry this denial without materially new authorization.
+
+Contract ScanReport/Diagnostic alignment remains blocked on missing private
+spec bytes. Manual screen-reader, real suspended-tab and full audit work remain
+unverified. Prior independent review was focused, not release qualification.
+
 ## Latest local snapshot and accessibility batch — 2026-10-25
 
 Continue **local** branch `chatgpt/lean-reliability-20261025`; inspect `git log`
