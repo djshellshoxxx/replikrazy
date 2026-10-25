@@ -101,6 +101,16 @@ try {
   check(await page.locator('#export-btn').isEnabled(), false);
   check(await page.locator('#use-public').isChecked(), false);
   check(await page.evaluate(() => globalThis.pwned), undefined);
+  await load(zip({ 'index.html': 'hello', '../bad/': '' }));
+  await page.locator('#cmp-zip').setInputFiles(zip({ 'index.html': 'hello' }));
+  await page.waitForFunction(() => document.querySelector('#compare-result').textContent.includes('original input has errors'));
+  checks++;
+  const conflicting = zip({ 'index.html': 'hello' });
+  conflicting.buffer[6] ^= 1; // only local flags differ from the central record
+  await page.locator('#zip-input').setInputFiles(conflicting);
+  await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('Could not read this ZIP'));
+  check(await page.locator('#inventory').isVisible(), false);
+
   // Storage denial is nonfatal and cannot override fresh policy checks.
   await page.evaluate(() => { Storage.prototype.getItem = () => { throw Error('denied'); }; Storage.prototype.setItem = () => { throw Error('denied'); }; });
   await load();

@@ -1,3 +1,4 @@
+import { buildPayloadZip } from "../src/core/exporter";
 import { zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_ZIP_LIMITS, readZip, ZipError } from "../src/core/zip";
@@ -83,4 +84,76 @@ describe("readZip", () => {
     const z = zipSync({ "a.txt": bytes("hello world") });
     expect(() => readZip(z.subarray(0, z.length - 5))).toThrow(ZipError);
   });
+});
+
+// New fixtures from the directory/header boundary review; preserve the exact
+// malformed inputs rather than teaching the parser to accept their subset.
+describe("directory and header boundaries", () => {
+  it("validates directory paths even when they carry no file bytes", () => {
+    for (const name of ["../bad/", "/absolute/", "a//", "bad%name/"]) {
+      expect(readZip(craftZip([{ name, unixMode: 0o40755 }])).rejected[0]?.code).toBe("MK_PATH_INVALID");
+    }
+  });
+  it("cannot disguise a symlink or encrypted entry with a trailing slash", () => {
+    expect(readZip(craftZip([{ name: "link/", unixMode: 0o120777 }])).rejected[0]?.code).toBe("MK_ENTRY_UNSUPPORTED");
+    expect(readZip(craftZip([{ name: "dir/", unixMode: 0o40755, flags: 0x801 }])).rejected[0]?.code).toBe("MK_ZIP_ENCRYPTED");
+  });
+  it("checks local directory names and rejects conflicting flags/method/size fields", () => {
+    expect(() => readZip(craftZip([{ name: "dir/", localName: "bad/", unixMode: 0o40755 }]))).toThrow("local/central name mismatch");
+    for (const offset of [6, 8, 14, 18, 22]) {
+      const z = craftZip([{ name: "a", data: bytes("hello") }]);
+      z[offset] = z[offset]! ^ 1;
+      expect(() => readZip(z)).toThrow("local/central metadata mismatch");
+    }
+  });
+  it("accepts valid stored and deflated empty directories without inventory entries", () => {
+    expect(readZip(craftZip([{ name: "a/", unixMode: 0o40755 }, { name: "b/", unixMode: 0o40755, deflate: true }]))).toEqual({ entries: [], rejected: [] });
+  });
+  it("rejects understated deflate output even when the forged CRC matches the retained prefix", () => {
+    const data = bytes("x".repeat(10_000));
+    // Known CRC32 of 100 ASCII x bytes, independently fixed as fixture oracle.
+    expect(() => readZip(craftZip([{ name: "a", data, deflate: true, usize: 100, crc: 0x5e0e5d8f }]))).toThrow("size or CRC mismatch");
+  });
+  it("rejects undeclared central records rather than returning a partial archive", () => {
+    const z = craftZip([{ name: "a" }, { name: "b" }]);
+    const view = new DataView(z.buffer);
+    view.setUint16(z.length - 22 + 8, 1, true);
+    view.setUint16(z.length - 22 + 10, 1, true);
+    expect(() => readZip(z)).toThrow("central directory count/size mismatch");
+  });
+});
+
+it("rejects nonzero per-entry disk references", () => {
+  const z = craftZip([{ name: "index.html", data: bytes("hello") }]);
+  const view = new DataView(z.buffer);
+  const central = view.getUint32(z.length - 22 + 16, true);
+  view.setUint16(central + 34, 1, true);
+  expect(() => readZip(z)).toThrow("split/multi-disk");
+});
+
+
+it("checks streaming data descriptor CRC and sizes against the central record", () => {
+  for (const relative of [4, 8, 12]) {
+    const z = buildPayloadZip([{ path: "index.html", bytes: bytes("hello") }]);
+    const view = new DataView(z.buffer);
+    const descriptor = 30 + bytes("index.html").length + 5;
+    expect(view.getUint32(descriptor, true)).toBe(0x08074b50);
+    view.setUint32(descriptor + relative, 99, true);
+    expect(() => readZip(z)).toThrow("data descriptor mismatch");
+  }
+});
+
+it("accepts unsigned ZIP32 data descriptors and rejects missing descriptors", () => {
+  const original = buildPayloadZip([{ path: "index.html", bytes: bytes("hello") }]);
+  const at = 30 + bytes("index.html").length + 5;
+  const remove = (length: number) => {
+    const z = new Uint8Array(original.length - length);
+    z.set(original.subarray(0, at));
+    z.set(original.subarray(at + length), at);
+    const view = new DataView(z.buffer);
+    view.setUint32(z.length - 22 + 16, new DataView(original.buffer).getUint32(original.length - 22 + 16, true) - length, true);
+    return z;
+  };
+  expect(readZip(remove(4)).entries[0]!.bytes).toEqual(bytes("hello"));
+  expect(() => readZip(remove(16))).toThrow("data descriptor mismatch");
 });

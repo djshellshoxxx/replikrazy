@@ -2,10 +2,11 @@
 // (instead of fflate's unzipSync) so that every entry is checked for size,
 // ratio, type, encryption and overlap BEFORE any byte is inflated. fflate is
 // used only for raw DEFLATE decoding into a buffer we pre-size from the
-// declared size, so a lying header cannot make us allocate more than the
-// limits allow; CRC + length checks then catch any mismatch.
+// declared size plus one sentinel byte, so a lying header cannot grow the
+// buffer. CRC + length checks reject mismatches, including a truncated prefix.
 
 import { inflateSync } from "fflate";
+import { validatePath } from "./paths";
 import { crc32 } from "./crc32";
 
 export interface ZipLimits {
@@ -123,6 +124,7 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS)
     const nlen = u16(p + 28);
     const xlen = u16(p + 30);
     const clen = u16(p + 32);
+    if (u16(p + 34) !== 0) throw new ZipError("split/multi-disk entry is not supported", "MK_ENTRY_UNSUPPORTED");
     const attrs = u32(p + 38);
     const locOff = u32(p + 42);
     if (!inBounds(p + 46, nlen + xlen + clen)) throw new ZipError("corrupt central directory");
@@ -156,11 +158,12 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS)
     if (isDir) {
       if (usize !== 0) throw new ZipError("directory entry with data");
       if (++dirs > limits.maxDirEntries) throw new ZipError("too many directory entries", "MK_LIMIT_EXCEEDED");
-      continue; // directories are implied by file paths
+      const path = name.endsWith("/") ? name.slice(0, -1) : name;
+      if (!validatePath(path).ok) { reject(name, "invalid directory path", "MK_PATH_INVALID"); continue; }
     }
-    if (++files > limits.maxEntries) throw new ZipError("too many entries", "MK_LIMIT_EXCEEDED");
+    if (!isDir && ++files > limits.maxEntries) throw new ZipError("too many entries", "MK_LIMIT_EXCEEDED");
     if (unixMode === 0xa000) { reject(name, "symbolic link", "MK_ENTRY_UNSUPPORTED"); continue; }
-    if (unixMode !== 0 && unixMode !== 0x8000) { reject(name, "not a regular file", "MK_ENTRY_UNSUPPORTED"); continue; }
+    if (unixMode !== 0 && unixMode !== 0x8000 && unixMode !== 0x4000) { reject(name, "not a regular file", "MK_ENTRY_UNSUPPORTED"); continue; }
     // Bit 0 = encrypted, bit 6 = strong encryption.
     if (flags & 0x41) { reject(name, "encrypted entry", "MK_ZIP_ENCRYPTED"); continue; }
     if (method !== 0 && method !== 8) { reject(name, `unsupported compression method ${method}`, "MK_ENTRY_UNSUPPORTED"); continue; }
@@ -176,6 +179,11 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS)
     if (total + usize > limits.maxTotalBytes) throw new ZipError("total uncompressed size exceeds limit", "MK_LIMIT_EXCEEDED");
 
     if (!inBounds(locOff, 30) || u32(locOff) !== SIG_LOC) throw new ZipError(`bad local header: ${name}`);
+    const localMatches = (offset: number, expected: number) => u32(locOff + offset) === expected || (!!(flags & 8) && u32(locOff + offset) === 0);
+    if (u16(locOff + 6) !== flags || u16(locOff + 8) !== method
+      || !localMatches(14, crc) || !localMatches(18, csize) || !localMatches(22, usize)) {
+      throw new ZipError(`local/central metadata mismatch: ${name}`);
+    }
     const lnlen = u16(locOff + 26);
     const lxlen = u16(locOff + 28);
     const dataStart = locOff + 30 + lnlen + lxlen;
@@ -188,22 +196,35 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS)
       reject(name, "ambiguous Unicode path extra field", "MK_PATH_INVALID");
       continue;
     }
-    ranges.push({ start: locOff, end: dataStart + csize, name });
+    let recordEnd = dataStart + csize;
+    if (flags & 8) {
+      // ZIP32 descriptors may include the signature or omit it. Compare all
+      // fields; a CRC equal to the signature must not force an ambiguous parse.
+      const matches = (at: number) => inBounds(at, 12) && at + 12 <= cenOff
+        && u32(at) === crc && u32(at + 4) === csize && u32(at + 8) === usize;
+      if (inBounds(recordEnd, 4) && u32(recordEnd) === 0x08074b50 && matches(recordEnd + 4)) recordEnd += 16;
+      else if (matches(recordEnd)) recordEnd += 12;
+      else throw new ZipError(`data descriptor mismatch: ${name}`);
+    }
+    ranges.push({ start: locOff, end: recordEnd, name });
 
     const comp = buf.subarray(dataStart, dataStart + csize);
     let bytes: Uint8Array;
     try {
-      // Output buffer is pre-sized to the declared size; fflate cannot grow
-      // it, so actual output is bounded during inflation, not checked after.
-      bytes = method === 0 ? comp.slice() : inflateSync(comp, { out: new Uint8Array(usize) });
+      // One bounded sentinel byte detects understated output even if a forged
+      // CRC matches the truncated prefix. No dynamically growing buffer.
+      bytes = method === 0 ? comp.slice() : inflateSync(comp, { out: new Uint8Array(usize + 1) });
     } catch {
       throw new ZipError(`corrupt compressed data: ${name}`);
     }
     // CRC32 detects corruption only; it is not an authenticity check.
     if (bytes.length !== usize || crc32(bytes) !== crc) throw new ZipError(`size or CRC mismatch: ${name}`);
+    if (isDir) continue; // validated empty directories are not payload files
     total += usize;
     entries.push({ name, bytes });
   }
+
+  if (p !== cenOff + cenSize) throw new ZipError("central directory count/size mismatch");
 
   // Overlapping local records are a known zip-bomb construction (many central
   // entries pointing at shared data). Refuse the archive outright.

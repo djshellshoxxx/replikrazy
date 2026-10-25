@@ -1,5 +1,32 @@
 # Replikrazy — restart handoff
 
+## Latest local ZIP boundary and transfer checkpoint — 2026-10-25
+
+Continue `chatgpt/lean-reliability-20261025`; inspect local `git log` after
+`1cf27b0`. Narrow ZIP-directory/metadata fixes preserve the original gates and
+add actual-output overflow detection with one bounded sentinel byte. Full
+failure evidence, review results, remaining conformance gaps and exact next code
+ranges are in [`../reviews/2026-10-25-zip-boundary.md`](../reviews/2026-10-25-zip-boundary.md).
+
+Results: **176 tests / 13 files**, typecheck/build/diff check pass; Chromium
+**35 checks**, **16 axe / 16 reflow checks**, **156 keyboard controls**, zero
+violations/page errors/external requests. Disjoint reviewer verified fixes with
+**58 focused tests**; not a full audit. Reuse these results; avoid redundant
+whole-repo scans/reruns unless subsequent code changes require them.
+
+A small source-only incremental Git bundle/diff and result manifest is being
+prepared outside the repo under `/workspace/checkpoints/`. Its manifest records
+the exact source SHA and base prerequisite `3233bb4a88fb254ba16ffc32c6e157aeb85750f5`.
+Private reference text, transfer metadata, node_modules, browser/build binaries
+and the research archive are excluded. This is local preparation for a private
+Library checkpoint, not GitHub publication or deployment.
+
+No new spec input needed for this completed batch. A broader private-data
+scan slice needs `09_ACCEPTANCE.md` T-ART-08 plus its referenced synthetic
+fixtures; a policy expansion needs `03_POLICY_AND_TARGETS.md` relevant numbered
+sections. Request source-pinned text, not archive-recovery workarounds.
+Download restrictions and stricter policy remain in force.
+
 ## Latest local contract slice — 2026-10-25
 
 Continue local branch `chatgpt/lean-reliability-20261025` after `432870e`; inspect
