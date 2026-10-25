@@ -21,3 +21,9 @@ ul { padding-left: 20px; }
 .identity input, .identity select { font: inherit; max-width: 100%; }
 fieldset.use { border: 1px solid var(--line); border-radius: 6px; margin: 8px 0; }
 fieldset.use label { display: block; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+input[type=file] { max-width: 100%; }
+/* Phone reflow: long hashes/paths wrap; wide tables scroll inside their box. */
+main, header { overflow-wrap: anywhere; }
+details { max-width: 100%; overflow-x: auto; }
+td.hash { white-space: normal; word-break: break-all; min-width: 16ch; }

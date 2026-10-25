@@ -51,16 +51,16 @@
     <section id="providers" hidden>
       <h2>4. Choose destinations</h2>
       <div class="filters">
-        <input id="f-text" type="search" placeholder="Filter providers" />
+        <label>Search <input id="f-text" type="search" placeholder="Filter providers" /></label>
         <label><input id="f-noacct" type="checkbox" /> No account needed</label>
         <label><input id="f-domain" type="checkbox" /> Custom domain</label>
-        <select id="f-method">
+        <label>Method <select id="f-method">
           <option value="">Any method</option>
           <option value="manual-web-upload">Manual web upload</option>
           <option value="git-push">Git push</option>
           <option value="cli">CLI on your machine</option>
           <option value="self-host">Self-host</option>
-        </select>
+        </select></label>
       </div>
       <p class="hint">Evidence levels: <b>unreviewed</b> &lt; researched lead &lt; documented &lt; tested. Entries are dated research leads, not qualified providers; none is <b>tested</b>. Direct deployment from the browser is <b>unsupported</b> for all providers.</p>
       <div id="provider-list"></div>

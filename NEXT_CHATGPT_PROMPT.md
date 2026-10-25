@@ -20,7 +20,7 @@ pack (unpublished). If you need it and it isn't attached, ask the owner.
 Never commit the pack, private review packets or secrets to this public repo.
 
 **Do next:** follow "Next steps" in RESTART.md. First, ask the owner whether
-the research catalogue data may be published. Then the Gate M accessibility pass (keyboard, screen reader, RTL, reflow).
+the research catalogue data may be published. Automated a11y (axe 0 violations, keyboard, 320 px reflow) is done; remaining Gate M: manual screen reader, RTL, independent security review.
 
 **Rules:** browser-only; no backend, no credential collection, no live
 provider writes or deploys; imported HTML/JS never executes in the app origin;

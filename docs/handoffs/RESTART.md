@@ -54,7 +54,7 @@ ROUTE_CONTRACT, browser-profile addendum), `v13/guest-host-catalog`,
 | 10 | MK-POL-003/004 | **partial**. Done: IntendedUse declaration, payment/token blocked everywhere, GitHub Pages commercial/payment exclusion (cited), rights and public-data confirmations. **Open** (needs #9): free/trial/paid, country/language/jurisdiction catalogue fields. |
 | 11 | T-ART-06 cancel, worker-thread work, changed input | **mostly done**: intake, hashing and scan run in a module worker with progress; Cancel terminates it and keeps nothing; a newer selection supersedes an older run; a folder file whose size changes fails with `MK_INPUT_CHANGED`. **Open:** content-change detection beyond size, a 60 s soft time limit, tab-suspension and storage-denied cases. |
 | 12 | T-ART-01 folder and ZIP give the same artifact | **done** at unit level (stored/deflated/reordered ZIP and folder → one artifactId); no browser folder-picker test |
-| 13 | Gate M: accessibility, RTL, keyboard, independent security review | **open** |
+| 13 | Gate M: accessibility, RTL, keyboard, independent security review | **partial**: automated axe-core 4.10.2 (WCAG 2.0/2.1 A/AA + best practice) finds 0 violations, light and dark, before and after a site is loaded; every control is reachable by Tab (the export button only once enabled); no horizontal scroll at 320 px. **Open:** manual screen-reader test, RTL layout, independent security review. |
 | 14 | Contract records | **ArtifactManifest + artifactId done** (`src/contracts/`, RFC 8785 subset, T-ART-01 test). `PublishPlan` with planId/24 h expiry/catalogDigests **done** (`src/contracts/publish-plan.ts`, manual/disabled modes only). **Open:** ConsentReceipt (only needed for future API writes), a contract-shaped ScanReport, and Diagnostic message keys. |
 
 ## Completed
@@ -71,6 +71,12 @@ Milestone 2 (this update):
 - `src/providers/select.ts`: scan-aware assessment (reserved paths block, routing/nesting/storage/realtime/deps/missing warnings).
 - `src/core/exporter.ts`: `app/` + `mirrorkit-control/` handoff (adds `scan.json`, per-destination compatibility notes), `buildPayloadZip`.
 - UI: root choice, "Will the copy still work?" panel, app-only ZIP button, limit/evidence lines on provider cards.
+
+## Milestone 6 (accessibility pass), 2026-10-25
+
+- Fixed the only axe violation (unnamed method `<select>`); the search box now has a visible label.
+- Added visible `:focus-visible` outlines; long hashes and paths wrap; wide tables scroll inside their own box.
+- How it was checked: axe-core run from a scratch folder (not a repo dependency, MPL-2.0) via Playwright, Tab traversal and 320 px reflow. The scripts are outside the repo; repeat with the same approach.
 
 ## Milestone 5 (worker + cancel), 2026-10-25
 
@@ -150,7 +156,7 @@ review, any provider account/upload (forbidden).
 2. Remaining contract records (gap 14): contract-shaped ScanReport and
    Diagnostic message keys. ConsentReceipt waits for any future API route.
 3. Rest of T-ART-06 (60 s soft limit, content-change detection); ZIP64 fixtures if wanted.
-4. Gate M items: accessibility/RTL/keyboard pass, independent security review.
+4. Gate M items: manual screen-reader check, RTL, independent security review.
 5. Optional verify mode: user re-selects the published files offline and
    Replikrazy compares against `MANIFEST.txt`.
 
