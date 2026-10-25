@@ -1,3 +1,9 @@
+> Latest handoff: resume `checkpoint/chatgpt-lean-handoff-20261025` after
+> verifying its remote SHA. Read `HANDOFF.md` and
+> `docs/handoffs/GITHUB_CHECKPOINT_20261025.md` first. The owner authorized this
+> separate GitHub checkpoint; earlier local-only notes below are historical.
+> No merge, deployment, release or provider action is authorized by the handoff.
+
 > Local continuation (2026-10-25): start from
 > `chatgpt/lean-reliability-20261025`, not Claude's branch. Read the newest
 > sections in `docs/handoffs/RESTART.md` and inspect local `git log` first.

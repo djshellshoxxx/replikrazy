@@ -1,5 +1,10 @@
 # Replikrazy — restart handoff
 
+> Current owner-requested GitHub checkpoint: `checkpoint/chatgpt-lean-handoff-20261025`.
+> Read [the checkpoint handoff](GITHUB_CHECKPOINT_20261025.md) first. Earlier
+> local-only instructions below are historical and superseded only for this
+> explicitly authorized source checkpoint. Other restrictions remain in force.
+
 ## Latest local ZIP boundary and transfer checkpoint — 2026-10-25
 
 Continue `chatgpt/lean-reliability-20261025`; inspect local `git log` after
