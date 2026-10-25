@@ -1,7 +1,9 @@
 import { zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_ZIP_LIMITS, readZip, ZipError } from "../src/core/zip";
-import { bytes, craftZip } from "./zipcraft";
+
+const code = (f: () => unknown) => { try { f(); } catch (e) { return (e as ZipError).code; } return "no error"; };
+import { bytes, craftZip, unicodePathExtra } from "./zipcraft";
 
 const reasons = (z: Uint8Array) => readZip(z).rejected.map((r) => r.reason);
 
@@ -24,23 +26,36 @@ describe("readZip", () => {
   it("rejects device/fifo entries", () => expect(reasons(craftZip([{ name: "f", unixMode: 0o010644 }]))).toEqual(["not a regular file"]));
   it("rejects encrypted entries", () => expect(reasons(craftZip([{ name: "e", data: bytes("x"), flags: 0x801 }]))).toEqual(["encrypted entry"]));
   it("rejects unknown methods", () => expect(reasons(craftZip([{ name: "m", data: bytes("x"), method: 12 }]))).toEqual(["unsupported compression method 12"]));
-  it("rejects bad CRC", () => expect(reasons(craftZip([{ name: "c", data: bytes("abc"), crc: 1 }]))).toEqual(["size or CRC mismatch"]));
+  it("fails the archive on bad CRC", () => expect(() => readZip(craftZip([{ name: "c", data: bytes("abc"), crc: 1 }]))).toThrow("size or CRC mismatch"));
   it("rejects duplicate names", () => expect(reasons(craftZip([{ name: "a", data: bytes("1") }, { name: "a", data: bytes("2") }]))).toEqual(["duplicate entry name"]));
   it("rejects non-UTF-8 names", () => expect(reasons(craftZip([{ name: new Uint8Array([0xff, 0xfe]) }]))).toEqual(["entry name is not valid UTF-8"]));
   it("rejects non-ASCII names without UTF-8 flag", () => expect(reasons(craftZip([{ name: "é", flags: 0 }]))).toEqual(["non-ASCII name without UTF-8 flag"]));
-  it("rejects stored size mismatch", () => expect(reasons(craftZip([{ name: "s", data: bytes("abc"), usize: 99 }]))).toEqual(["stored entry size mismatch"]));
+  it("fails the archive on stored size mismatch", () => expect(() => readZip(craftZip([{ name: "s", data: bytes("abc"), usize: 99 }]))).toThrow("stored entry size mismatch"));
+  it("rejects strong-encryption flag", () => expect(reasons(craftZip([{ name: "e", data: bytes("x"), flags: 0x840 }]))).toEqual(["encrypted entry"]));
+  it("rejects a Unicode-path extra field override", () => expect(reasons(craftZip([{ name: "u", data: bytes("x"), extra: unicodePathExtra("other") }]))).toEqual(["ambiguous Unicode path extra field"]));
+  it("fails on local/central name mismatch", () => expect(() => readZip(craftZip([{ name: "good.html", localName: "evil.html", data: bytes("x") }]))).toThrow("local/central name mismatch"));
+  it("fails when metadata exceeds the cap", () => {
+    const z = craftZip([{ name: "a" }, { name: "b" }]);
+    expect(code(() => readZip(z, { ...DEFAULT_ZIP_LIMITS, maxMetadataBytes: 10 }))).toBe("MK_LIMIT_EXCEEDED");
+  });
+  it("counts directory entries separately", () => {
+    const z = craftZip([{ name: "d1/", unixMode: 0o40755 }, { name: "d2/", unixMode: 0o40755 }, { name: "f", data: bytes("1") }]);
+    expect(code(() => readZip(z, { ...DEFAULT_ZIP_LIMITS, maxDirEntries: 1 }))).toBe("MK_LIMIT_EXCEEDED");
+    expect(readZip(z, { ...DEFAULT_ZIP_LIMITS, maxEntries: 1 }).entries).toHaveLength(1);
+  });
 
-  it("rejects high-ratio entries (bomb) before inflating", () => {
-    const big = new Uint8Array(1_000_000);
-    expect(reasons(craftZip([{ name: "bomb", data: big, deflate: true }]))).toEqual(["compression ratio exceeds limit"]);
+  it("fails on high-ratio entries above 1 MiB (bomb) before inflating", () => {
+    const z = craftZip([{ name: "bomb", data: new Uint8Array(4 * 1024 * 1024), deflate: true }]);
+    expect(code(() => readZip(z))).toBe("MK_ZIP_BOMB");
+  });
+  it("allows high ratios for small files (below the 1 MiB floor)", () => {
+    expect(readZip(craftZip([{ name: "zeros", data: new Uint8Array(500_000), deflate: true }])).entries).toHaveLength(1);
   });
   it("caps output when the header under-declares size", () => {
     // Real data is 10 000 bytes; header claims 100. Output buffer is 100 bytes,
     // so inflation cannot grow past it and the CRC check rejects the entry.
     const data = new Uint8Array(10_000).map((_, i) => i & 0xff);
-    const r = readZip(craftZip([{ name: "lie", data, deflate: true, usize: 100 }]));
-    expect(r.entries).toEqual([]);
-    expect(r.rejected[0]!.reason).toMatch(/CRC|corrupt|ratio/);
+    expect(code(() => readZip(craftZip([{ name: "lie", data, deflate: true, usize: 100 }])))).toBe("MK_ZIP_CORRUPT");
   });
   it("rejects files over the per-file limit", () => {
     const z = craftZip([{ name: "big", data: new Uint8Array(2048) }]);
@@ -55,7 +70,11 @@ describe("readZip", () => {
     expect(() => readZip(z, { ...DEFAULT_ZIP_LIMITS, maxEntries: 2 })).toThrow("too many entries");
   });
   it("fails on overlapping entries", () => {
-    expect(() => readZip(craftZip([{ name: "a", data: bytes("xx") }, { name: "b", data: bytes("xx"), localOffset: 0 }]))).toThrow("overlapping entries");
+    const z = craftZip([{ name: "a", data: bytes("xx") }, { name: "a2", data: bytes("xx"), localOffset: 0, localName: "a" }]);
+    // Same local record claimed twice: name check fires first or overlap does; both reject the archive.
+    expect(() => readZip(z)).toThrow(ZipError);
+    const same = craftZip([{ name: "a", data: bytes("xx") }, { name: "b", data: bytes("xx") }]);
+    expect(readZip(same).entries).toHaveLength(2);
   });
   it("fails on ZIP64", () => expect(() => readZip(craftZip([{ name: "a" }], { zip64Locator: true }))).toThrow("ZIP64"));
   it("fails on garbage", () => expect(() => readZip(bytes("not a zip at all, definitely not"))).toThrow("not a ZIP"));

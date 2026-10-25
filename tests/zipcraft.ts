@@ -15,6 +15,8 @@ export interface CraftEntry {
   csize?: number;
   usize?: number;
   localOffset?: number; // override central-dir pointer
+  localName?: string; // name written in the local header, if different
+  extra?: Uint8Array; // extra field, written to both headers
 }
 
 export function craftZip(entries: CraftEntry[], opts: { zip64Locator?: boolean } = {}): Uint8Array {
@@ -31,7 +33,9 @@ export function craftZip(entries: CraftEntry[], opts: { zip64Locator?: boolean }
     const crc = e.crc ?? crc32(data);
     const csize = e.csize ?? comp.length;
     const usize = e.usize ?? data.length;
-    const loc = new Uint8Array(30 + name.length);
+    const lname = e.localName !== undefined ? enc.encode(e.localName) : name;
+    const extra = e.extra ?? new Uint8Array();
+    const loc = new Uint8Array(30 + lname.length + extra.length);
     const lv = new DataView(loc.buffer);
     lv.setUint32(0, 0x04034b50, true);
     lv.setUint16(4, 20, true);
@@ -40,9 +44,11 @@ export function craftZip(entries: CraftEntry[], opts: { zip64Locator?: boolean }
     lv.setUint32(14, crc, true);
     lv.setUint32(18, csize, true);
     lv.setUint32(22, usize, true);
-    lv.setUint16(26, name.length, true);
-    loc.set(name, 30);
-    const c = new Uint8Array(46 + name.length);
+    lv.setUint16(26, lname.length, true);
+    lv.setUint16(28, extra.length, true);
+    loc.set(lname, 30);
+    loc.set(extra, 30 + lname.length);
+    const c = new Uint8Array(46 + name.length + extra.length);
     const cv = new DataView(c.buffer);
     cv.setUint32(0, 0x02014b50, true);
     cv.setUint16(4, ((e.madeBy ?? 3) << 8) | 20, true);
@@ -53,9 +59,11 @@ export function craftZip(entries: CraftEntry[], opts: { zip64Locator?: boolean }
     cv.setUint32(20, csize, true);
     cv.setUint32(24, usize, true);
     cv.setUint16(28, name.length, true);
+    cv.setUint16(30, extra.length, true);
     cv.setUint32(38, ((e.unixMode ?? 0o100644) << 16) >>> 0, true);
     cv.setUint32(42, e.localOffset ?? off, true);
     c.set(name, 46);
+    c.set(extra, 46 + name.length);
     cen.push(c);
     chunks.push(loc, comp);
     off += loc.length + comp.length;
@@ -82,3 +90,15 @@ export function craftZip(entries: CraftEntry[], opts: { zip64Locator?: boolean }
 }
 
 export const bytes = (s: string) => new TextEncoder().encode(s);
+
+// Info-ZIP Unicode Path extra field (0x7075): version 1, CRC of header name, UTF-8 name.
+export function unicodePathExtra(name: string): Uint8Array {
+  const n = bytes(name);
+  const out = new Uint8Array(4 + 5 + n.length);
+  const v = new DataView(out.buffer);
+  v.setUint16(0, 0x7075, true);
+  v.setUint16(2, 5 + n.length, true);
+  out[4] = 1;
+  out.set(n, 9);
+  return out;
+}

@@ -21,6 +21,8 @@ export interface Claim<T> {
   value: T | null; // null = not known
   evidence: Evidence;
   note?: string;
+  source?: string; // official URL the claim was taken from
+  observed?: string; // ISO date the source was read (research date, not a check by this app)
 }
 
 export type ProviderKind = "static-host" | "git-pages" | "content-addressed" | "self-hosted-anonymity" | "self-hosted";
@@ -48,6 +50,18 @@ export interface ProviderAdapter {
   redirectsFile: Claim<boolean>; // honours a _redirects file
   headersFile: Claim<boolean>; // honours a _headers file
   runsServerCode: Claim<boolean>;
+  // Bundle paths this host would treat as server code/config (labels from
+  // core/scan RESERVED_PATTERNS). Present in a bundle => destination blocked;
+  // we never strip them (research MK-POL-002).
+  serverExecutablePaths: string[];
+  // Serves index.html (or a configured fallback) for unknown paths, which
+  // history-API routing needs for deep links/reloads.
+  spaFallback: Claim<boolean>;
+  // Default published URL lives under a sub-path (e.g. /repo/), which breaks
+  // root-relative asset references unless a custom/root domain is used.
+  defaultUrlNested: Claim<boolean>;
+  // Research catalogue record id, kept verbatim for provenance (MK-POL-006).
+  researchId?: string;
   maxFileBytes: Claim<number>;
   maxFiles: Claim<number>;
   prerequisites: string[];

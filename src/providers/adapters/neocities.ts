@@ -15,13 +15,16 @@ export const adapter: ProviderAdapter = {
   redirectsFile: claim(false, "unreviewed"),
   headersFile: claim(false, "unreviewed"),
   runsServerCode: claim(false, "unreviewed"),
+  serverExecutablePaths: [],
+  spaFallback: unknown(),
+  defaultUrlNested: claim(false, "unreviewed"),
   maxFileBytes: unknown(),
   maxFiles: unknown(),
   prerequisites: ["A Neocities account", "File types allowed by the free tier (some types are restricted)"],
   manualSteps: [
     "Open your Neocities dashboard.",
-    "Upload the contents of site/, recreating folders as needed.",
-    "Open your site URL and compare files against MANIFEST.txt.",
+    "Upload the contents of app/, recreating folders as needed.",
+    "Open your site URL and compare files against mirrorkit-control/MANIFEST.txt.",
   ],
   caveats: ["Free accounts restrict some file types; restricted files will be refused by the host."],
 };

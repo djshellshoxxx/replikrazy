@@ -4,6 +4,7 @@
 import { assess, type Assessment } from "../providers/select";
 import type { ProviderAdapter } from "../providers/types";
 import type { BundleFacts } from "./analyze";
+import type { ScanReport } from "./scan";
 
 export type DestinationStatus =
   | "blocked" // incompatible bundle, or bundle has errors
@@ -36,11 +37,12 @@ export function buildPlan(
   facts: BundleFacts,
   bundleHasErrors: boolean,
   providers: readonly ProviderAdapter[],
+  scan?: ScanReport,
 ): DryRunPlan {
   return {
     bundleDigest,
     destinations: providers.map((p) => {
-      const assessment = assess(p, facts);
+      const assessment = assess(p, facts, scan);
       const base = initialStatus(assessment, bundleHasErrors);
       return { providerId: p.id, status: base, baseStatus: base, assessment };
     }),

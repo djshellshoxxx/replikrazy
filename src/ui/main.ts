@@ -2,10 +2,11 @@
 // through textContent (never innerHTML), and file contents are never rendered.
 
 import { analyze, factIssues } from "../core/analyze";
-import { buildExport } from "../core/exporter";
-import { intakeFolder, intakeZip, type BundleFile, type IntakeIssue } from "../core/intake";
+import { buildExport, buildPayloadZip } from "../core/exporter";
+import { intakeFolder, intakeZip, type BundleFile, type IntakeOptions, type IntakeResult } from "../core/intake";
 import { buildInventory, type Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, transition, type DryRunPlan } from "../core/plan";
+import { scanBundle, type ScanReport } from "../core/scan";
 import { DEFAULT_ZIP_LIMITS } from "../core/zip";
 import { filterCatalogue, getProvider } from "../providers/catalogue";
 import type { MethodId, ProviderAdapter } from "../providers/types";
@@ -25,8 +26,12 @@ interface State {
   hasErrors: boolean;
   selected: Set<string>;
   plan: DryRunPlan | null;
+  scan: ScanReport | null;
+  // Re-runs intake with new options (root choice) without re-picking files.
+  reload: ((opts: IntakeOptions) => Promise<IntakeResult>) | null;
+  stripRoot: boolean;
 }
-const state: State = { files: [], inv: null, hasErrors: false, selected: new Set(), plan: null };
+const state: State = { files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, reload: null, stripRoot: false };
 
 // Per-viewer convenience only: remembers statuses for a given bundle digest.
 const storeKey = (digest: string) => `replikrazy.plan.${digest}`;
@@ -57,27 +62,64 @@ function restoreStatuses(plan: DryRunPlan): DryRunPlan {
 
 const fmtBytes = (n: number) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KiB` : `${(n / 1048576).toFixed(1)} MiB`);
 
-async function loadBundle(load: () => Promise<{ files: BundleFile[]; issues: IntakeIssue[]; strippedRoot: string | null }>) {
+async function loadBundle(load: (opts: IntakeOptions) => Promise<IntakeResult>, stripRoot = false) {
   const status = $("intake-status");
   status.textContent = "Reading…";
+  state.reload = load;
+  state.stripRoot = stripRoot;
   try {
-    const r = await load();
+    const r = await load({ stripRoot });
     const inv = await buildInventory(r.files);
     const facts = analyze(inv.entries);
+    const scan = scanBundle(r.files);
     const issues = [...r.issues, ...factIssues(facts)];
     state.files = r.files;
     state.inv = inv;
-    state.hasErrors = issues.some((i) => i.severity === "error");
+    state.scan = scan;
+    // Suspected live credentials block export just like intake errors.
+    state.hasErrors = issues.some((i) => i.severity === "error") || scan.findings.some((f) => f.severity === "blocker");
     state.selected.clear();
     state.plan = null;
-    status.textContent = r.strippedRoot ? `Loaded. Wrapper folder "${r.strippedRoot}/" was removed from paths.` : "Loaded.";
+    status.textContent = r.strippedRoot ? `Loaded with "${r.strippedRoot}/" as the site root.` : "Loaded.";
+    renderRootChoice(r);
     renderInventory(inv, issues);
+    renderCompat(scan);
     renderProviders();
     renderPlan();
   } catch {
     // Do not echo exception text: it could contain imported names/contents.
     status.textContent = "Could not read this input.";
   }
+}
+
+// Root selection is an explicit, visible choice (research T-ART-02).
+function renderRootChoice(r: IntakeResult) {
+  const box = $("root-choice");
+  box.replaceChildren();
+  if (!r.candidateRoot) return;
+  const label = el("label");
+  const cb = el("input");
+  cb.type = "checkbox";
+  cb.checked = !!r.strippedRoot;
+  cb.addEventListener("change", () => { if (state.reload) void loadBundle(state.reload, cb.checked); });
+  label.append(cb, document.createTextNode(` Use the folder "${r.candidateRoot}/" as the site root (every file is inside it)`));
+  box.append(label);
+}
+
+function renderCompat(scan: ScanReport) {
+  $("compat").hidden = false;
+  const h = scan.hints;
+  $("compat-hints").textContent =
+    `Asset paths: ${h.assetBase}. Routing: ${h.routing}. Service worker: ${h.serviceWorker}. ` +
+    `Browser storage: ${h.usesOriginStorage ? "used" : "not detected"}. Realtime connections: ${h.usesRealtime ? "used" : "not detected"}. ` +
+    "External dependency list complete: no (static inspection only).";
+  $("compat-findings").replaceChildren(
+    ...scan.findings.map((f) => el("li", `${f.severity.toUpperCase()} [${f.certainty}]: ${f.message}${f.path ? ` (${f.path})` : ""}`, f.severity === "blocker" ? "error" : f.severity === "warning" ? "warning" : "")),
+  );
+  $("compat-deps").replaceChildren(...scan.dependencies.map((d) => el("li", `${d.origin} — ${d.roles.join(", ")} — used by ${d.files.slice(0, 5).join(", ")}${d.files.length > 5 ? ", …" : ""}`)));
+  if (!scan.dependencies.length) $("compat-deps").replaceChildren(el("li", "None found by static inspection."));
+  $("compat-missing").replaceChildren(...scan.missing.slice(0, 500).map((m) => el("li", `${m.from}: ${m.ref} → ${m.resolved}`)));
+  if (!scan.missing.length) $("compat-missing").replaceChildren(el("li", "None found."));
 }
 
 function renderInventory(inv: Inventory, issues: { severity: string; path?: string; message: string }[]) {
@@ -120,7 +162,14 @@ function providerCard(p: ProviderAdapter): HTMLElement {
   label.append(cb, document.createTextNode(" Include in dry run"));
   const methods = el("ul");
   methods.append(...p.methods.map((m) => el("li", `${m.id} [${m.evidence}]: ${m.summary}`)));
-  card.append(h, methods, el("p", `Account: ${p.requiresAccount.value === null ? "unknown" : p.requiresAccount.value ? "required" : "not required"} [${p.requiresAccount.evidence}]`), label);
+  const lim = (c: ProviderAdapter["maxFiles"]) => `${c.value ?? "unknown"} [${c.evidence}${c.observed ? `, read ${c.observed}` : ""}]`;
+  card.append(
+    h,
+    methods,
+    el("p", `Account: ${p.requiresAccount.value === null ? "unknown" : p.requiresAccount.value ? "required" : "not required"} [${p.requiresAccount.evidence}]`),
+    el("p", `Max files: ${lim(p.maxFiles)}. Max file bytes: ${lim(p.maxFileBytes)}.`),
+    label,
+  );
   return card;
 }
 
@@ -134,7 +183,7 @@ function rebuildPlan() {
   if (!state.inv) return;
   const providers = [...state.selected].map((id) => getProvider(id)!).filter(Boolean);
   state.plan = providers.length
-    ? restoreStatuses(buildPlan(state.inv.bundleDigest, analyze(state.inv.entries), state.hasErrors, providers))
+    ? restoreStatuses(buildPlan(state.inv.bundleDigest, analyze(state.inv.entries), state.hasErrors, providers, state.scan ?? undefined))
     : null;
   renderPlan();
 }
@@ -178,16 +227,25 @@ function renderPlan() {
   );
   const exportable = !state.hasErrors && plan.destinations.some((d) => d.status !== "blocked" && d.status !== "skipped");
   ($("export-btn") as HTMLButtonElement).disabled = !exportable;
+  ($("payload-btn") as HTMLButtonElement).disabled = state.hasErrors;
 }
 
 function download() {
   if (!state.plan || !state.inv) return;
   const providers = state.plan.destinations.map((d) => getProvider(d.providerId)!);
-  const zip = buildExport(state.files, state.inv, state.plan, providers);
+  saveZip(buildExport(state.files, state.inv, state.plan, providers, state.scan ?? undefined), `replikrazy-handoff-${state.inv.bundleDigest.slice(0, 12)}.zip`);
+}
+
+function downloadPayload() {
+  if (!state.inv || state.hasErrors) return;
+  saveZip(buildPayloadZip(state.files), `replikrazy-app-${state.inv.bundleDigest.slice(0, 12)}.zip`);
+}
+
+function saveZip(zip: Uint8Array, name: string) {
   const url = URL.createObjectURL(new Blob([zip.slice()], { type: "application/zip" }));
   const a = el("a");
   a.href = url;
-  a.download = `replikrazy-export-${state.inv.bundleDigest.slice(0, 12)}.zip`;
+  a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
@@ -197,11 +255,12 @@ $("zip-input").addEventListener("change", (ev) => {
   if (!f) return;
   // Refuse oversized archives from metadata, before reading them into memory.
   if (f.size > DEFAULT_ZIP_LIMITS.maxArchiveBytes) { $("intake-status").textContent = "Archive is larger than the 256 MiB limit."; return; }
-  void loadBundle(async () => intakeZip(new Uint8Array(await f.arrayBuffer())));
+  void loadBundle(async (opts) => intakeZip(new Uint8Array(await f.arrayBuffer()), opts));
 });
 $("dir-input").addEventListener("change", (ev) => {
   const list = (ev.target as HTMLInputElement).files;
-  if (list?.length) void loadBundle(() => intakeFolder([...list]));
+  if (list?.length) void loadBundle((opts) => intakeFolder([...list], opts));
 });
 for (const id of ["f-text", "f-noacct", "f-domain", "f-method"]) $(id).addEventListener("input", renderProviders);
 $("export-btn").addEventListener("click", download);
+$("payload-btn").addEventListener("click", downloadPayload);

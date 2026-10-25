@@ -15,13 +15,16 @@ export const adapter: ProviderAdapter = {
   redirectsFile: unknown(),
   headersFile: unknown(),
   runsServerCode: claim(false, "unreviewed"),
+  serverExecutablePaths: [],
+  spaFallback: claim(true, "unreviewed", "via a _redirects rewrite rule"),
+  defaultUrlNested: unknown(),
   maxFileBytes: unknown(),
   maxFiles: unknown(),
   prerequisites: ["A Codeberg account", "Content compatible with Codeberg terms (free/libre projects)"],
   manualSteps: [
     "Create a repository named pages (or use a pages branch) as described in Codeberg docs.",
-    "Copy the export site/ contents into it and push from your own git client.",
-    "Open the published URL and compare files against MANIFEST.txt.",
+    "Copy the export app/ contents into it and push from your own git client.",
+    "Open the published URL and compare files against mirrorkit-control/MANIFEST.txt.",
   ],
   caveats: ["Codeberg is a non-profit service with content rules; check them first."],
 };

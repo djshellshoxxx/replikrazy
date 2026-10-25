@@ -1,23 +1,26 @@
 # Next prompt — Replikrazy (formerly MirrorKit)
 
 Resume `djshellshoxxx/replikrazy` on branch `claude/trusting-goodall-9jdwxu`
-(draft PR into `main` if one exists; check first). Read
-`docs/handoffs/RESTART.md` before doing anything.
+(draft PR #1 into `main`). Read `docs/handoffs/RESTART.md` and
+`docs/research/PROVENANCE.md` first. Check `git log`/`git ls-remote` for the
+current head rather than trusting any SHA written here.
 
-**Do NOT redo:** bundle intake, ZIP reader/limits, path validation,
-inventory/hashing, analysis, provider catalogue/filter/assessment, dry-run
-plan, export ZIP, UI, CI workflow. They exist and 65 tests pass
-(`npm ci && npm run typecheck && npm test && npm run build`).
+**Do NOT redo (done, 97 tests pass):** bounded ZIP reader with spec caps,
+MK-ART-002 path rules, UTF-8-ordered SHA-256 inventory, explicit root choice,
+compatibility/secret scan (`src/core/scan.ts`), 10 provider adapters with
+evidence ladder, scan-aware assessment, dry-run plan, `app/` +
+`mirrorkit-control/` handoff ZIP and app-only ZIP, UI under strict CSP, CI.
+Verify with `npm ci && npm run typecheck && npm test && npm run build`.
 
-**Do next:**
-1. Read the research from `origin/docs/research-intake-20261025` (owner's
-   review branch — do not push to it); if still empty, ask the owner. Never upload the private preparation ZIP to this public repo.
-2. Reconcile `src/providers/adapters/*` with that research; keep every
-   unconfirmed claim `unreviewed`; never mark browser-direct deploy as
-   supported; only add numeric limits with a cited official source.
-3. Continue with the ordered list in RESTART.md.
+**Do NOT regenerate research.** The owner holds the MirrorKit v13 research
+pack (unpublished). If you need it and it isn't attached, ask the owner.
+Never commit the pack, private review packets or secrets to this public repo.
+
+**Do next:** follow "Next steps" in RESTART.md. First, ask the owner whether
+the research catalogue data may be published. Then do contract records (gap 14).
 
 **Rules:** browser-only; no backend, no credential collection, no live
-deploys; imported HTML/JS never executes in the app origin; licence stays
-TBD; GhostPay and p2p-offramp are owned by other sessions — do not touch
-them from here.
+provider writes or deploys; imported HTML/JS never executes in the app origin;
+catalogue entries are dated research leads, never "qualified"; Tor/I2P stay
+manual self-host checklists; licence stays TBD; GhostPay and p2p-offramp
+belong to other sessions — do not touch them from here.

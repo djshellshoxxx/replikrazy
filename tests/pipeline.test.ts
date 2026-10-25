@@ -1,7 +1,7 @@
 import { zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { analyze, factIssues } from "../src/core/analyze";
-import { buildExport } from "../src/core/exporter";
+import { buildExport, buildPayloadZip } from "../src/core/exporter";
 import { intakeFolder, intakeZip, type PickedFile } from "../src/core/intake";
 import { buildInventory, canonicalManifest, sha256Hex } from "../src/core/inventory";
 import { allowedTransitions, buildPlan, transition } from "../src/core/plan";
@@ -19,8 +19,12 @@ const SITE = {
 };
 
 describe("intake", () => {
-  it("strips one wrapper folder and keeps bytes", async () => {
-    const r = intakeZip(zipSync(SITE));
+  it("offers the wrapper folder as a root choice but only strips it when asked", async () => {
+    const plain = intakeZip(zipSync(SITE));
+    expect(plain.candidateRoot).toBe("mysite");
+    expect(plain.strippedRoot).toBeNull();
+    expect(plain.files.map((f) => f.path)).toContain("mysite/index.html");
+    const r = intakeZip(zipSync(SITE), { stripRoot: true });
     expect(r.issues).toEqual([]);
     expect(r.strippedRoot).toBe("mysite");
     expect(r.files.map((f) => f.path)).toEqual(["css/a.css", "img/x.bin", "index.html"]);
@@ -33,7 +37,7 @@ describe("intake", () => {
   });
   it("reports case collisions", () => {
     const r = intakeZip(craftZip([{ name: "A.html", data: bytes("1") }, { name: "a.html", data: bytes("2") }]));
-    expect(r.issues.some((i) => i.message.includes("letter case"))).toBe(true);
+    expect(r.issues.some((i) => i.code === "MK_PATH_COLLISION")).toBe(true);
   });
   it("turns fatal archive errors into an issue", () => {
     const r = intakeZip(bytes("garbage"));
@@ -45,7 +49,7 @@ describe("intake", () => {
     const pick = (p: string, data: Uint8Array, size = data.length): PickedFile => ({
       webkitRelativePath: p, size, arrayBuffer: async () => { reads++; return data.slice().buffer; },
     });
-    const r = await intakeFolder([pick("site/index.html", bytes("hi")), pick("site/huge.bin", new Uint8Array(), 10 ** 9)]);
+    const r = await intakeFolder([pick("site/index.html", bytes("hi")), pick("site/huge.bin", new Uint8Array(), 10 ** 9)], { stripRoot: true });
     expect(r.files.map((f) => f.path)).toEqual(["index.html"]);
     expect(r.issues[0]!.message).toBe("file exceeds size limit");
     expect(reads).toBe(1);
@@ -55,7 +59,7 @@ describe("intake", () => {
 describe("inventory", () => {
   it("hashes match known SHA-256 and digest is order-independent", async () => {
     expect(await sha256Hex(bytes("abc"))).toBe("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
-    const files = intakeZip(zipSync(SITE)).files;
+    const files = intakeZip(zipSync(SITE), { stripRoot: true }).files;
     const a = await buildInventory(files);
     const b = await buildInventory([...files].reverse());
     expect(a.bundleDigest).toBe(b.bundleDigest);
@@ -81,9 +85,17 @@ describe("analysis and selection", () => {
   it("never reports unverified limits as compatible", () => {
     for (const p of CATALOGUE) {
       const a = assess(p, facts(["index.html"]));
-      expect(a.verdict).not.toBe("compatible"); // all limits are unverified in this milestone
-      expect(a.unknowns.length).toBeGreaterThan(0);
+      if (p.maxFileBytes.value === null || p.maxFiles.value === null) {
+        expect(a.verdict).not.toBe("compatible");
+        expect(a.unknowns.length).toBeGreaterThan(0);
+      }
     }
+  });
+  it("blocks over a researched limit and cites its evidence", () => {
+    const many = analyze(Array.from({ length: 1001 }, (_, i) => ({ path: i ? `f${i}` : "index.html", size: 1, sha256: "" })));
+    const a = assess(getProvider("cloudflare-pages")!, many);
+    expect(a.verdict).toBe("incompatible");
+    expect(a.blockers.join()).toMatch(/file count 1001 exceeds limit 1000 \(researched-lead, 2026-10-25\)/);
   });
   it("blocks bundles with secrets on every provider", () => {
     for (const p of CATALOGUE) expect(assess(p, facts(["index.html", "id_rsa"])).verdict).toBe("incompatible");
@@ -142,7 +154,7 @@ describe("plan and export", () => {
     expect(plan.destinations.every((d) => d.status === "blocked")).toBe(true);
   });
   it("export round-trips site bytes exactly and is deterministic", async () => {
-    const files = intakeZip(zipSync(SITE)).files;
+    const files = intakeZip(zipSync(SITE), { stripRoot: true }).files;
     const inv = await buildInventory(files);
     const providers = [getProvider("netlify")!, getProvider("tor-onion")!];
     const plan = buildPlan(inv.bundleDigest, analyze(inv.entries), false, providers);
@@ -151,10 +163,22 @@ describe("plan and export", () => {
     const back = readZip(z1);
     expect(back.rejected).toEqual([]);
     const names = back.entries.map((e) => e.name).sort();
-    expect(names).toEqual(["MANIFEST.txt", "instructions/netlify.txt", "instructions/tor-onion.txt", "plan.json", "site/css/a.css", "site/img/x.bin", "site/index.html"]);
-    const siteFiles = back.entries.filter((e) => e.name.startsWith("site/")).map((e) => ({ path: e.name.slice(5), bytes: e.bytes }));
-    expect((await buildInventory(siteFiles)).bundleDigest).toBe(inv.bundleDigest);
-    const instr = new TextDecoder().decode(back.entries.find((e) => e.name === "instructions/tor-onion.txt")!.bytes);
+    expect(names).toEqual([
+      "app/css/a.css", "app/img/x.bin", "app/index.html",
+      "mirrorkit-control/MANIFEST.txt", "mirrorkit-control/instructions/netlify.txt", "mirrorkit-control/instructions/tor-onion.txt", "mirrorkit-control/plan.json",
+    ]);
+    const appFiles = back.entries.filter((e) => e.name.startsWith("app/")).map((e) => ({ path: e.name.slice(4), bytes: e.bytes }));
+    expect((await buildInventory(appFiles)).bundleDigest).toBe(inv.bundleDigest);
+    const instr = new TextDecoder().decode(back.entries.find((e) => e.name === "mirrorkit-control/instructions/tor-onion.txt")!.bytes);
     expect(instr).toContain("did NOT contact this provider");
+    expect(instr).toContain("Never upload mirrorkit-control/");
+  });
+  it("payload ZIP has app files at the root and nothing else, and re-imports identically", async () => {
+    const files = intakeZip(zipSync(SITE), { stripRoot: true }).files;
+    const inv = await buildInventory(files);
+    const again = intakeZip(buildPayloadZip(files));
+    expect(again.candidateRoot).toBeNull();
+    expect(again.files.map((f) => f.path)).toEqual(["css/a.css", "img/x.bin", "index.html"]);
+    expect((await buildInventory(again.files)).bundleDigest).toBe(inv.bundleDigest);
   });
 });

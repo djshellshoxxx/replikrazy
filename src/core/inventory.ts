@@ -3,6 +3,7 @@
 // bytes and names always compare equal.
 
 import type { BundleFile } from "./intake";
+import { compareUtf8 } from "./paths";
 
 export interface InventoryEntry {
   path: string;
@@ -24,11 +25,11 @@ export async function sha256Hex(bytes: Uint8Array): Promise<string> {
   return hex(await crypto.subtle.digest("SHA-256", bytes.slice()));
 }
 
-// One line per file, "sha256 size path\n", sorted by path code units. Paths
+// One line per file, "sha256 size path\n", sorted by UTF-8 byte order. Paths
 // cannot contain newlines (validatePath rejects control characters).
 export function canonicalManifest(entries: readonly InventoryEntry[]): string {
   return [...entries]
-    .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
+    .sort((a, b) => compareUtf8(a.path, b.path))
     .map((e) => `${e.sha256} ${e.size} ${e.path}\n`)
     .join("");
 }
@@ -40,7 +41,7 @@ export async function buildInventory(files: readonly BundleFile[]): Promise<Inve
     entries.push({ path: f.path, size: f.bytes.length, sha256: await sha256Hex(f.bytes) });
     totalBytes += f.bytes.length;
   }
-  entries.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+  entries.sort((a, b) => compareUtf8(a.path, b.path));
   const bundleDigest = await sha256Hex(new TextEncoder().encode(canonicalManifest(entries)));
   return { entries, totalBytes, bundleDigest };
 }

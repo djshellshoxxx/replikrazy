@@ -24,6 +24,7 @@
       <label>or folder <input id="dir-input" type="file" webkitdirectory multiple /></label>
       <p class="hint">Files stay in this tab. HTML and scripts in the bundle are never opened or run.</p>
       <div id="intake-status" role="status"></div>
+      <div id="root-choice"></div>
     </section>
     <section id="inventory" hidden>
       <h2>2. Inventory</h2>
@@ -31,8 +32,16 @@
       <ul id="issues"></ul>
       <details><summary>Files</summary><table><thead><tr><th>Path</th><th>Bytes</th><th>SHA-256</th></tr></thead><tbody id="inv-rows"></tbody></table></details>
     </section>
+    <section id="compat" hidden>
+      <h2>3. Will the copy still work?</h2>
+      <p class="hint">Copying the exact bytes does not by itself make a working mirror. This is a read-only text scan: nothing in the bundle is run or fetched, and URLs built at runtime cannot be seen.</p>
+      <p id="compat-hints"></p>
+      <ul id="compat-findings"></ul>
+      <details><summary>External origins the site loads or calls</summary><ul id="compat-deps"></ul></details>
+      <details><summary>References to files not in the bundle</summary><ul id="compat-missing"></ul></details>
+    </section>
     <section id="providers" hidden>
-      <h2>3. Choose destinations</h2>
+      <h2>4. Choose destinations</h2>
       <div class="filters">
         <input id="f-text" type="search" placeholder="Filter providers" />
         <label><input id="f-noacct" type="checkbox" /> No account needed</label>
@@ -45,14 +54,15 @@
           <option value="self-host">Self-host</option>
         </select>
       </div>
-      <p class="hint">Evidence levels: <b>unreviewed</b> &lt; researched lead &lt; documented &lt; tested. Every entry here is currently <b>unreviewed</b>. Direct deployment from the browser is <b>unsupported</b> for all providers.</p>
+      <p class="hint">Evidence levels: <b>unreviewed</b> &lt; researched lead &lt; documented &lt; tested. Entries are dated research leads, not qualified providers; none is <b>tested</b>. Direct deployment from the browser is <b>unsupported</b> for all providers.</p>
       <div id="provider-list"></div>
     </section>
     <section id="plan" hidden>
-      <h2>4. Dry-run plan</h2>
+      <h2>5. Dry-run plan</h2>
       <div id="plan-list"></div>
-      <button id="export-btn" type="button">Download manual-export ZIP</button>
-      <p class="hint">The export contains <code>site/</code> (exact bytes), <code>MANIFEST.txt</code>, <code>plan.json</code> and per-destination instructions.</p>
+      <button id="export-btn" type="button">Download handoff ZIP</button>
+      <button id="payload-btn" type="button">Download app-only ZIP</button>
+      <p class="hint">Handoff ZIP: <code>app/</code> (exact bytes, the only part to upload) plus <code>mirrorkit-control/</code> (manifest, plan, scan, instructions — never upload). App-only ZIP: just your site files at the root, for hosts that accept a ZIP.</p>
     </section>
   </main>
   <script type="module" src="/src/ui/main.ts"></script>

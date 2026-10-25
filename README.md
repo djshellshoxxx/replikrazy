@@ -17,7 +17,7 @@ that name, and historical filenames and references are kept unchanged. The
 research package; it is under review and not merged or released. See
 [`docs/research/PROVENANCE.md`](docs/research/PROVENANCE.md).
 
-## Status: milestone 1 (foundation)
+## Status: milestone 2 (compatibility scan + intake hardening)
 
 This branch adds the first application implementation on top of the
 research-only landing page on `main`. No provider qualification, live
@@ -29,14 +29,15 @@ deployment or production readiness is claimed.
 | Path safety (traversal, absolute, drive letters, reserved names, case collisions) | implemented, unit-tested |
 | Byte-preserving inventory, SHA-256, canonical manifest + bundle digest | implemented, unit-tested |
 | Static-site analysis (missing index, secrets, server-side files) | implemented, unit-tested |
-| Provider catalogue, filtering, capability-aware assessment | implemented, unit-tested; **all provider data is `unreviewed`** |
+| Functional-compatibility scan: missing assets, external origins, root/relative paths, `<base>`, history/hash routing, service worker, browser storage, realtime backends, WASM, source maps, provider-reserved server paths, content secret patterns | implemented, unit-tested, browser smoke-tested; heuristic and explicitly incomplete |
+| Provider catalogue, filtering, capability-aware assessment | implemented, unit-tested; Cloudflare/Netlify carry dated `researched-lead` claims with official URLs, the rest are `unreviewed` |
 | Dry-run plan with user-attested per-destination status | implemented, unit-tested |
-| Manual-export ZIP (site/ + MANIFEST.txt + plan.json + instructions) | implemented, unit-tested, browser smoke-tested |
+| Handoff ZIP (`app/` + `mirrorkit-control/`) and app-only payload ZIP | implemented, unit-tested, browser smoke-tested |
 | Any live deployment / provider API | **not implemented, by design** |
 
 ### Evidence levels
 
-Each provider claim carries one of: `unreviewed` (general knowledge, not yet
+Catalogue entries are dated research leads, not qualified providers. Each provider claim carries one of: `unreviewed` (general knowledge, not yet
 checked) < `researched-lead` (in the MirrorKit research) < `documented`
 (confirmed in current official docs, cited) < `tested` (exercised by this
 project). `unsupported` means an action is known not to be possible here.
@@ -57,10 +58,15 @@ protect or monitor them.
   executed. Names reach the DOM only via `textContent`.
 - Strict CSP (`default-src 'none'; connect-src 'none'; frame-src 'none'`):
   the app cannot make network requests.
-- ZIP limits: 256 MiB archive, 10 000 entries, 64 MiB per file, 512 MiB total,
-  ratio ≤ 200; symlinks, encrypted, ZIP64, overlapping and CRC-mismatched
-  entries are refused. Inflation writes into a buffer pre-sized from the
-  declared size, so a lying header cannot exhaust memory.
+- ZIP limits follow research spec MK-ART-003: 128 MiB archive, 10 000 files,
+  100 000 directory entries, 32 MiB per file, 256 MiB total, 8 MiB metadata,
+  ratio ≤ 1000:1 above 1 MiB. Symlinks, special entries, encryption, ZIP64,
+  split archives, Unicode-path overrides and local/central name mismatches are
+  refused; CRC/size mismatch, overlap and limit breaches reject the whole
+  archive. Inflation writes into a buffer pre-sized from the declared size, so
+  a lying header cannot exhaust memory. CRC32 detects corruption only.
+- Path rules follow MK-ART-002 (UTF-8 byte limits, bidi/control/`#%?:` and
+  reserved-name rejection, NFC + case-fold collision checks).
 - No backend, no credential broker, no daemon, no telemetry.
 
 ## Develop
