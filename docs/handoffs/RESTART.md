@@ -86,6 +86,7 @@ Milestone 2 (this update):
 - **Measured after the fix** (2 MiB inputs, Node 22): every case under 0.6 s, most 15–150 ms.
 - **Trade-off:** a literal `<` inside a quoted attribute value hides that tag from the hint scan. Acceptable, because the scan is advisory and declared incomplete.
 - **Guard:** `tests/scan-redos.test.ts` runs 13 hostile inputs, 3 s budget each. Total suite: 8 files, **129 passed**.
+- **ZIP fuzz:** `tests/zip-fuzz.test.ts` runs 3,000 seeded mutations (seed 20261024): byte flips, extreme field values, truncation and prepended garbage. Every result must parse within limits or throw `ZipError`. Ad hoc, 20 more seeds (60,000 mutations) also found no other exception type. Total suite: 9 files, **130 passed**.
 - This is a self-review, **not** the independent security review Gate M requires.
 
 ## Milestone 6 (accessibility pass), 2026-10-25
