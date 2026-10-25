@@ -1,7 +1,7 @@
 # Next prompt — Replikrazy (formerly MirrorKit)
 
 Resume `djshellshoxxx/replikrazy` on branch `claude/trusting-goodall-9jdwxu`
-(draft PR #1 into `main`). Read `docs/handoffs/RESTART.md` and
+(draft PR #1 into `main`; last verified head `beffd0d`, CI green, 2026-10-25). Read `docs/handoffs/RESTART.md` and
 `docs/research/PROVENANCE.md` first. Check `git log`/`git ls-remote` for the
 current head rather than trusting any SHA written here.
 

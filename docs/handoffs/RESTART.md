@@ -1,6 +1,6 @@
 # Replikrazy — restart handoff
 
-_Last updated: 2026-10-25, milestone 2 (Claude Code cloud session `01YP9ZPr`)._
+_Last updated: 2026-10-25 ~11:15 UTC, after milestone 2 (Claude Code cloud session `01YP9ZPr`)._
 
 ## Ownership
 
@@ -18,7 +18,8 @@ Haiku/Sonnet workers were spawned. Do not claim otherwise.
 - `docs/research-intake-20261025` = `b6b763e` at last check (owner's review
   branch for the research; empty so far; agents do not push to it).
 - Milestone 1 = `1172011`; merge of `main` = `2887c52` (CI green).
-- Milestone 2 = the commit that adds this file version (see `git log`).
+- Milestone 2 = `beffd0d` — CI `test` green on GitHub Actions (runs 40187654299, 40187652192). PR #1 is a draft, mergeable, no reviews; waiting on the owner.
+- This handoff refresh is a docs-only commit on top of `beffd0d`.
 
 ## Research
 
@@ -115,4 +116,16 @@ integrating `aws4fetch`/`browser-fs-access` (reference-only).
 
 ## Blockers
 
-- Publication approval for research data (gap 9/10).
+- Publication approval for research data (gap 9/10). Asked in PR #1 description and session; no answer yet.
+
+## Unpublished / local-only state
+
+None: every commit is pushed. The research pack was used only in this
+session's scratch directory and is not in git. The Playwright smoke scripts
+live outside the repo and are not reusable artifacts.
+
+## Session status
+
+Session `01YP9ZPr` is subscribed to PR #1 activity and has a self check-in
+scheduled for 12:00 UTC. A new agent taking over should not assume that
+watcher exists.
