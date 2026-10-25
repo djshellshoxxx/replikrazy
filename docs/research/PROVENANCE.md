@@ -2,10 +2,12 @@
 
 - Project formerly named **MirrorKit**; renamed **Replikrazy**.
 - The owner supplied the MirrorKit research checkpoint **v13 (2026-10-25)**
-  privately to the working session. Its own manifests mark it "local staging,
-  not yet published". It is **not** committed to this public repository and
-  must not be, until the owner approves publication (the owner's review branch
-  is `docs/research-intake-20261025`; agents read it but do not push to it).
+  privately to the working session. On 2026-10-25 the owner approved
+  publishing its **catalogue data**; that subset is in
+  [`mirrorkit-v13/`](mirrorkit-v13/README.md) (see "Imported files"). The rest
+  of the pack (specs, reports, reviews, route specs, regional research,
+  reference code copies, nested checkpoint archive) is still unpublished and
+  must not be committed without separate approval.
 - What this repository takes from it, and how:
   - **Requirement IDs** (e.g. `MK-ART-002`, `MK-ART-003`, `MK-POL-002`,
     `T-ART-10`) are cited in code comments and tests so behaviour can be traced
@@ -20,10 +22,10 @@
   - The export's `mirrorkit-control/` folder name follows spec MK-ART-006.
   - Research catalogue record ids are kept verbatim in `researchId`
     (`cloudflare_pages`, `netlify`, `github_pages`).
-- Not used: the 62-profile / 311-lead catalogue data, the hosting database,
-  route specs, regional research, and the licensed reference copies
-  (`aws4fetch`, MIT; `browser-fs-access`, Apache-2.0). Those copies are
-  reference-only and are not integrated or tested here.
+- Not imported: route specs, regional research, specs/reports, and the
+  licensed reference copies (`aws4fetch`, MIT; `browser-fs-access`,
+  Apache-2.0). Those copies are reference-only and are not integrated or
+  tested here.
 - Import rule (repo is public): only research/specification text the owner
   approves after privacy, provenance and licence checks. Never import the
   private checkpoint ZIP itself, private review packets or secrets. Keep
@@ -32,4 +34,13 @@
 
 ## Imported files
 
-_None._
+| Path in repo | Original path in pack | Date | Approval | Changes |
+| --- | --- | --- | --- | --- |
+| `docs/research/mirrorkit-v13/catalog/*` (8 files) | `mirrorkit-research/catalog/*` | 2026-10-25 | owner, in session | none |
+| `docs/research/mirrorkit-v13/v13/hosting-database/**` (7 files) | `mirrorkit-research/v13/hosting-database/**` | 2026-10-25 | owner, in session | none |
+| `docs/research/mirrorkit-v13/v13/guest-host-catalog/*` (4 files) | `mirrorkit-research/v13/guest-host-catalog/*` | 2026-10-25 | owner, in session | one personal-looking contact email replaced with a placeholder in `guest-hosts.json` and `guest-hosts.csv` |
+
+Per-file hashes and the pack-manifest check: `mirrorkit-v13/IMPORT-MANIFEST.json`.
+Pre-publication checks: secret/token patterns (none), local filesystem paths
+(none outside URLs), emails (provider business contacts kept; one personal-looking address redacted),
+internal workflow notes (only methodology notes about research search tools, kept).

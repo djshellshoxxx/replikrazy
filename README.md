@@ -13,8 +13,10 @@ The work began under the historical working name **MirrorKit**; that name
 in older notes records provenance, not a separate active repository. The
 research and planning material (including `BUILD_PLAN.md`) was written under
 that name, and historical filenames and references are kept unchanged. The
-`docs/research-intake-20261025` branch is reserved for the source-cited
-research package; it is under review and not merged or released. See
+research **catalogue data** (provider profiles, lead register, hosting
+database, guest-host catalogue) is published in
+[`docs/research/mirrorkit-v13/`](docs/research/mirrorkit-v13/README.md) as
+dated research leads, not qualified providers. See
 [`docs/research/PROVENANCE.md`](docs/research/PROVENANCE.md).
 
 ## Status: milestone 2 (compatibility scan + intake hardening)

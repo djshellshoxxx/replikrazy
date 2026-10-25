@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Replikrazy hosting research database (derived, non-executable)",
+  "type": "object",
+  "required": [
+    "database",
+    "version",
+    "status",
+    "not_for_execution",
+    "source_inputs",
+    "count_interpretation",
+    "records"
+  ],
+  "properties": {
+    "database": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "generated_utc_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "const": "research_only_not_provider_qualification_or_deployment_data"
+    },
+    "not_for_execution": {
+      "type": "boolean",
+      "const": true
+    },
+    "source_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source_key",
+          "logical_path",
+          "sha256",
+          "size_bytes"
+        ],
+        "properties": {
+          "source_key": {
+            "type": "string"
+          },
+          "logical_path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "input_role": {
+            "type": "string"
+          },
+          "transformation_note": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "count_interpretation": {
+      "type": "object"
+    },
+    "normalization_rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "records": {
+      "type": "object",
+      "required": [
+        "catalog_leads",
+        "provider_profiles",
+        "regional_offers",
+        "record_enrichments",
+        "market_sweeps",
+        "browser_workflow_routes",
+        "hosting_route_spec_index",
+        "workflow_source_registry"
+      ],
+      "properties": {
+        "catalog_leads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/normalizedRecord"
+          }
+        },
+        "provider_profiles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/normalizedRecord"
+          }
+        },
+        "regional_offers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/normalizedRecord"
+          }
+        },
+        "record_enrichments": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "market_sweeps": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "browser_workflow_routes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "hosting_route_spec_index": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "workflow_source_registry": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "normalizedRecord": {
+      "type": "object",
+      "required": [
+        "record_id",
+        "record_kind",
+        "source_collection",
+        "record_status",
+        "display_name",
+        "source_evidence",
+        "source_record"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string"
+        },
+        "record_kind": {
+          "enum": [
+            "lead",
+            "provider",
+            "protocol",
+            "adapter",
+            "offer"
+          ]
+        },
+        "source_collection": {
+          "type": "string"
+        },
+        "record_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "record_subtype": {},
+        "source_evidence_checked_utc": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "canonical_domain": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "market_or_scope": {},
+        "operator_evidence": {},
+        "serving_region_evidence": {},
+        "documentation_languages": {},
+        "offer_economics": {},
+        "resource_caps": {},
+        "expiry_retention": {},
+        "eligibility_constraints": {},
+        "hosting_type": {},
+        "documented_setup_or_transfer": {},
+        "javascript_compatibility_evidence": {},
+        "browser_publishing": {
+          "type": "object"
+        },
+        "onion_i2p_route_reference": {
+          "type": "object"
+        },
+        "browser_workflow_route": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_evidence": {
+          "type": "array"
+        },
+        "source_evidence_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_record": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
