@@ -9,12 +9,19 @@ host, and it never asks for hosting credentials.**
 
 ## About the name
 
-Replikrazy was previously called **MirrorKit**. The research and planning
-material for this project (including `BUILD_PLAN.md`) was written under that
-name; historical filenames and references to "MirrorKit" are kept unchanged
-for provenance. See [`docs/research/PROVENANCE.md`](docs/research/PROVENANCE.md).
+The work began under the historical working name **MirrorKit**; that name
+in older notes records provenance, not a separate active repository. The
+research and planning material (including `BUILD_PLAN.md`) was written under
+that name, and historical filenames and references are kept unchanged. The
+`docs/research-intake-20261025` branch is reserved for the source-cited
+research package; it is under review and not merged or released. See
+[`docs/research/PROVENANCE.md`](docs/research/PROVENANCE.md).
 
 ## Status: milestone 1 (foundation)
+
+This branch adds the first application implementation on top of the
+research-only landing page on `main`. No provider qualification, live
+deployment or production readiness is claimed.
 
 | Area | State |
 | --- | --- |
@@ -71,8 +78,8 @@ runtime; TypeScript, Vite, Vitest for development.
 
 ## Licence
 
-TBD — no licence has been selected yet. Until one is, all rights are
-reserved by the repository owner.
+No software license or rights grant is made. Code and artwork reuse rights
+remain TBD and require separate review.
 
 ## Handoff
 

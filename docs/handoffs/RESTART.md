@@ -16,7 +16,11 @@ sequentially). Do not claim otherwise.
 
 ## Starting state found
 
-- Remote repo was **empty** (no commits, no default branch).
+- Remote repo was **empty** at session start. During the session the owner
+  pushed `main` = `b6b763e` (research-only landing README) and created
+  `docs/research-intake-20261025` (also `b6b763e`, research not yet pushed).
+  This branch merged `main` (unrelated histories, merge commit, no rewrite)
+  and reconciled the README wording (no licence grant; MirrorKit provenance).
 - The MirrorKit preparation ZIP / research (`CLAUDE_START_HERE.md`,
   `BUILD_PLAN.md`) was **not attached** to the container (`/mnt/attach`,
   `/mnt/user-data/uploads` empty). Nothing was imported; see
@@ -59,7 +63,8 @@ this milestone anyway).
 
 ## Remaining requirements / next steps (in order)
 
-1. **Obtain the MirrorKit research** from the owner. Reconcile each adapter in
+1. **Obtain the MirrorKit research**: check `origin/docs/research-intake-20261025`
+   first (owner's review branch; read-only for agents), else ask the owner. Reconcile each adapter in
    `src/providers/adapters/` against it: raise evidence to `researched-lead`
    only where the research says so; record numeric limits only with a cited
    source (`documented`). Import approved research docs under

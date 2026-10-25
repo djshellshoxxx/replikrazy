@@ -13,6 +13,11 @@
   private preparation ZIP itself, private review packets or secrets. Keep
   historical MirrorKit filenames unchanged; add an index entry here for each
   imported file (original path, date, approval).
+- The owner created `main` (landing README, b6b763e) and the branch
+  `docs/research-intake-20261025` for the source-cited research package
+  during this session. At last check that branch still pointed at b6b763e
+  (no research files yet). It is the owner's review branch: read from it, do
+  not push to it, and do not copy its contents here until the owner approves.
 
 ## Imported files
 

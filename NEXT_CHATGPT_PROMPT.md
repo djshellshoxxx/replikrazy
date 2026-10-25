@@ -10,8 +10,8 @@ plan, export ZIP, UI, CI workflow. They exist and 65 tests pass
 (`npm ci && npm run typecheck && npm test && npm run build`).
 
 **Do next:**
-1. Ask the owner for the MirrorKit research (BUILD_PLAN.md etc.) if it is
-   not attached. Never upload the private preparation ZIP to this public repo.
+1. Read the research from `origin/docs/research-intake-20261025` (owner's
+   review branch — do not push to it); if still empty, ask the owner. Never upload the private preparation ZIP to this public repo.
 2. Reconcile `src/providers/adapters/*` with that research; keep every
    unconfirmed claim `unreviewed`; never mark browser-direct deploy as
    supported; only add numeric limits with a cited official source.
