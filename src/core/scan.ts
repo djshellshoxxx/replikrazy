@@ -132,12 +132,16 @@ interface Ref {
 function htmlRefs(text: string): Ref[] {
   const out: Ref[] = [];
   // Tag-aware enough to assign roles; still regex-only, no DOM.
-  const tagRe = /<(script|link|img|source|video|audio|iframe|embed|object|a|form|area|track|input|image|use)\b([^>]*)>/gi;
+  // "[^<>]" (not "[^>]") stops each attempt at the next tag, so many
+  // unterminated "<a " opens cannot each scan to the end of the file. A
+  // literal "<" inside a quoted attribute value hides that tag; acceptable
+  // for a hinting scan.
+  const tagRe = /<(script|link|img|source|video|audio|iframe|embed|object|a|form|area|track|input|image|use)\b([^<>]{0,16384})>/gi;
   for (const m of text.matchAll(tagRe)) {
     const tag = m[1]!.toLowerCase();
     const attrs = m[2]!;
-    const rel = /\brel\s*=\s*["']?([^"'>\s]+)/i.exec(attrs)?.[1]?.toLowerCase() ?? "";
-    for (const a of attrs.matchAll(/\b(src|href|xlink:href|data|poster|action|srcset)\s*=\s*("([^"]*)"|'([^']*)'|([^\s>"']+))/gi)) {
+    const rel = /\brel\s*=\s*["']?([^"'>\s]{1,256})/i.exec(attrs)?.[1]?.toLowerCase() ?? "";
+    for (const a of attrs.matchAll(/\b(src|href|xlink:href|data|poster|action|srcset)\s*=\s*("([^"]{0,8192})"|'([^']{0,8192})'|([^\s>"']{1,2048}))/gi)) {
       const attr = a[1]!.toLowerCase();
       const value = a[3] ?? a[4] ?? a[5] ?? "";
       const role: DepRole =
@@ -156,35 +160,62 @@ function htmlRefs(text: string): Ref[] {
       } else out.push({ url: value, role });
     }
   }
-  for (const m of text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) out.push(...cssRefs(m[1]!));
-  for (const m of text.matchAll(/\bstyle\s*=\s*"([^"]*)"/gi)) out.push(...cssRefs(m[1]!));
-  for (const m of text.matchAll(/<script\b(?![^>]*\bsrc\s*=)[^>]*>([\s\S]*?)<\/script>/gi)) out.push(...jsRefs(m[1]!));
+  for (const body of blocks(text, "style")) out.push(...cssRefs(body.text));
+  for (const m of text.matchAll(/\bstyle\s*=\s*"([^"]{0,8192})"/gi)) out.push(...cssRefs(m[1]!));
+  for (const body of blocks(text, "script")) if (!/\bsrc\s*=/i.test(body.open)) out.push(...jsRefs(body.text));
   return out;
+}
+
+// Linear scan for <tag ...>body</tag>. A lazy regex here is quadratic on
+// many unclosed open tags (each one rescans to the end); with indexOf, an
+// unclosed tag simply ends the search.
+function* blocks(text: string, tag: string): Generator<{ open: string; text: string }> {
+  const lower = text.toLowerCase();
+  const openTok = `<${tag}`;
+  const closeTok = `</${tag}`;
+  let i = 0;
+  for (;;) {
+    const start = lower.indexOf(openTok, i);
+    if (start < 0) return;
+    const after = lower.charCodeAt(start + openTok.length);
+    // Require a tag boundary: "<style>" or "<style " but not "<styles".
+    if (!(after === 62 || after === 47 || after === 32 || after === 9 || after === 10 || after === 13 || after === 12)) { i = start + 1; continue; }
+    const gt = lower.indexOf(">", start);
+    if (gt < 0) return;
+    const end = lower.indexOf(closeTok, gt + 1);
+    if (end < 0) return;
+    yield { open: text.slice(start, gt + 1), text: text.slice(gt + 1, end) };
+    i = end + closeTok.length;
+  }
 }
 
 function cssRefs(text: string): Ref[] {
   const out: Ref[] = [];
-  for (const m of text.matchAll(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^)"'\s]+))\s*\)/gi)) {
+  // Bounded, and "(" excluded from unquoted URLs, so repeated "url(" without
+  // a closing ")" cannot make each match attempt run to the end of the file.
+  for (const m of text.matchAll(/url\(\s{0,64}(?:"([^"\n]{0,2048})"|'([^'\n]{0,2048})'|([^()"'\s]{1,2048}))\s{0,64}\)/gi)) {
     const u = m[1] ?? m[2] ?? m[3] ?? "";
     out.push({ url: u, role: /\.(woff2?|ttf|otf|eot)(\?|#|$)/i.test(u) ? "font" : "image" });
   }
-  for (const m of text.matchAll(/@import\s+(?:url\(\s*)?["']([^"']+)["']/gi)) out.push({ url: m[1]!, role: "style" });
+  for (const m of text.matchAll(/@import\s{1,64}(?:url\(\s{0,64})?["']([^"'\n]{1,2048})["']/gi)) out.push({ url: m[1]!, role: "style" });
   return out;
 }
 
 function jsRefs(text: string): Ref[] {
   const out: Ref[] = [];
-  const lit = `(?:"([^"\\n]*)"|'([^'\\n]*)'|\`([^\`$]*)\`)`;
+  const lit = `(?:"([^"\\n]{0,2048})"|'([^'\\n]{0,2048})'|\`([^\`$]{0,2048})\`)`;
   const val = (m: RegExpMatchArray) => m[1] ?? m[2] ?? m[3] ?? "";
-  for (const m of text.matchAll(new RegExp(`\\bimport\\s*(?:[\\w*{}\\s,$]+from\\s*)?${lit}`, "g"))) out.push({ url: val(m), role: "script" });
-  for (const m of text.matchAll(new RegExp(`\\bimport\\s*\\(\\s*${lit}\\s*\\)`, "g"))) out.push({ url: val(m), role: "script" });
-  for (const m of text.matchAll(new RegExp(`\\bnew\\s+(?:Shared)?Worker\\s*\\(\\s*${lit}`, "g"))) out.push({ url: val(m), role: "worker" });
-  for (const m of text.matchAll(new RegExp(`\\bimportScripts\\s*\\(\\s*${lit}`, "g"))) out.push({ url: val(m), role: "script" });
-  for (const m of text.matchAll(new RegExp(`\\b(?:fetch|EventSource|WebSocket|sendBeacon)\\s*\\(\\s*${lit}`, "g"))) out.push({ url: val(m), role: "api" });
+  // The specifier clause must start with a non-space and is length-bounded,
+  // so "import" + whitespace or many "import x" without "from" stay linear.
+  for (const m of text.matchAll(new RegExp(`\\bimport\\s{0,64}(?:[\\w*{$][\\w*{}\\s,$]{0,510}?\\bfrom\\s{0,64})?${lit}`, "g"))) out.push({ url: val(m), role: "script" });
+  for (const m of text.matchAll(new RegExp(`\\bimport\\s{0,64}\\(\\s{0,64}${lit}\\s{0,64}\\)`, "g"))) out.push({ url: val(m), role: "script" });
+  for (const m of text.matchAll(new RegExp(`\\bnew\\s{1,64}(?:Shared)?Worker\\s{0,64}\\(\\s{0,64}${lit}`, "g"))) out.push({ url: val(m), role: "worker" });
+  for (const m of text.matchAll(new RegExp(`\\bimportScripts\\s{0,64}\\(\\s{0,64}${lit}`, "g"))) out.push({ url: val(m), role: "script" });
+  for (const m of text.matchAll(new RegExp(`\\b(?:fetch|EventSource|WebSocket|sendBeacon)\\s{0,64}\\(\\s{0,64}${lit}`, "g"))) out.push({ url: val(m), role: "api" });
   // Bare absolute URL literals elsewhere in code: external, role unknown
   // unless one of the patterns above already gave that exact URL a role.
   const known = new Set(out.map((r) => r.url));
-  for (const m of text.matchAll(/["'`]((?:https?|wss?):\/\/[^"'`\s]+)["'`]/g)) if (!known.has(m[1]!)) out.push({ url: m[1]!, role: "unknown" });
+  for (const m of text.matchAll(/["'`]((?:https?|wss?):\/\/[^"'`\s]{1,2048})["'`]/g)) if (!known.has(m[1]!)) out.push({ url: m[1]!, role: "unknown" });
   return out;
 }
 
@@ -239,11 +270,11 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
 
     const isHtml = HTML_EXT.test(f.path);
     const isJs = JS_EXT.test(f.path) || isHtml;
-    if (isHtml && /<base\b[^>]*\bhref\s*=/i.test(text)) {
+    if (isHtml && /<base\b[^<>]{0,4096}\bhref\s*=/i.test(text)) {
       baseTag = true;
       add({ code: "MK_BASE_TAG", severity: "warning", certainty: "definite", path: f.path, message: "<base href> changes how every relative URL resolves; check it matches the mirror's URL" });
     }
-    if (isHtml && /<meta\b[^>]*http-equiv\s*=\s*["']?content-security-policy/i.test(text))
+    if (isHtml && /<meta\b[^<>]{0,4096}http-equiv\s*=\s*["']?content-security-policy/i.test(text))
       add({ code: "MK_META_CSP", severity: "info", certainty: "definite", path: f.path, message: "page sets its own CSP; origins it allows must still be reachable from the mirror" });
     if (isJs) {
       if (/\bnavigator\.serviceWorker\.register\s*\(/.test(text)) sw = true;

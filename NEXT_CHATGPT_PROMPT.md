@@ -5,7 +5,7 @@ Resume `djshellshoxxx/replikrazy` on branch `claude/trusting-goodall-9jdwxu`
 `docs/research/PROVENANCE.md` first. Check `git log`/`git ls-remote` for the
 current head rather than trusting any SHA written here.
 
-**Do NOT redo (done, 116 tests pass):** worker-based intake/hash/scan with
+**Do NOT redo (done, 129 tests pass):** scanner ReDoS hardening + regression guard, worker-based intake/hash/scan with
 progress + cancel (`src/core/pipeline.ts`, `src/ui/analysis-worker.ts`), contract `ArtifactManifest` + RFC 8785
 canonical JSON + `artifactId` with app id / entry-page selection, intended-use
 policy gates and contract `PublishPlan` with planId/expiry (`src/contracts/`), bounded ZIP reader with spec caps,

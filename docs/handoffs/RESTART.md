@@ -72,6 +72,22 @@ Milestone 2 (this update):
 - `src/core/exporter.ts`: `app/` + `mirrorkit-control/` handoff (adds `scan.json`, per-destination compatibility notes), `buildPayloadZip`.
 - UI: root choice, "Will the copy still work?" panel, app-only ZIP button, limit/evidence lines on provider cards.
 
+## Milestone 7 (security self-review: scanner ReDoS), 2026-10-25
+
+- **Finding (fixed):** eight scanner patterns were quadratic on hostile text within the 2 MiB per-file cap, each over 15 s and in practice never finishing:
+  - unclosed `<style>` or `<script>` blocks;
+  - repeated `url(` in CSS;
+  - `import` without `from`;
+  - `import` followed by whitespace;
+  - many unterminated `<a ` tags, or `<base`/`<meta` tags with no `>`.
+
+  The worker kept the UI responsive, but the scan would never finish.
+- **Fix:** `<style>`/`<script>` bodies are now found with an `indexOf` scan. Other patterns use bounded quantifiers, exclude `<`/`(` where needed, and no longer overlap.
+- **Measured after the fix** (2 MiB inputs, Node 22): every case under 0.6 s, most 15–150 ms.
+- **Trade-off:** a literal `<` inside a quoted attribute value hides that tag from the hint scan. Acceptable, because the scan is advisory and declared incomplete.
+- **Guard:** `tests/scan-redos.test.ts` runs 13 hostile inputs, 3 s budget each. Total suite: 8 files, **129 passed**.
+- This is a self-review, **not** the independent security review Gate M requires.
+
 ## Milestone 6 (accessibility pass), 2026-10-25
 
 - Fixed the only axe violation (unnamed method `<select>`); the search box now has a visible label.
