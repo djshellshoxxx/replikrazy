@@ -6,10 +6,11 @@ import { buildPublishPlan } from "../contracts/publish-plan";
 import { artifactId, buildManifest, defaultEntrypoint, htmlCandidates, ID_RE, type ArtifactManifest } from "../contracts/manifest";
 import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
-import { intakeFolder, intakeZip, type BundleFile, type IntakeIssue, type IntakeOptions, type IntakeResult } from "../core/intake";
-import { buildInventory, type Inventory } from "../core/inventory";
+import type { BundleFile, IntakeIssue, IntakeOptions, IntakeResult } from "../core/intake";
+import { runAnalysis, type AnalysisInput, type AnalysisResult, type Progress } from "../core/pipeline";
+import type { Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, transition, type DryRunPlan } from "../core/plan";
-import { scanBundle, type ScanReport } from "../core/scan";
+import type { ScanReport } from "../core/scan";
 import { DEFAULT_ZIP_LIMITS } from "../core/zip";
 import { filterCatalogue, getProvider } from "../providers/catalogue";
 import type { MethodId, ProviderAdapter } from "../providers/types";
@@ -30,8 +31,9 @@ interface State {
   selected: Set<string>;
   plan: DryRunPlan | null;
   scan: ScanReport | null;
-  // Re-runs intake with new options (root choice) without re-picking files.
-  reload: ((opts: IntakeOptions) => Promise<IntakeResult>) | null;
+  // Current selection, so intake can re-run with new options (root choice)
+  // without the user picking files again.
+  input: AnalysisInput | null;
   stripRoot: boolean;
   intakeIssues: IntakeIssue[];
   // Owner-declared identity inputs (research MK-CTR-003); changing either
@@ -45,7 +47,7 @@ interface State {
   publicDataReviewed: boolean;
 }
 const state: State = {
-  files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, reload: null, stripRoot: false,
+  files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, input: null, stripRoot: false,
   intakeIssues: [], appId: "site", entrypoint: null, manifest: null, artifactId: null,
   use: { category: "public-demo", containsPrivateData: false, ownerHasRights: false, description: "" },
   publicDataReviewed: false,
@@ -80,17 +82,47 @@ function restoreStatuses(plan: DryRunPlan): DryRunPlan {
 
 const fmtBytes = (n: number) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KiB` : `${(n / 1048576).toFixed(1)} MiB`);
 
-async function loadBundle(load: (opts: IntakeOptions) => Promise<IntakeResult>, stripRoot = false) {
+class Cancelled extends Error {}
+let cancelActive: (() => void) | null = null;
+let generation = 0;
+
+// Runs the pipeline in a module worker so large inputs keep the page
+// responsive and can be cancelled (T-ART-06). Falls back to the page thread
+// where workers are unavailable.
+function analyzeOffThread(input: AnalysisInput, opts: IntakeOptions, onProgress: Progress): Promise<AnalysisResult> {
+  if (typeof Worker === "undefined") return runAnalysis(input, opts, onProgress);
+  return new Promise((resolve, reject) => {
+    const w = new Worker(new URL("./analysis-worker.ts", import.meta.url), { type: "module" });
+    const finish = () => { w.terminate(); cancelActive = null; };
+    cancelActive = () => { finish(); reject(new Cancelled()); };
+    w.onmessage = (ev: MessageEvent) => {
+      const m = ev.data as { type: string; stage?: Parameters<Progress>[0]; done?: number; total?: number; result?: AnalysisResult };
+      if (m.type === "progress") onProgress(m.stage!, m.done!, m.total!);
+      else if (m.type === "done") { finish(); resolve(m.result!); }
+      else { finish(); reject(new Error("analysis failed")); }
+    };
+    w.onerror = () => { finish(); reject(new Error("analysis failed")); };
+    w.postMessage({ input, opts });
+  });
+}
+
+async function loadBundle(input: AnalysisInput, stripRoot = false) {
   const status = $("intake-status");
+  const cancelBtn = $("cancel-btn") as HTMLButtonElement;
+  cancelActive?.();
+  const gen = ++generation;
   status.textContent = "Reading…";
-  state.reload = load;
+  cancelBtn.hidden = false;
+  state.input = input;
   state.stripRoot = stripRoot;
   try {
-    const r = await load({ stripRoot });
-    const inv = await buildInventory(r.files);
+    const { intake: r, inv, scan } = await analyzeOffThread(input, { stripRoot }, (stage, done, total) => {
+      if (gen === generation) status.textContent = `${stage[0]!.toUpperCase()}${stage.slice(1)}… ${done} / ${total}`;
+    });
+    if (gen !== generation) return; // a newer selection replaced this one
     state.files = r.files;
     state.inv = inv;
-    state.scan = scanBundle(r.files);
+    state.scan = scan;
     state.intakeIssues = r.issues;
     state.entrypoint = defaultEntrypoint(inv.entries.map((e) => e.path));
     state.selected.clear();
@@ -100,9 +132,12 @@ async function loadBundle(load: (opts: IntakeOptions) => Promise<IntakeResult>, 
     renderCompat(state.scan);
     renderProviders();
     await refreshIdentity();
-  } catch {
+  } catch (e) {
+    if (gen !== generation) return;
     // Do not echo exception text: it could contain imported names/contents.
-    status.textContent = "Could not read this input.";
+    status.textContent = e instanceof Cancelled ? "Cancelled. Nothing was kept; select the input again to retry." : "Could not read this input.";
+  } finally {
+    if (gen === generation) cancelBtn.hidden = true;
   }
 }
 
@@ -149,7 +184,7 @@ function renderRootChoice(r: IntakeResult) {
   const cb = el("input");
   cb.type = "checkbox";
   cb.checked = !!r.strippedRoot;
-  cb.addEventListener("change", () => { if (state.reload) void loadBundle(state.reload, cb.checked); });
+  cb.addEventListener("change", () => { if (state.input) void loadBundle(state.input, cb.checked); });
   label.append(cb, document.createTextNode(` Use the folder "${r.candidateRoot}/" as the site root (every file is inside it)`));
   box.append(label);
 }
@@ -313,15 +348,19 @@ $("zip-input").addEventListener("change", (ev) => {
   const f = (ev.target as HTMLInputElement).files?.[0];
   if (!f) return;
   // Refuse oversized archives from metadata, before reading them into memory.
-  if (f.size > DEFAULT_ZIP_LIMITS.maxArchiveBytes) { $("intake-status").textContent = "Archive is larger than the 256 MiB limit."; return; }
-  void loadBundle(async (opts) => intakeZip(new Uint8Array(await f.arrayBuffer()), opts));
+  if (f.size > DEFAULT_ZIP_LIMITS.maxArchiveBytes) {
+    $("intake-status").textContent = `Archive is larger than the ${DEFAULT_ZIP_LIMITS.maxArchiveBytes / 1048576} MiB limit.`;
+    return;
+  }
+  void loadBundle({ kind: "zip", file: f });
 });
 $("dir-input").addEventListener("change", (ev) => {
   const list = (ev.target as HTMLInputElement).files;
-  if (list?.length) void loadBundle((opts) => intakeFolder([...list], opts));
+  if (list?.length) void loadBundle({ kind: "folder", entries: [...list].map((f) => ({ path: f.webkitRelativePath, blob: f })) });
 });
 for (const id of ["f-text", "f-noacct", "f-domain", "f-method"]) $(id).addEventListener("input", renderProviders);
 $("export-btn").addEventListener("click", () => void download());
+$("cancel-btn").addEventListener("click", () => cancelActive?.());
 function readUse() {
   const country = ($("use-country") as HTMLInputElement).value.trim().toUpperCase();
   state.use = {

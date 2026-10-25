@@ -25,7 +25,7 @@ deployment or production readiness is claimed.
 
 | Area | State |
 | --- | --- |
-| ZIP / folder intake with bounded, validating reader | implemented, unit-tested |
+| ZIP / folder intake with bounded, validating reader; runs in a Web Worker with progress and cancel | implemented, unit-tested, browser smoke-tested |
 | Path safety (traversal, absolute, drive letters, reserved names, case collisions) | implemented, unit-tested |
 | Byte-preserving inventory, SHA-256, file-list checksum | implemented, unit-tested |
 | Contract `ArtifactManifest` (owner app id + entry page), RFC 8785 canonical JSON, `artifactId` (folder and ZIP give the same id) | implemented, unit-tested, browser smoke-tested |
@@ -58,8 +58,9 @@ protect or monitor them.
 
 - Imported HTML/JS is treated as opaque bytes: never rendered, framed or
   executed. Names reach the DOM only via `textContent`.
-- Strict CSP (`default-src 'none'; connect-src 'none'; frame-src 'none'`):
-  the app cannot make network requests.
+- Strict CSP (`default-src 'none'; connect-src 'none'; frame-src 'none'`;
+  `worker-src 'self'` for the app's own analysis worker): the app cannot make
+  network requests.
 - ZIP limits follow research spec MK-ART-003: 128 MiB archive, 10 000 files,
   100 000 directory entries, 32 MiB per file, 256 MiB total, 8 MiB metadata,
   ratio ≤ 1000:1 above 1 MiB. Symlinks, special entries, encryption, ZIP64,

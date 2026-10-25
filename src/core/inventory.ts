@@ -34,12 +34,16 @@ export function canonicalManifest(entries: readonly InventoryEntry[]): string {
     .join("");
 }
 
-export async function buildInventory(files: readonly BundleFile[]): Promise<Inventory> {
+export async function buildInventory(
+  files: readonly BundleFile[],
+  onProgress: (done: number, total: number) => void = () => {},
+): Promise<Inventory> {
   const entries: InventoryEntry[] = [];
   let totalBytes = 0;
   for (const f of files) {
     entries.push({ path: f.path, size: f.bytes.length, sha256: await sha256Hex(f.bytes) });
     totalBytes += f.bytes.length;
+    onProgress(entries.length, files.length);
   }
   entries.sort((a, b) => compareUtf8(a.path, b.path));
   const bundleDigest = await sha256Hex(new TextEncoder().encode(canonicalManifest(entries)));

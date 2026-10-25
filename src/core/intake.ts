@@ -102,6 +102,7 @@ export async function intakeFolder(
   picked: readonly PickedFile[],
   opts: IntakeOptions = {},
   limits: ZipLimits = DEFAULT_ZIP_LIMITS,
+  onProgress: (done: number, total: number) => void = () => {},
 ): Promise<IntakeResult> {
   const issues: IntakeIssue[] = [];
   if (picked.length > limits.maxEntries) return failed("folder", "too many files", "MK_LIMIT_EXCEEDED");
@@ -120,6 +121,7 @@ export async function intakeFolder(
     // The file changed between listing and reading (MK_INPUT_CHANGED).
     if (bytes.length !== f.size) return failed("folder", "a file changed while it was being read; select the folder again", "MK_INPUT_CHANGED");
     raw.push({ name: f.webkitRelativePath, bytes });
+    onProgress(raw.length, picked.length);
   }
   return finish("folder", raw, issues, opts);
 }
