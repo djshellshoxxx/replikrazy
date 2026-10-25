@@ -1,9 +1,10 @@
 // UI wiring. Invariant: imported file names/contents only ever reach the DOM
 // through textContent (never innerHTML), and file contents are never rendered.
 
+import { artifactId, buildManifest, defaultEntrypoint, htmlCandidates, ID_RE, type ArtifactManifest } from "../contracts/manifest";
 import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
-import { intakeFolder, intakeZip, type BundleFile, type IntakeOptions, type IntakeResult } from "../core/intake";
+import { intakeFolder, intakeZip, type BundleFile, type IntakeIssue, type IntakeOptions, type IntakeResult } from "../core/intake";
 import { buildInventory, type Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, transition, type DryRunPlan } from "../core/plan";
 import { scanBundle, type ScanReport } from "../core/scan";
@@ -30,21 +31,31 @@ interface State {
   // Re-runs intake with new options (root choice) without re-picking files.
   reload: ((opts: IntakeOptions) => Promise<IntakeResult>) | null;
   stripRoot: boolean;
+  intakeIssues: IntakeIssue[];
+  // Owner-declared identity inputs (research MK-CTR-003); changing either
+  // gives a new artifactId and invalidates any plan built for the old one.
+  appId: string;
+  entrypoint: string | null;
+  manifest: ArtifactManifest | null;
+  artifactId: string | null;
 }
-const state: State = { files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, reload: null, stripRoot: false };
+const state: State = {
+  files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, reload: null, stripRoot: false,
+  intakeIssues: [], appId: "site", entrypoint: null, manifest: null, artifactId: null,
+};
 
-// Per-viewer convenience only: remembers statuses for a given bundle digest.
+// Per-viewer convenience only: remembers statuses for a given artifactId.
 const storeKey = (digest: string) => `replikrazy.plan.${digest}`;
 function savePlan() {
   if (!state.plan) return;
   try {
     const s = Object.fromEntries(state.plan.destinations.map((d) => [d.providerId, d.status]));
-    localStorage.setItem(storeKey(state.plan.bundleDigest), JSON.stringify(s));
+    localStorage.setItem(storeKey(state.plan.artifactId), JSON.stringify(s));
   } catch { /* storage unavailable: statuses simply aren't remembered */ }
 }
 function restoreStatuses(plan: DryRunPlan): DryRunPlan {
   let saved: Record<string, string> = {};
-  try { saved = JSON.parse(localStorage.getItem(storeKey(plan.bundleDigest)) ?? "{}"); } catch { return plan; }
+  try { saved = JSON.parse(localStorage.getItem(storeKey(plan.artifactId)) ?? "{}"); } catch { return plan; }
   let p = plan;
   for (const d of plan.destinations) {
     const want = saved[d.providerId];
@@ -70,26 +81,56 @@ async function loadBundle(load: (opts: IntakeOptions) => Promise<IntakeResult>, 
   try {
     const r = await load({ stripRoot });
     const inv = await buildInventory(r.files);
-    const facts = analyze(inv.entries);
-    const scan = scanBundle(r.files);
-    const issues = [...r.issues, ...factIssues(facts)];
     state.files = r.files;
     state.inv = inv;
-    state.scan = scan;
-    // Suspected live credentials block export just like intake errors.
-    state.hasErrors = issues.some((i) => i.severity === "error") || scan.findings.some((f) => f.severity === "blocker");
+    state.scan = scanBundle(r.files);
+    state.intakeIssues = r.issues;
+    state.entrypoint = defaultEntrypoint(inv.entries.map((e) => e.path));
     state.selected.clear();
     state.plan = null;
     status.textContent = r.strippedRoot ? `Loaded with "${r.strippedRoot}/" as the site root.` : "Loaded.";
     renderRootChoice(r);
-    renderInventory(inv, issues);
-    renderCompat(scan);
+    renderCompat(state.scan);
     renderProviders();
-    renderPlan();
+    await refreshIdentity();
   } catch {
     // Do not echo exception text: it could contain imported names/contents.
     status.textContent = "Could not read this input.";
   }
+}
+
+// Recomputes facts, manifest and artifactId from the current appId/entrypoint.
+async function refreshIdentity() {
+  if (!state.inv || !state.scan) return;
+  const inv = state.inv;
+  const facts = analyze(inv.entries, state.entrypoint);
+  const issues: { severity: string; path?: string; message: string }[] = [...state.intakeIssues, ...factIssues(facts)];
+  state.manifest = null;
+  state.artifactId = null;
+  if (facts.entrypoint) {
+    const m = buildManifest(state.appId, inv.entries, facts.entrypoint);
+    if (m.ok) {
+      state.manifest = m.manifest;
+      state.artifactId = await artifactId(m.manifest);
+    } else issues.push(...m.errors.map((message) => ({ severity: "error", message: `manifest: ${message}` })));
+  }
+  // Suspected live credentials block export just like intake errors.
+  state.hasErrors = !state.artifactId || issues.some((i) => i.severity === "error") || state.scan.findings.some((f) => f.severity === "blocker");
+  renderIdentity(inv);
+  renderInventory(inv, issues);
+  rebuildPlan();
+}
+
+function renderIdentity(inv: Inventory) {
+  const appIdInput = $("app-id") as HTMLInputElement;
+  appIdInput.value = state.appId;
+  const sel = $("entrypoint") as HTMLSelectElement;
+  const candidates = htmlCandidates(inv.entries.map((e) => e.path));
+  sel.replaceChildren(el("option", "— choose the entry page —"), ...candidates.map((p) => el("option", p)));
+  (sel.options[0] as HTMLOptionElement).value = "";
+  for (let i = 1; i < sel.options.length; i++) (sel.options[i] as HTMLOptionElement).value = candidates[i - 1]!;
+  sel.value = state.entrypoint ?? "";
+  $("artifact-id").textContent = state.artifactId ? `Artifact id: ${state.artifactId}` : "Artifact id: not available until the identity is valid.";
 }
 
 // Root selection is an explicit, visible choice (research T-ART-02).
@@ -124,7 +165,7 @@ function renderCompat(scan: ScanReport) {
 
 function renderInventory(inv: Inventory, issues: { severity: string; path?: string; message: string }[]) {
   $("inventory").hidden = false;
-  $("inv-summary").textContent = `${inv.entries.length} files, ${fmtBytes(inv.totalBytes)}. Bundle digest ${inv.bundleDigest}`;
+  $("inv-summary").textContent = `${inv.entries.length} files, ${fmtBytes(inv.totalBytes)}. File-list checksum ${inv.bundleDigest}`;
   const ul = $("issues");
   ul.replaceChildren(...issues.map((i) => el("li", `${i.severity.toUpperCase()}: ${i.message}${i.path ? ` (${i.path})` : ""}`, i.severity)));
   if (!issues.length) ul.replaceChildren(el("li", "No issues found.", "okay"));
@@ -183,7 +224,7 @@ function rebuildPlan() {
   if (!state.inv) return;
   const providers = [...state.selected].map((id) => getProvider(id)!).filter(Boolean);
   state.plan = providers.length
-    ? restoreStatuses(buildPlan(state.inv.bundleDigest, analyze(state.inv.entries), state.hasErrors, providers, state.scan ?? undefined))
+    ? restoreStatuses(buildPlan(state.artifactId ?? "none", analyze(state.inv.entries, state.entrypoint), state.hasErrors, providers, state.scan ?? undefined))
     : null;
   renderPlan();
 }
@@ -233,12 +274,14 @@ function renderPlan() {
 function download() {
   if (!state.plan || !state.inv) return;
   const providers = state.plan.destinations.map((d) => getProvider(d.providerId)!);
-  saveZip(buildExport(state.files, state.inv, state.plan, providers, state.scan ?? undefined), `replikrazy-handoff-${state.inv.bundleDigest.slice(0, 12)}.zip`);
+  if (!state.manifest || !state.artifactId) return;
+  saveZip(buildExport(state.files, state.inv, state.manifest, state.plan, providers, state.scan ?? undefined), `replikrazy-handoff-${state.artifactId.slice(7, 19)}.zip`);
 }
 
 function downloadPayload() {
   if (!state.inv || state.hasErrors) return;
-  saveZip(buildPayloadZip(state.files), `replikrazy-app-${state.inv.bundleDigest.slice(0, 12)}.zip`);
+  if (!state.artifactId) return;
+  saveZip(buildPayloadZip(state.files), `replikrazy-app-${state.artifactId.slice(7, 19)}.zip`);
 }
 
 function saveZip(zip: Uint8Array, name: string) {
@@ -263,4 +306,14 @@ $("dir-input").addEventListener("change", (ev) => {
 });
 for (const id of ["f-text", "f-noacct", "f-domain", "f-method"]) $(id).addEventListener("input", renderProviders);
 $("export-btn").addEventListener("click", download);
+$("app-id").addEventListener("change", (ev) => {
+  const v = (ev.target as HTMLInputElement).value.trim();
+  state.appId = v;
+  $("app-id-hint").textContent = ID_RE.test(v) ? "" : "Use 1–80 characters: lowercase letters, digits, dot, dash, underscore; start with a letter or digit.";
+  void refreshIdentity();
+});
+$("entrypoint").addEventListener("change", (ev) => {
+  state.entrypoint = (ev.target as HTMLSelectElement).value || null;
+  void refreshIdentity();
+});
 $("payload-btn").addEventListener("click", downloadPayload);

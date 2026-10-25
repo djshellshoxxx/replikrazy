@@ -22,7 +22,8 @@ export function assess(p: ProviderAdapter, f: BundleFacts, scan?: ScanReport): A
   const warnings: string[] = [];
   const unknowns: string[] = [];
 
-  if (!f.hasRootIndex) blockers.push("bundle has no root index.html");
+  if (!f.entrypoint) blockers.push("no entry page selected");
+  else if (!f.hasRootIndex) warnings.push(`no root index.html: the site root URL will not show ${f.entrypoint}`);
   if (f.sensitiveFiles.length) blockers.push("bundle contains possible secrets/private files");
   if (f.serverSideFiles.length && p.runsServerCode.value !== true)
     blockers.push("server-side files would not run and could be exposed as source");

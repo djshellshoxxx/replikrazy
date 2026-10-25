@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { analyze, factIssues } from "../src/core/analyze";
 import { buildExport, buildPayloadZip } from "../src/core/exporter";
 import { intakeFolder, intakeZip, type PickedFile } from "../src/core/intake";
+import { artifactId, buildManifest, validateManifest } from "../src/contracts/manifest";
 import { buildInventory, canonicalManifest, sha256Hex } from "../src/core/inventory";
 import { allowedTransitions, buildPlan, transition } from "../src/core/plan";
 import { readZip } from "../src/core/zip";
@@ -78,7 +79,9 @@ describe("analysis and selection", () => {
   it("flags missing index, secrets and server code", () => {
     const f = facts(["about.html", ".env", "api.php", ".git/config"]);
     const msgs = factIssues(f).map((i) => i.severity + ":" + i.message.split(":")[0]);
-    expect(msgs).toContain("error:no index.html at the bundle root");
+    expect(msgs).toContain("error:no entry page");
+    const chosen = factIssues(analyze([{ path: "about.html", size: 1, sha256: "" }], "about.html"));
+    expect(chosen.map((i) => i.severity)).toEqual(["warning"]);
     expect(f.sensitiveFiles).toEqual([".env", ".git/config"]);
     expect(f.serverSideFiles).toEqual(["api.php"]);
   });
@@ -157,21 +160,29 @@ describe("plan and export", () => {
     const files = intakeZip(zipSync(SITE), { stripRoot: true }).files;
     const inv = await buildInventory(files);
     const providers = [getProvider("netlify")!, getProvider("tor-onion")!];
-    const plan = buildPlan(inv.bundleDigest, analyze(inv.entries), false, providers);
-    const z1 = buildExport(files, inv, plan, providers);
-    expect(buildExport(files, inv, plan, providers)).toEqual(z1);
+    const m = buildManifest("site", inv.entries, "index.html");
+    if (!m.ok) throw new Error(m.errors.join());
+    const id = await artifactId(m.manifest);
+    const plan = buildPlan(id, analyze(inv.entries), false, providers);
+    const z1 = buildExport(files, inv, m.manifest, plan, providers);
+    expect(buildExport(files, inv, m.manifest, plan, providers)).toEqual(z1);
     const back = readZip(z1);
     expect(back.rejected).toEqual([]);
     const names = back.entries.map((e) => e.name).sort();
     expect(names).toEqual([
       "app/css/a.css", "app/img/x.bin", "app/index.html",
-      "mirrorkit-control/MANIFEST.txt", "mirrorkit-control/instructions/netlify.txt", "mirrorkit-control/instructions/tor-onion.txt", "mirrorkit-control/plan.json",
+      "mirrorkit-control/MANIFEST.txt", "mirrorkit-control/artifact-manifest.json", "mirrorkit-control/instructions/netlify.txt", "mirrorkit-control/instructions/tor-onion.txt", "mirrorkit-control/plan.json",
     ]);
     const appFiles = back.entries.filter((e) => e.name.startsWith("app/")).map((e) => ({ path: e.name.slice(4), bytes: e.bytes }));
     expect((await buildInventory(appFiles)).bundleDigest).toBe(inv.bundleDigest);
     const instr = new TextDecoder().decode(back.entries.find((e) => e.name === "mirrorkit-control/instructions/tor-onion.txt")!.bytes);
     expect(instr).toContain("did NOT contact this provider");
     expect(instr).toContain("Never upload mirrorkit-control/");
+    expect(instr).toContain(`Artifact id (sha256 of mirrorkit-control/artifact-manifest.json): ${id}`);
+    // The exported manifest bytes re-hash to the same artifactId (T-ART-09).
+    const json = back.entries.find((e) => e.name === "mirrorkit-control/artifact-manifest.json")!.bytes;
+    expect(`sha256:${await sha256Hex(json)}`).toBe(id);
+    expect(validateManifest(JSON.parse(new TextDecoder().decode(json)))).toEqual([]);
   });
   it("payload ZIP has app files at the root and nothing else, and re-imports identically", async () => {
     const files = intakeZip(zipSync(SITE), { stripRoot: true }).files;

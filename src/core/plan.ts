@@ -23,7 +23,8 @@ export interface Destination {
 }
 
 export interface DryRunPlan {
-  bundleDigest: string;
+  // Contract artifactId ("sha256:…" of the canonical ArtifactManifest).
+  artifactId: string;
   destinations: Destination[];
 }
 
@@ -33,14 +34,14 @@ export function initialStatus(a: Assessment, bundleHasErrors: boolean): Destinat
 }
 
 export function buildPlan(
-  bundleDigest: string,
+  artifactId: string,
   facts: BundleFacts,
   bundleHasErrors: boolean,
   providers: readonly ProviderAdapter[],
   scan?: ScanReport,
 ): DryRunPlan {
   return {
-    bundleDigest,
+    artifactId,
     destinations: providers.map((p) => {
       const assessment = assess(p, facts, scan);
       const base = initialStatus(assessment, bundleHasErrors);

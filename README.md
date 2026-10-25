@@ -27,12 +27,13 @@ deployment or production readiness is claimed.
 | --- | --- |
 | ZIP / folder intake with bounded, validating reader | implemented, unit-tested |
 | Path safety (traversal, absolute, drive letters, reserved names, case collisions) | implemented, unit-tested |
-| Byte-preserving inventory, SHA-256, canonical manifest + bundle digest | implemented, unit-tested |
+| Byte-preserving inventory, SHA-256, file-list checksum | implemented, unit-tested |
+| Contract `ArtifactManifest` (owner app id + entry page), RFC 8785 canonical JSON, `artifactId` (folder and ZIP give the same id) | implemented, unit-tested, browser smoke-tested |
 | Static-site analysis (missing index, secrets, server-side files) | implemented, unit-tested |
 | Functional-compatibility scan: missing assets, external origins, root/relative paths, `<base>`, history/hash routing, service worker, browser storage, realtime backends, WASM, source maps, provider-reserved server paths, content secret patterns | implemented, unit-tested, browser smoke-tested; heuristic and explicitly incomplete |
 | Provider catalogue, filtering, capability-aware assessment | implemented, unit-tested; Cloudflare/Netlify carry dated `researched-lead` claims with official URLs, the rest are `unreviewed` |
 | Dry-run plan with user-attested per-destination status | implemented, unit-tested |
-| Handoff ZIP (`app/` + `mirrorkit-control/`) and app-only payload ZIP | implemented, unit-tested, browser smoke-tested |
+| Handoff ZIP (`app/` + `mirrorkit-control/` incl. `artifact-manifest.json`) and app-only payload ZIP | implemented, unit-tested, browser smoke-tested |
 | Any live deployment / provider API | **not implemented, by design** |
 
 ### Evidence levels

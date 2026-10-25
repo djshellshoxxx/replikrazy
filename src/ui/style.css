@@ -17,3 +17,5 @@ td.hash { font-family: ui-monospace, monospace; }
 button { font: inherit; padding: 6px 12px; cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 ul { padding-left: 20px; }
+.hash { font-family: ui-monospace, monospace; word-break: break-all; }
+.identity input, .identity select { font: inherit; max-width: 100%; }

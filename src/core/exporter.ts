@@ -1,7 +1,8 @@
 // Manual-export packages (research MK-ART-006, T-ART-09).
 //
 // Handoff ZIP:  app/ (exact bytes, the only deployable part) plus a sibling
-//               mirrorkit-control/ with MANIFEST.txt, plan.json, scan.json and
+//               mirrorkit-control/ with artifact-manifest.json (canonical
+//               contract bytes), MANIFEST.txt, plan.json, scan.json and
 //               per-destination instructions. The control folder keeps its
 //               historical MirrorKit name for spec compatibility; it must
 //               never be uploaded.
@@ -13,6 +14,8 @@
 import { zipSync, type Zippable } from "fflate";
 import type { ProviderAdapter } from "../providers/types";
 import type { BundleFile } from "./intake";
+import { canonicalBytes } from "../contracts/canonical";
+import type { ArtifactManifest } from "../contracts/manifest";
 import { canonicalManifest, type Inventory } from "./inventory";
 import type { DryRunPlan } from "./plan";
 import type { ScanReport } from "./scan";
@@ -26,10 +29,17 @@ export const CONTROL_DIR = "mirrorkit-control";
 const fmtClaim = (label: string, c: { value: unknown; evidence: string; note?: string; source?: string; observed?: string }) =>
   `  - ${label}: ${c.value === null ? "unknown" : String(c.value)} [${c.evidence}${c.observed ? `, read ${c.observed}` : ""}]${c.note ? ` — ${c.note}` : ""}${c.source ? `\n      source: ${c.source}` : ""}`;
 
-export function instructionsText(p: ProviderAdapter, inv: Inventory, statusLine: string, assessment?: DryRunPlan["destinations"][number]["assessment"]): string {
+export function instructionsText(
+  p: ProviderAdapter,
+  inv: Inventory,
+  artifactIdOf: string,
+  statusLine: string,
+  assessment?: DryRunPlan["destinations"][number]["assessment"],
+): string {
   const lines = [
     `Replikrazy manual export — ${p.name}`,
-    `Bundle digest (sha256 of ${CONTROL_DIR}/MANIFEST.txt): ${inv.bundleDigest}`,
+    `Artifact id (sha256 of ${CONTROL_DIR}/artifact-manifest.json): ${artifactIdOf}`,
+    `File-list checksum (sha256 of ${CONTROL_DIR}/MANIFEST.txt): ${inv.bundleDigest}`,
     `Planned status: ${statusLine}`,
     "",
     "Replikrazy did NOT contact this provider and did NOT deploy anything.",
@@ -71,6 +81,7 @@ export function buildPayloadZip(files: readonly BundleFile[]): Uint8Array {
 export function buildExport(
   files: readonly BundleFile[],
   inv: Inventory,
+  manifest: ArtifactManifest,
   plan: DryRunPlan,
   providers: readonly ProviderAdapter[],
   scan?: ScanReport,
@@ -78,13 +89,15 @@ export function buildExport(
   const enc = new TextEncoder();
   const tree: Zippable = {};
   for (const f of files) tree[`${APP_DIR}/${f.path}`] = [f.bytes, OPT];
+  // Canonical bytes exactly as hashed for artifactId (no trailing newline).
+  tree[`${CONTROL_DIR}/artifact-manifest.json`] = [canonicalBytes(manifest), OPT];
   tree[`${CONTROL_DIR}/MANIFEST.txt`] = [enc.encode(canonicalManifest(inv.entries)), OPT];
   tree[`${CONTROL_DIR}/plan.json`] = [enc.encode(JSON.stringify(plan, null, 2) + "\n"), OPT];
   if (scan) tree[`${CONTROL_DIR}/scan.json`] = [enc.encode(JSON.stringify(scan, null, 2) + "\n"), OPT];
   for (const d of plan.destinations) {
     if (d.status === "skipped") continue;
     const p = providers.find((x) => x.id === d.providerId);
-    if (p) tree[`${CONTROL_DIR}/instructions/${p.id}.txt`] = [enc.encode(instructionsText(p, inv, d.status, d.assessment)), OPT];
+    if (p) tree[`${CONTROL_DIR}/instructions/${p.id}.txt`] = [enc.encode(instructionsText(p, inv, plan.artifactId, d.status, d.assessment)), OPT];
   }
   return zipSync(tree);
 }

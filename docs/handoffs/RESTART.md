@@ -19,7 +19,8 @@ Haiku/Sonnet workers were spawned. Do not claim otherwise.
   branch for the research; empty so far; agents do not push to it).
 - Milestone 1 = `1172011`; merge of `main` = `2887c52` (CI green).
 - Milestone 2 = `beffd0d` — CI `test` green on GitHub Actions (runs 40187654299, 40187652192). PR #1 is a draft, mergeable, no reviews; waiting on the owner.
-- This handoff refresh is a docs-only commit on top of `beffd0d`.
+- `60562e4`: docs-only handoff refresh (CI green).
+- Milestone 3 (contract identity): see `git log` after `60562e4`.
 
 ## Research
 
@@ -52,9 +53,9 @@ ROUTE_CONTRACT, browser-profile addendum), `v13/guest-host-catalog`,
 | 9 | Research catalogue mapper (62 profiles / 311 leads, source pins, MK-POL-006 pinned snapshot digest) | **open**; blocked on the owner approving publication of research data |
 | 10 | MK-POL-003/004: sensitive-use profile, intended use, free/trial/paid, country/language/jurisdiction fields | **open** (needs #9) |
 | 11 | T-ART-06 cancellation, worker-thread hashing, `MK_INPUT_CHANGED` for ZIP re-reads | partial (folder size-change check only) |
-| 12 | T-ART-01 folder and ZIP give the same artifact (browser test) | unit-level only |
+| 12 | T-ART-01 folder and ZIP give the same artifact | **done** at unit level (stored/deflated/reordered ZIP and folder → one artifactId); no browser folder-picker test |
 | 13 | Gate M: accessibility, RTL, keyboard, independent security review | **open** |
-| 14 | Contract records (`ArtifactManifest` with appId/entrypoint, `PublishPlan` planId/expiry, canonical JSON bytes) | **open**. The current manifest is a line format, not the canonical JSON contract. |
+| 14 | Contract records | **ArtifactManifest + artifactId done** (`src/contracts/`, RFC 8785 subset, T-ART-01 test). `PublishPlan` planId/expiry/consent, `Diagnostic` messageKey/requirementId shape and `ScanReport` contract fields remain **open**. |
 
 ## Completed
 
@@ -70,6 +71,20 @@ Milestone 2 (this update):
 - `src/providers/select.ts`: scan-aware assessment (reserved paths block, routing/nesting/storage/realtime/deps/missing warnings).
 - `src/core/exporter.ts`: `app/` + `mirrorkit-control/` handoff (adds `scan.json`, per-destination compatibility notes), `buildPayloadZip`.
 - UI: root choice, "Will the copy still work?" panel, app-only ZIP button, limit/evidence lines on provider cards.
+
+## Milestone 3 (contract identity), 2026-10-25
+
+- `src/contracts/canonical.ts`: RFC 8785 JCS for null/bool/safe-int/string/array/plain-object; rejects fractions, NaN, undefined, lone surrogates and class instances.
+- `src/contracts/manifest.ts`: `ArtifactManifest {schemaVersion, appId, files, entrypoint}`, `validateManifest`, `artifactId = sha256:` + hash of the canonical bytes, `defaultEntrypoint` (root index.html/htm only, never guesses).
+- Analysis and assessment use the selected entry page: no entry page means blocked; an entry other than index.html gives a warning.
+- Plan is keyed by `artifactId` (was the file-list checksum). Export adds `mirrorkit-control/artifact-manifest.json` with the exact hashed bytes, and the instructions show the artifactId.
+- UI: app id field (validated), entry-page picker, artifactId display. Changing either gives a new id and rebuilds the plan.
+- Tests: `npm test` = 5 files, **106 passed**. Browser smoke covered:
+  - a site with no index.html is blocked until an entry page is chosen;
+  - an invalid app id clears the id;
+  - a new app id gives a new id;
+  - the export contains `artifact-manifest.json`;
+  - 0 console errors.
 
 ## Test commands and actual results (milestone 2)
 
@@ -101,8 +116,8 @@ review, any provider account/upload (forbidden).
    MK-POL-006 mapper (pinned snapshot + digest, ids/source pins verbatim,
    unknowns stay unknown) and replace hand-written adapter data; if no, keep
    citing official URLs per claim.
-2. Canonical contract records (gap 14): JSON `ArtifactManifest` with
-   `entrypoint` selection, canonical bytes, `planId`.
+2. Remaining contract records (gap 14): `PublishPlan` planId/expiry,
+   ConsentReceipt, Diagnostic/ScanReport contract shape.
 3. Worker-thread hashing + cancel (T-ART-06); ZIP64 fixtures if wanted.
 4. Gate M items: accessibility/RTL/keyboard pass, independent security review.
 5. Optional verify mode: user re-selects the published files offline and

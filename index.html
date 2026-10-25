@@ -28,6 +28,13 @@
     </section>
     <section id="inventory" hidden>
       <h2>2. Inventory</h2>
+      <div class="identity">
+        <label>App id <input id="app-id" type="text" maxlength="80" spellcheck="false" autocomplete="off" /></label>
+        <label>Entry page <select id="entrypoint"></select></label>
+        <p id="app-id-hint" class="warning" role="status"></p>
+        <p id="artifact-id" class="hash"></p>
+        <p class="hint">The artifact id is a SHA-256 over the file list, app id and entry page. The same files always give the same id, whether loaded from a folder or a ZIP. It identifies content; it is not a publisher identity or a signature.</p>
+      </div>
       <p id="inv-summary"></p>
       <ul id="issues"></ul>
       <details><summary>Files</summary><table><thead><tr><th>Path</th><th>Bytes</th><th>SHA-256</th></tr></thead><tbody id="inv-rows"></tbody></table></details>
