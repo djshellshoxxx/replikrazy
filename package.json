@@ -19,6 +19,7 @@
     "fflate": "^0.8.2"
   },
   "devDependencies": {
+    "@types/node": "^22.19.1",
     "typescript": "5.6.3",
     "vite": "8.3.5",
     "vitest": "5.0.5"

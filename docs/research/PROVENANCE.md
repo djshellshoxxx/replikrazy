@@ -41,6 +41,9 @@
 | `docs/research/mirrorkit-v13/v13/guest-host-catalog/*` (4 files) | `mirrorkit-research/v13/guest-host-catalog/*` | 2026-10-25 | owner, in session | one personal-looking contact email replaced with a placeholder in `guest-hosts.json` and `guest-hosts.csv` |
 
 Per-file hashes and the pack-manifest check: `mirrorkit-v13/IMPORT-MANIFEST.json`.
+App use: `src/research/catalogue-snapshot.json` is generated from
+`catalog/consolidated-providers.json` by `src/research/mapper.ts` and records
+that file's SHA-256.
 Pre-publication checks: secret/token patterns (none), local filesystem paths
 (none outside URLs), emails (provider business contacts kept; one personal-looking address redacted),
 internal workflow notes (only methodology notes about research search tools, kept).

@@ -8,6 +8,7 @@ export const adapter: ProviderAdapter = {
   name: "GitLab Pages",
   kind: "git-pages",
   homepage: "https://docs.gitlab.com/ee/user/project/pages/",
+  researchId: "gitlab_pages",
   browserDirectDeploy: noBrowserDeploy,
   methods: [{ id: "git-push", evidence: "unreviewed", summary: "Push the site with a CI job that publishes a public/ folder." }],
   requiresAccount: claim(true, "unreviewed"),

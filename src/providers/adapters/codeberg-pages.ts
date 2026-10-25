@@ -8,6 +8,7 @@ export const adapter: ProviderAdapter = {
   name: "Codeberg Pages",
   kind: "git-pages",
   homepage: "https://codeberg.page/",
+  researchId: "codeberg_pages",
   browserDirectDeploy: noBrowserDeploy,
   methods: [{ id: "git-push", evidence: "unreviewed", summary: "Push static files to a pages repository or branch." }],
   requiresAccount: claim(true, "unreviewed"),

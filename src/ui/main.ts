@@ -362,6 +362,19 @@ $("dir-input").addEventListener("change", (ev) => {
 for (const id of ["f-text", "f-noacct", "f-domain", "f-method"]) $(id).addEventListener("input", renderProviders);
 $("export-btn").addEventListener("click", () => void download());
 $("cancel-btn").addEventListener("click", () => cancelActive?.());
+// Research catalogue: loaded only when first opened.
+$("research").addEventListener("toggle", async (ev) => {
+  const d = ev.target as HTMLDetailsElement;
+  if (!d.open || d.dataset.loaded) return;
+  d.dataset.loaded = "1";
+  try {
+    const [{ mountResearch }, snap] = await Promise.all([import("./research"), import("../research/catalogue-snapshot.json")]);
+    mountResearch($("research-body"), snap.default as Parameters<typeof mountResearch>[1]);
+  } catch {
+    $("research-body").textContent = "Could not load the research catalogue.";
+    delete d.dataset.loaded;
+  }
+});
 
 // Compare a copy (e.g. files saved back from a mirror) with the loaded
 // artifact. Offline: the user supplies the files; nothing is fetched.

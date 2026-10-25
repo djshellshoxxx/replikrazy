@@ -5,7 +5,7 @@ Resume `djshellshoxxx/replikrazy` on branch `claude/trusting-goodall-9jdwxu`
 `docs/research/PROVENANCE.md` first. Check `git log`/`git ls-remote` for the
 current head rather than trusting any SHA written here.
 
-**Do NOT redo (done, 132 tests pass):** offline compare-a-copy (`src/core/compare.ts`), seeded ZIP mutation fuzz, scanner ReDoS hardening + regression guard, worker-based intake/hash/scan with
+**Do NOT redo (done, 137 tests pass):** research catalogue publication (`docs/research/mirrorkit-v13/`, owner-approved) and its mapper/snapshot/browser (`src/research/`), offline compare-a-copy (`src/core/compare.ts`), seeded ZIP mutation fuzz, scanner ReDoS hardening + regression guard, worker-based intake/hash/scan with
 progress + cancel (`src/core/pipeline.ts`, `src/ui/analysis-worker.ts`), contract `ArtifactManifest` + RFC 8785
 canonical JSON + `artifactId` with app id / entry-page selection, intended-use
 policy gates and contract `PublishPlan` with planId/expiry (`src/contracts/`), bounded ZIP reader with spec caps,
@@ -15,12 +15,12 @@ evidence ladder, scan-aware assessment, dry-run plan, `app/` +
 `mirrorkit-control/` handoff ZIP and app-only ZIP, UI under strict CSP, CI.
 Verify with `npm ci && npm run typecheck && npm test && npm run build`.
 
-**Do NOT regenerate research.** The owner holds the MirrorKit v13 research
-pack (unpublished). If you need it and it isn't attached, ask the owner.
-Never commit the pack, private review packets or secrets to this public repo.
+**Do NOT regenerate research.** The catalogue part of MirrorKit v13 is
+published in `docs/research/mirrorkit-v13/`. The rest of the pack (specs,
+reports, reviews, route specs, reference code) is still unpublished: ask the
+owner before committing any of it. Never commit secrets or private review packets.
 
-**Do next:** follow "Next steps" in RESTART.md. First, ask the owner whether
-the research catalogue data may be published. Automated a11y (axe 0 violations, keyboard, 320 px reflow) is done; remaining Gate M: manual screen reader, RTL, independent security review.
+**Do next:** follow "Next steps" in RESTART.md. Automated a11y (axe 0 violations, keyboard, 320 px reflow) is done; remaining Gate M: manual screen reader, RTL, independent security review.
 
 **Rules:** browser-only; no backend, no credential collection, no live
 provider writes or deploys; imported HTML/JS never executes in the app origin;

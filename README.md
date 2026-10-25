@@ -33,6 +33,7 @@ deployment or production readiness is claimed.
 | Contract `ArtifactManifest` (owner app id + entry page), RFC 8785 canonical JSON, `artifactId` (folder and ZIP give the same id) | implemented, unit-tested, browser smoke-tested |
 | Static-site analysis (missing index, secrets, server-side files) | implemented, unit-tested |
 | Functional-compatibility scan: missing assets, external origins, root/relative paths, `<base>`, history/hash routing, service worker, browser storage, realtime backends, WASM, source maps, provider-reserved server paths, content secret patterns | implemented, unit-tested, browser smoke-tested; heuristic and explicitly incomplete |
+| Research catalogue browser: 62 MirrorKit v13 profiles mapped (ids/source pins verbatim, prose kept as text, gaps null) into a pinned snapshot with source SHA-256; lazy-loaded, read-only, enables nothing | implemented, unit-tested (snapshot regenerates exactly), browser smoke-tested |
 | Provider catalogue, filtering, capability-aware assessment | implemented, unit-tested; Cloudflare/Netlify carry dated `researched-lead` claims with official URLs, the rest are `unreviewed` |
 | Dry-run plan with user-attested per-destination status | implemented, unit-tested |
 | Intended-use declaration + policy gates (rights, public-data review, payment/token blocked everywhere, GitHub Pages commercial exclusion with cited source); contract `PublishPlan` with `planId`, 24 h expiry, manual-only non-mutating operations | implemented, unit-tested, browser smoke-tested |
@@ -83,6 +84,8 @@ npm test          # vitest, synthetic fixtures only
 npm run typecheck
 npm run build     # static output in dist/
 npm run dev       # note: CSP blocks Vite's HMR socket; reload manually
+# after changing docs/research/mirrorkit-v13/catalog/consolidated-providers.json:
+node --experimental-strip-types scripts/build-research-snapshot.ts
 ```
 
 Dependencies: [`fflate`](https://github.com/101arrowz/fflate) (MIT) at

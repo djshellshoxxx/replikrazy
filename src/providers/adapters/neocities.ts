@@ -8,6 +8,7 @@ export const adapter: ProviderAdapter = {
   name: "Neocities",
   kind: "static-host",
   homepage: "https://neocities.org/",
+  researchId: "neocities",
   browserDirectDeploy: noBrowserDeploy,
   methods: [{ id: "manual-web-upload", evidence: "unreviewed", summary: "Upload files through the site dashboard." }],
   requiresAccount: claim(true, "unreviewed"),

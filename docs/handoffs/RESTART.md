@@ -50,8 +50,8 @@ ROUTE_CONTRACT, browser-profile addendum), `v13/guest-host-catalog`,
 | 6 | MK-ART-004 / MK-POL-002 / T-ART-10 compatibility hints | **done (heuristic)**: missing assets, external origins, asset base, `<base>`, routing, SW, storage, realtime, WASM, CSP meta |
 | 7 | T-POL-02 provider-reserved executables | **done** for Cloudflare (`_worker.js`, `functions/`, `_routes.json`); others warn only |
 | 8 | MK-ART-006 export layout `app/` + `mirrorkit-control/`, payload-only ZIP | **done** |
-| 9 | Research catalogue mapper (62 profiles / 311 leads, source pins, MK-POL-006 pinned snapshot digest) | **open**; blocked on the owner approving publication of research data |
-| 10 | MK-POL-003/004 | **partial**. Done: IntendedUse declaration, payment/token blocked everywhere, GitHub Pages commercial/payment exclusion (cited), rights and public-data confirmations. **Open** (needs #9): free/trial/paid, country/language/jurisdiction catalogue fields. |
+| 9 | Research catalogue mapper (MK-POL-006) | **done for the 62 profiles**. The owner approved publication on 2026-10-25; data is in `docs/research/mirrorkit-v13/`. `src/research/mapper.ts` maps it to `src/research/catalogue-snapshot.json` (ids/pins verbatim, source sha256). The UI shows it as a lazy, read-only lead browser. The 311-row lead register and the hosting database are published as data but not mapped into the app. |
+| 10 | MK-POL-003/004 | **partial**. Done: IntendedUse, payment/token blocked everywhere, GitHub Pages exclusion, rights/public-data confirmations; research leads show operator country, market, doc languages and free model as researched text. **Open:** typed free/trial/paid and country-eligibility filters. The research prose would need per-record human review before it could be turned into typed fields. |
 | 11 | T-ART-06 cancel, worker-thread work, changed input | **mostly done**: intake, hashing and scan run in a module worker with progress; Cancel terminates it and keeps nothing; a newer selection supersedes an older run; a folder file whose size changes fails with `MK_INPUT_CHANGED`. **Open:** content-change detection beyond size, a 60 s soft time limit, tab-suspension and storage-denied cases. |
 | 12 | T-ART-01 folder and ZIP give the same artifact | **done** at unit level (stored/deflated/reordered ZIP and folder → one artifactId); no browser folder-picker test |
 | 13 | Gate M: accessibility, RTL, keyboard, independent security review | **partial**: automated axe-core 4.10.2 (WCAG 2.0/2.1 A/AA + best practice) finds 0 violations, light and dark, before and after a site is loaded; every control is reachable by Tab (the export button only once enabled); no horizontal scroll at 320 px. **Open:** manual screen-reader test, RTL layout, independent security review. |
@@ -71,6 +71,18 @@ Milestone 2 (this update):
 - `src/providers/select.ts`: scan-aware assessment (reserved paths block, routing/nesting/storage/realtime/deps/missing warnings).
 - `src/core/exporter.ts`: `app/` + `mirrorkit-control/` handoff (adds `scan.json`, per-destination compatibility notes), `buildPayloadZip`.
 - UI: root choice, "Will the copy still work?" panel, app-only ZIP button, limit/evidence lines on provider cards.
+
+## Milestone 9 (research catalogue published + mapped), 2026-10-25
+
+- **Publication:** commit `5f93121` imported, with owner approval, `catalog/`, `v13/hosting-database/` and `v13/guest-host-catalog/` under `docs/research/mirrorkit-v13/`.
+  - All 19 originals match the pack's own recorded SHA-256 values (`IMPORT-MANIFEST.json`).
+  - One personal-looking operator email was redacted.
+  - No secrets or local paths; every "/root/" hit was inside a URL or prose.
+  - Specs, reports, reviews, route specs and reference code are still unpublished.
+- **Mapper:** `src/research/mapper.ts` plus `scripts/build-research-snapshot.ts` (run with `node --experimental-strip-types`). Only structured fields become typed values: operator country (38/62) and confirmed doc languages (38/62). Everything else stays text or null. `directBrowserPublishVerified` is false for all 62.
+- **UI:** collapsible "Research catalogue: 62 dated leads" in step 4. It loads only when opened, filters by text/kind/tier, shows https-only source pins with dates, and links to matching destination cards (now 6 adapters carry `researchId`).
+- **Tests:** 11 files, **137 passed**. The snapshot test re-runs the mapper on the published source and requires an exact match. Browser smoke: 62 leads, a Korea filter gives 2, axe reports 0 violations, 0 external requests.
+- **Dev dependency:** `@types/node` 22.19.1, used only by that test via a triple-slash reference so browser code cannot use Node globals.
 
 ## Milestone 8 (compare a copy), 2026-10-25
 
@@ -172,11 +184,10 @@ review, any provider account/upload (forbidden).
 
 ## Next steps (in order)
 
-1. Owner decision: may research catalogue data (`consolidated-providers.json`,
-   hosting database) be published in this public repo? If yes, build the
-   MK-POL-006 mapper (pinned snapshot + digest, ids/source pins verbatim,
-   unknowns stay unknown) and replace hand-written adapter data; if no, keep
-   citing official URLs per claim.
+1. Research follow-ups (data now public): per-record human review to move
+   individual research facts into adapter claims (`researched-lead` + pin
+   URL); optionally map the 311-row lead register; never parse prose into
+   limits automatically.
 2. Remaining contract records (gap 14): contract-shaped ScanReport and
    Diagnostic message keys. ConsentReceipt waits for any future API route.
 3. Rest of T-ART-06 (60 s soft limit, content-change detection); ZIP64 fixtures if wanted.
@@ -193,7 +204,7 @@ integrating `aws4fetch`/`browser-fs-access` (reference-only).
 
 ## Blockers
 
-- Publication approval for research data (gap 9/10). Asked in PR #1 description and session; no answer yet.
+- None for the current scope. (Research publication was approved 2026-10-25.)
 
 ## Unpublished / local-only state
 
