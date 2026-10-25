@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Imported site files are treated as opaque bytes and never rendered,
+       framed or executed in this origin. connect-src 'none' enforces that the
+       app makes no network requests (no hosting APIs, no telemetry). -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Replikrazy</title>
+  <link rel="stylesheet" href="/src/ui/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Replikrazy</h1>
+    <p class="sub">Plan static-site mirrors in your browser. Dry run and manual export only — nothing is uploaded or deployed.</p>
+  </header>
+  <main>
+    <section id="intake">
+      <h2>1. Load a static site</h2>
+      <label>ZIP archive <input id="zip-input" type="file" accept=".zip,application/zip" /></label>
+      <label>or folder <input id="dir-input" type="file" webkitdirectory multiple /></label>
+      <p class="hint">Files stay in this tab. HTML and scripts in the bundle are never opened or run.</p>
+      <div id="intake-status" role="status"></div>
+    </section>
+    <section id="inventory" hidden>
+      <h2>2. Inventory</h2>
+      <p id="inv-summary"></p>
+      <ul id="issues"></ul>
+      <details><summary>Files</summary><table><thead><tr><th>Path</th><th>Bytes</th><th>SHA-256</th></tr></thead><tbody id="inv-rows"></tbody></table></details>
+    </section>
+    <section id="providers" hidden>
+      <h2>3. Choose destinations</h2>
+      <div class="filters">
+        <input id="f-text" type="search" placeholder="Filter providers" />
+        <label><input id="f-noacct" type="checkbox" /> No account needed</label>
+        <label><input id="f-domain" type="checkbox" /> Custom domain</label>
+        <select id="f-method">
+          <option value="">Any method</option>
+          <option value="manual-web-upload">Manual web upload</option>
+          <option value="git-push">Git push</option>
+          <option value="cli">CLI on your machine</option>
+          <option value="self-host">Self-host</option>
+        </select>
+      </div>
+      <p class="hint">Evidence levels: <b>unreviewed</b> &lt; researched lead &lt; documented &lt; tested. Every entry here is currently <b>unreviewed</b>. Direct deployment from the browser is <b>unsupported</b> for all providers.</p>
+      <div id="provider-list"></div>
+    </section>
+    <section id="plan" hidden>
+      <h2>4. Dry-run plan</h2>
+      <div id="plan-list"></div>
+      <button id="export-btn" type="button">Download manual-export ZIP</button>
+      <p class="hint">The export contains <code>site/</code> (exact bytes), <code>MANIFEST.txt</code>, <code>plan.json</code> and per-destination instructions.</p>
+    </section>
+  </main>
+  <script type="module" src="/src/ui/main.ts"></script>
+</body>
+</html>
