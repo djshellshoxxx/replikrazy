@@ -5,19 +5,19 @@ body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui,
 header, main { max-width: 960px; margin: 0 auto; padding: 16px; }
 h1 { margin: 8px 0 0; } .sub, .hint { color: var(--muted); }
 section { border-top: 1px solid var(--line); padding: 12px 0; }
-label { display: inline-block; margin: 4px 12px 4px 0; }
+label { display: inline-block; margin-block: 4px; margin-inline: 0 12px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; display: block; overflow-x: auto; }
-td, th { text-align: left; padding: 2px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td, th { text-align: start; padding: 2px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 td.hash { font-family: ui-monospace, monospace; }
 .error { color: var(--err); } .warning { color: var(--warn); } .okay { color: var(--ok); }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; margin: 8px 0; }
 .card h3 { margin: 0 0 4px; font-size: 16px; }
-.badge { font-size: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 0 8px; margin-left: 6px; color: var(--muted); }
+.badge { font-size: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 0 8px; margin-inline-start: 6px; color: var(--muted); }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 button { font: inherit; padding: 6px 12px; cursor: pointer; }
 button:disabled { cursor: not-allowed; }
-ul { padding-left: 20px; }
-.hash { font-family: ui-monospace, monospace; word-break: break-all; }
+ul, ol { padding-inline-start: 20px; }
+.hash { font-family: ui-monospace, monospace; word-break: break-all; direction: ltr; unicode-bidi: isolate; text-align: start; }
 .identity input, .identity select { font: inherit; max-width: 100%; }
 fieldset.use { border: 1px solid var(--line); border-radius: 6px; margin: 8px 0; }
 fieldset.use label { display: block; }

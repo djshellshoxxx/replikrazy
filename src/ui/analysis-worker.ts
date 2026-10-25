@@ -3,10 +3,9 @@
 // Errors are reported as a fixed message: exception text could echo imported
 // names or contents.
 
-import { runAnalysis, type AnalysisInput } from "../core/pipeline";
-import type { IntakeOptions } from "../core/intake";
+import { runAnalysis, type AnalysisInput, type AnalysisOptions } from "../core/pipeline";
 
-self.onmessage = async (ev: MessageEvent<{ input: AnalysisInput; opts: IntakeOptions }>) => {
+self.onmessage = async (ev: MessageEvent<{ input: AnalysisInput; opts: AnalysisOptions }>) => {
   try {
     const result = await runAnalysis(ev.data.input, ev.data.opts, (stage, done, total) => {
       self.postMessage({ type: "progress", stage, done, total });

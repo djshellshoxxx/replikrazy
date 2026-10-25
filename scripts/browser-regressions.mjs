@@ -69,6 +69,15 @@ try {
   check(await page.locator('#export-btn').isEnabled(), true);
   await page.locator('#use-rights').uncheck();
   check(await page.locator('#export-btn').isEnabled(), false);
+  // A comparison has its own visible cancel action, independent of intake.
+  await page.evaluate(() => {
+    window.Worker = class { postMessage() {} terminate() { window.testTerminated = (window.testTerminated ?? 0) + 1; } };
+  });
+  await page.locator('#cmp-zip').setInputFiles(site);
+  await page.locator('#compare-cancel-btn').click();
+  await page.waitForFunction(() => document.querySelector('#compare-result').textContent.includes('Cancelled'));
+  check(await page.evaluate(() => window.testTerminated), 1);
+  check(await page.locator('#compare-cancel-btn').isVisible(), false);
   await page.evaluate(() => { window.Worker = class { constructor() { throw Error('unavailable'); } }; });
   await page.locator('#zip-input').setInputFiles(site);
   await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('requires Web Worker'));

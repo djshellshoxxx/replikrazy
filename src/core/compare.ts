@@ -10,7 +10,7 @@ import type { InventoryEntry } from "./inventory";
 
 export interface Comparison {
   matching: string[];
-  changed: { path: string; expectedSize: number; actualSize: number }[];
+  changed: { path: string; expectedSize: number; actualSize: number; expectedSha256: string; actualSha256: string }[];
   missing: string[];
   extra: string[];
 }
@@ -23,7 +23,7 @@ export function compareInventories(expected: readonly InventoryEntry[], actual: 
     const a = got.get(e.path);
     if (!a) out.missing.push(e.path);
     else if (a.sha256 === e.sha256 && a.size === e.size) out.matching.push(e.path);
-    else out.changed.push({ path: e.path, expectedSize: e.size, actualSize: a.size });
+    else out.changed.push({ path: e.path, expectedSize: e.size, actualSize: a.size, expectedSha256: e.sha256, actualSha256: a.sha256 });
   }
   for (const a of actual) if (!want.has(a.path)) out.extra.push(a.path);
   out.extra.sort(compareUtf8);

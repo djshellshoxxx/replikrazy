@@ -1,5 +1,53 @@
 # Replikrazy — restart handoff
 
+## Latest local snapshot and accessibility batch — 2026-10-25
+
+Continue **local** branch `chatgpt/lean-reliability-20261025`; inspect `git log`
+for its current tip. Local checkpoint `9c57cda` fixed the five review findings;
+this next checkpoint adds snapshot consistency and RTL/browser regressions.
+Claude's remote tip remains `3233bb4`; main and PR refs were also unchanged at
+final inspection. No source push/publication, CI dispatch or deployment occurred.
+
+Completed:
+- A source digest binds original normalized paths and SHA-256 file content.
+  Root-choice reanalysis and a comparison's second (stripped-root) read must
+  match the first read. Same-size byte edits and path changes produce
+  `MK_INPUT_CHANGED` with no retained files or inventory. A new explicit input
+  selection intentionally establishes a new snapshot.
+- This is a reread-consistency invariant, **not** filesystem monitoring: a
+  browser File/Blob snapshot may not expose later disk edits. No claim that
+  arbitrary edits before the first read or behind immutable snapshots are detected.
+- Changed-copy results show exact expected/actual hashes even for equal sizes.
+- Independent comparison Cancel control; invalid intake status explicitly says
+  export is blocked.
+- Logical CSS spacing/alignment for RTL; isolated LTR hashes and automatic
+  filename direction. UI remains English; this is layout support, not localization.
+
+Final verification:
+- 12 test files / **157 tests passed**, preserving all original 144 tests,
+  fixture oracles, hostile regex budgets and fuzz seed.
+- Typecheck, production build and `git diff --check` pass.
+- `scripts/browser-regressions.mjs`: **24 checks**, zero page errors and external
+  requests. Covers export policy, malformed storage, storage denial, invalid
+  comparison inputs, comparison cancellation and unavailable workers.
+- `scripts/browser-accessibility.mjs`: **16 axe scans / 16 reflow checks**
+  (light/dark × LTR/RTL × empty/loaded × 320/960 px), zero violations;
+  **156 visible controls reached** over four keyboard traversals. Expanded
+  same-size difference details expose the exact expected/actual hashes.
+  Zero page errors and external requests.
+- Optional external tools: Playwright core and axe-core 4.10.2 in
+  `/tmp/replikrazy-browser`; Chromium `/usr/bin/chromium`. Build and run Vite
+  preview on 127.0.0.1:4173, then:
+  `BROWSER_TEST_TOOLS=/tmp/replikrazy-browser node scripts/browser-accessibility.mjs`.
+
+Independent review of the security fixes additionally reran **49 focused tests**
+and Chromium policy/invalid-reference reproductions, with zero page errors;
+reviewer found all five issues addressed and made no edits. This is focused
+review, not full audit or release qualification. Manual screen reader,
+cross-browser and real suspended-tab checks remain open. ScanReport/Diagnostic
+contract alignment remains blocked on the unavailable private specs. No further
+Library transfer was attempted in this batch (details below).
+
 ## Continued local security batch — 2026-10-25
 
 A disjoint read-only reviewer found five reproducible issues at `d54a3f7`.

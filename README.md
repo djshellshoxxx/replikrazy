@@ -19,7 +19,7 @@ database, guest-host catalogue) is published in
 dated research leads, not qualified providers. See
 [`docs/research/PROVENANCE.md`](docs/research/PROVENANCE.md).
 
-## Status: milestone 2 (compatibility scan + intake hardening)
+## Status: browser-only planner with local reliability checks
 
 This branch adds the first application implementation on top of the
 research-only landing page on `main`. No provider qualification, live
@@ -38,7 +38,7 @@ deployment or production readiness is claimed.
 | Dry-run plan with user-attested per-destination status | implemented, unit-tested |
 | Intended-use declaration + policy gates (rights, public-data review, payment/token blocked everywhere, GitHub Pages commercial exclusion with cited source); contract `PublishPlan` with `planId`, 24 h expiry, manual-only non-mutating operations | implemented, unit-tested, browser smoke-tested |
 | Handoff ZIP (`app/` + `mirrorkit-control/` incl. `artifact-manifest.json`) and app-only payload ZIP | implemented, unit-tested, browser smoke-tested |
-| Offline "compare a copy": owner-supplied mirror files vs the artifact (matching / changed / missing / extra) | implemented, unit-tested, browser smoke-tested; a byte match is not proof the mirror works |
+| Offline "compare a copy" with exact changed-file hashes and cancellation: owner-supplied mirror files vs the artifact (matching / changed / missing / extra) | implemented, unit-tested, browser smoke-tested; a byte match is not proof the mirror works |
 | Any live deployment / provider API | **not implemented, by design** |
 
 ### Evidence levels
@@ -72,6 +72,8 @@ protect or monitor them.
   refused; CRC/size mismatch, overlap and limit breaches reject the whole
   archive. Inflation writes into a buffer pre-sized from the declared size, so
   a lying header cannot exhaust memory. CRC32 detects corruption only.
+- Repeated reads of one selection are checked against its first original-path/content digest, including same-size changes. This does not monitor edits hidden by a browser File snapshot; select the input again to load later edits.
+- Scan output and dependency relationships are bounded; truncated scans block export.
 - Path rules follow MK-ART-002 (UTF-8 byte limits, bidi/control/`#%?:` and
   reserved-name rejection, NFC + case-fold collision checks).
 - No backend, no credential broker, no daemon, no telemetry.
@@ -90,6 +92,17 @@ node --experimental-strip-types scripts/build-research-snapshot.ts
 
 Dependencies: [`fflate`](https://github.com/101arrowz/fflate) (MIT) at
 runtime; TypeScript, Vite, Vitest for development.
+
+Optional browser regressions use Chromium and tooling installed outside the repo
+(`playwright-core`, plus `axe-core@4.10.2` for accessibility). Build, start
+`vite preview` on `127.0.0.1:4173`, then run:
+
+```sh
+BROWSER_TEST_TOOLS=/path/to/tools node scripts/browser-regressions.mjs
+BROWSER_TEST_TOOLS=/path/to/tools node scripts/browser-accessibility.mjs
+```
+
+These are local automated checks, not a full accessibility or security audit.
 
 ## Licence
 

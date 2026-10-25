@@ -40,3 +40,19 @@ the import was corrected before final validation.
   `playwright-core` in an external tooling directory, start production preview
   on `127.0.0.1:4173`, then run with `BROWSER_TEST_TOOLS=<directory>`.
 - No fuzz seed, hostile-regex budget, original fixture oracle or limit was relaxed.
+
+
+## Independent fix verification
+
+The same disjoint reviewer rechecked the fixes without edits: 49 focused tests
+passed across policy, pipeline/export and scan; Chromium reproduced the fixed
+rights/payment, revoked-rights/null-storage and invalid-reference cases with
+zero page errors. All five original findings were addressed; no residual defect
+was found within those fixes. This does not extend the review to a full audit.
+
+The later source-snapshot change received a separate narrow reread review:
+13 focused pipeline/worker tests passed, diff check passed, and no concrete
+bypass/stale-result issue was found. Reviewer checked original-path digest
+stability, preserved pins before UI clearing, comparison second-read pinning,
+empty mismatch results and existing generation checks. The invariant covers
+observed rereads, not invisible filesystem mutations. No reviewer edits.

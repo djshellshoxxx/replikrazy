@@ -1,3 +1,10 @@
+> Local continuation (2026-10-25): start from
+> `chatgpt/lean-reliability-20261025`, not Claude's branch. Read the newest
+> sections in `docs/handoffs/RESTART.md` and inspect local `git log` first.
+> Local checkpoints are unpushed by instruction. No source publication,
+> provider writes, merge or deployment is authorized. The older prompt below
+> is historical context; its "all pushed" and test-count statements are stale.
+
 # Next prompt — Replikrazy (formerly MirrorKit)
 
 Resume `djshellshoxxx/replikrazy` on branch `claude/trusting-goodall-9jdwxu`

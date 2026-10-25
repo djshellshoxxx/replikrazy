@@ -1,5 +1,4 @@
-import type { AnalysisInput, AnalysisResult, Progress } from "../core/pipeline";
-import type { IntakeOptions } from "../core/intake";
+import type { AnalysisInput, AnalysisOptions, AnalysisResult, Progress } from "../core/pipeline";
 
 export class AnalysisStopped extends Error {
   constructor(readonly reason: "cancelled" | "timeout" | "unavailable" | "failed") {
@@ -19,7 +18,7 @@ export class AnalysisTask {
 
   cancel() { this.stop?.(); }
 
-  run(input: AnalysisInput, opts: IntakeOptions, progress: Progress): Promise<AnalysisResult> {
+  run(input: AnalysisInput, opts: AnalysisOptions, progress: Progress): Promise<AnalysisResult> {
     this.cancel();
     return new Promise((resolve, reject) => {
       let worker: Worker;

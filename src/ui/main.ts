@@ -6,7 +6,7 @@ import { buildPublishPlan } from "../contracts/publish-plan";
 import { artifactId, buildManifest, defaultEntrypoint, htmlCandidates, ID_RE, type ArtifactManifest } from "../contracts/manifest";
 import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
-import type { BundleFile, IntakeIssue, IntakeOptions, IntakeResult } from "../core/intake";
+import type { BundleFile, IntakeIssue, IntakeResult } from "../core/intake";
 import { compareInventories, isIdentical } from "../core/compare";
 import { type AnalysisInput, type Progress } from "../core/pipeline";
 import type { Inventory } from "../core/inventory";
@@ -35,6 +35,7 @@ interface State {
   // Current selection, so intake can re-run with new options (root choice)
   // without the user picking files again.
   input: AnalysisInput | null;
+  sourceDigest: string | null;
   stripRoot: boolean;
   intakeIssues: IntakeIssue[];
   // Owner-declared identity inputs (research MK-CTR-003); changing either
@@ -48,7 +49,7 @@ interface State {
   publicDataReviewed: boolean;
 }
 const state: State = {
-  files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, input: null, stripRoot: false,
+  files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, input: null, sourceDigest: null, stripRoot: false,
   intakeIssues: [], appId: "site", entrypoint: null, manifest: null, artifactId: null,
   use: { category: "public-demo", containsPrivateData: false, ownerHasRights: false, description: "" },
   publicDataReviewed: false,
@@ -91,6 +92,7 @@ function clearArtifact() {
   ++compareGeneration;
   compareTask.cancel();
   state.files = [];
+  state.sourceDigest = null;
   state.inv = null;
   state.scan = null;
   state.manifest = null;
@@ -103,12 +105,13 @@ function clearArtifact() {
   for (const id of ["inventory", "compat", "plan"]) $(id).hidden = true;
   $("root-choice").replaceChildren();
   $("compare-result").replaceChildren();
+  $("compare-cancel-btn").hidden = true;
   $("artifact-id").textContent = "Artifact id: not available until the identity is valid.";
   ($("export-btn") as HTMLButtonElement).disabled = true;
   ($("payload-btn") as HTMLButtonElement).disabled = true;
 }
 
-async function loadBundle(input: AnalysisInput, stripRoot = false) {
+async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourceDigest?: string) {
   const status = $("intake-status");
   const cancelBtn = $("cancel-btn") as HTMLButtonElement;
   intakeTask.cancel();
@@ -119,18 +122,19 @@ async function loadBundle(input: AnalysisInput, stripRoot = false) {
   state.input = input;
   state.stripRoot = stripRoot;
   try {
-    const { intake: r, inv, scan } = await intakeTask.run(input, { stripRoot }, (stage, done, total) => {
+    const { intake: r, inv, scan, sourceDigest } = await intakeTask.run(input, { stripRoot, expectedSourceDigest }, (stage, done, total) => {
       if (gen === generation) status.textContent = `${stage[0]!.toUpperCase()}${stage.slice(1)}… ${done} / ${total}`;
     });
     if (gen !== generation) return; // a newer selection replaced this one
     state.files = r.files;
+    state.sourceDigest = r.issues.some((i) => i.severity === "error") ? null : sourceDigest;
     state.inv = inv;
     state.scan = scan;
     state.intakeIssues = r.issues;
     state.entrypoint = defaultEntrypoint(inv.entries.map((e) => e.path));
     state.selected.clear();
     state.plan = null;
-    status.textContent = r.strippedRoot ? `Loaded with "${r.strippedRoot}/" as the site root.` : "Loaded.";
+    status.textContent = r.issues.some((i) => i.severity === "error") ? "Input has errors. Export is blocked; review them below." : r.strippedRoot ? `Loaded with "${r.strippedRoot}/" as the site root.` : "Loaded.";
     renderRootChoice(r);
     renderCompat(state.scan);
     renderProviders();
@@ -193,7 +197,7 @@ function renderRootChoice(r: IntakeResult) {
   const cb = el("input");
   cb.type = "checkbox";
   cb.checked = !!r.strippedRoot;
-  cb.addEventListener("change", () => { if (state.input) void loadBundle(state.input, cb.checked); });
+  cb.addEventListener("change", () => { if (state.input) void loadBundle(state.input, cb.checked, state.sourceDigest ?? undefined); });
   label.append(cb, document.createTextNode(` Use the folder "${r.candidateRoot}/" as the site root (every file is inside it)`));
   box.append(label);
 }
@@ -224,7 +228,9 @@ function renderInventory(inv: Inventory, issues: { severity: string; path?: stri
   $("inv-rows").replaceChildren(
     ...inv.entries.map((e) => {
       const tr = el("tr");
-      tr.append(el("td", e.path), el("td", String(e.size)), el("td", e.sha256, "hash"));
+      const path = el("td", e.path);
+      path.dir = "auto";
+      tr.append(path, el("td", String(e.size)), el("td", e.sha256, "hash"));
       return tr;
     }),
   );
@@ -394,6 +400,7 @@ async function compareCopy(input: AnalysisInput) {
   const gen = ++compareGeneration;
   compareTask.cancel();
   out.textContent = "Reading the copy…";
+  $("compare-cancel-btn").hidden = false;
   try {
     const progress: Progress = (stage, done, total) => { if (gen === compareGeneration) out.textContent = `Copy: ${stage} ${done} / ${total}`; };
     // A copy may or may not be wrapped in one folder; keep whichever reading
@@ -403,7 +410,7 @@ async function compareCopy(input: AnalysisInput) {
     if (plain.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
     let best = compareInventories(reference.entries, plain.inv.entries);
     if (plain.intake.candidateRoot) {
-      const stripped = await compareTask.run(input, { stripRoot: true }, progress);
+      const stripped = await compareTask.run(input, { stripRoot: true, expectedSourceDigest: plain.sourceDigest }, progress);
       if (gen !== compareGeneration) return;
       if (stripped.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
       const c = compareInventories(reference.entries, stripped.inv.entries);
@@ -413,7 +420,7 @@ async function compareCopy(input: AnalysisInput) {
       const d = el("details");
       d.append(el("summary", `${title}: ${items.length}`));
       const ul = el("ul");
-      ul.append(...items.slice(0, 1000).map((t) => el("li", t)));
+      ul.append(...items.slice(0, 1000).map((t) => { const item = el("li", t); item.dir = "auto"; return item; }));
       d.append(ul);
       return d;
     };
@@ -423,14 +430,17 @@ async function compareCopy(input: AnalysisInput) {
         : "The copy differs. Hosts can legitimately change served files (analytics, minification, injected snippets); check each difference.",
         isIdentical(best) ? "okay" : "warning"),
       list("Matching", best.matching),
-      list("Changed", best.changed.map((c) => `${c.path} (expected ${c.expectedSize} bytes, got ${c.actualSize})`)),
+      list("Changed", best.changed.map((c) => `${c.path} (expected ${c.expectedSize} bytes, got ${c.actualSize}). SHA-256 expected: ${c.expectedSha256}; actual: ${c.actualSha256}`)),
       list("Missing from the copy", best.missing),
       list("Extra in the copy", best.extra),
     );
   } catch (e) {
     if (gen === compareGeneration) out.textContent = failureMessage(e);
+  } finally {
+    if (gen === compareGeneration) $("compare-cancel-btn").hidden = true;
   }
 }
+$("compare-cancel-btn").addEventListener("click", () => compareTask.cancel());
 $("cmp-zip").addEventListener("change", (ev) => {
   const f = (ev.target as HTMLInputElement).files?.[0];
   if (f) void compareCopy({ kind: "zip", file: f });

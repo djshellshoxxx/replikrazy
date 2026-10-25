@@ -22,7 +22,7 @@
       <h2>1. Load a static site</h2>
       <label>ZIP archive <input id="zip-input" type="file" accept=".zip,application/zip" /></label>
       <label>or folder <input id="dir-input" type="file" webkitdirectory multiple /></label>
-      <p class="hint">Files stay in this tab. HTML and scripts in the bundle are never opened or run.</p>
+      <p class="hint">Files stay in this tab. HTML and scripts in the bundle are never opened or run. The first read establishes a content snapshot; repeated reads must match it. To load later edits, select the site again.</p>
       <div id="intake-status" role="status" aria-live="polite"></div>
       <button id="cancel-btn" type="button" hidden>Cancel</button>
       <div id="root-choice"></div>
@@ -30,8 +30,8 @@
     <section id="inventory" hidden>
       <h2>2. Inventory</h2>
       <div class="identity">
-        <label>App id <input id="app-id" type="text" maxlength="80" spellcheck="false" autocomplete="off" /></label>
-        <label>Entry page <select id="entrypoint"></select></label>
+        <label>App id <input id="app-id" dir="ltr" type="text" maxlength="80" spellcheck="false" autocomplete="off" /></label>
+        <label>Entry page <select id="entrypoint" dir="auto"></select></label>
         <p id="app-id-hint" class="warning" role="status"></p>
         <p id="artifact-id" class="hash"></p>
         <p class="hint">The artifact id is a SHA-256 over the file list, app id and entry page. The same files always give the same id, whether loaded from a folder or a ZIP. It identifies content; it is not a publisher identity or a signature.</p>
@@ -76,7 +76,7 @@
         <label>Use <select id="use-category"></select></label>
         <label><input id="use-rights" type="checkbox" /> I have the rights to publish this site</label>
         <label><input id="use-public" type="checkbox" /> I reviewed every file: it contains no private data or credentials, and source maps are intended to be public</label>
-        <label>Country (optional, two letters) <input id="use-country" type="text" maxlength="2" size="3" autocomplete="off" /></label>
+        <label>Country (optional, two letters) <input id="use-country" dir="ltr" type="text" maxlength="2" size="3" autocomplete="off" /></label>
         <label>Note (optional) <input id="use-description" type="text" maxlength="2000" autocomplete="off" /></label>
         <p class="hint">Payment and token/key apps are blocked on every destination until one is qualified for them. The scan cannot prove a bundle is free of secrets.</p>
       </fieldset>
@@ -91,6 +91,7 @@
       <p class="hint">After publishing, save the mirror's files with your own tools and load them here to compare against the original. Nothing is downloaded by Replikrazy.</p>
       <label>Copy as ZIP <input id="cmp-zip" type="file" accept=".zip,application/zip" /></label>
       <label>or folder <input id="cmp-dir" type="file" webkitdirectory multiple /></label>
+      <button id="compare-cancel-btn" type="button" hidden>Cancel comparison</button>
       <div id="compare-result" role="status" aria-live="polite"></div>
     </section>
   </main>
