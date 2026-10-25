@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/core/analyze";
 import { buildInventory } from "../src/core/inventory";
-import { resolveRef, scanBundle } from "../src/core/scan";
+import { resolveRef, SCAN_LIMITS, scanBundle } from "../src/core/scan";
 import { getProvider } from "../src/providers/catalogue";
 import { assess } from "../src/providers/select";
 import { bytes } from "./zipcraft";
@@ -124,5 +124,27 @@ describe("assessment with scan", () => {
   it("blocks every destination on suspected live credentials in content", async () => {
     const a = await run({ "index.html": "", "x.js": "gh" + "p_" + "a".repeat(36) }, "netlify");
     expect(a.verdict).toBe("incompatible");
+  });
+});
+
+
+describe("scan saturation stays fail-closed", () => {
+  it("cannot hide a later credential blocker behind advisory findings", () => {
+    const files = Array.from({ length: SCAN_LIMITS.maxFindings / 2 }, (_, i) => ({
+      path: `a${i}.html`, bytes: bytes('<base href="/"><meta http-equiv="content-security-policy">'),
+    }));
+    files.push({ path: "index.html", bytes: bytes("") }, { path: "z.js", bytes: bytes("gh" + "p_" + "a".repeat(36)) });
+    const scan = scanBundle(files);
+    expect(scan.findings.length).toBe(SCAN_LIMITS.maxFindings);
+    expect(scan.truncated).toBe(true);
+    const facts = analyze(files.map((f) => ({ path: f.path, size: f.bytes.length, sha256: "" })));
+    expect(assess(getProvider("netlify")!, facts, scan).blockers.join()).toContain("scan output exceeded");
+  });
+  it("bounds origin/file relationships across files and reports truncated refs", () => {
+    const files = Array.from({ length: 3 }, (_, i) => ({ path: `a${i}.js`, bytes: bytes(Array.from({ length: 5000 }, (_, j) => `fetch("https://h${i}-${j}.example/x");`).join("")) }));
+    const scan = scanBundle(files);
+    expect(scan.dependencies.reduce((n, d) => n + d.files.length, 0)).toBe(SCAN_LIMITS.maxDependencyReferences);
+    expect(scan.truncated).toBe(true);
+    expect(scanBundle([{ path: "a.css", bytes: bytes("a{background:url(missing)}".repeat(5001)) }]).truncated).toBe(true);
   });
 });

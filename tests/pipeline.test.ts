@@ -193,3 +193,24 @@ describe("plan and export", () => {
     expect((await buildInventory(again.files)).bundleDigest).toBe(inv.bundleDigest);
   });
 });
+
+
+describe("export object-key filenames", () => {
+  it("preserves prototype-related names as exact data entries", async () => {
+    const files = ["__proto__", "constructor", "toString", "index.html", "nested/__proto__"].map((path) => ({ path, bytes: bytes(path) }));
+    const inv = await buildInventory(files);
+    const manifest = buildManifest("site", inv.entries, "index.html");
+    if (!manifest.ok) throw new Error(manifest.errors.join());
+    const plan = buildPlan(await artifactId(manifest.manifest), analyze(inv.entries), false, []);
+    for (const [archive, prefix] of [
+      [buildPayloadZip(files), ""],
+      [buildExport(files, inv, manifest.manifest, plan, []), "app/"],
+    ] as const) {
+      const read = readZip(archive);
+      expect(read.rejected).toEqual([]);
+      const entries = read.entries.filter((e) => !e.name.startsWith("mirrorkit-control/"));
+      expect(entries.map((e) => e.name).sort()).toEqual(files.map((f) => prefix + f.path).sort());
+      for (const f of files) expect(entries.find((e) => e.name === prefix + f.path)!.bytes).toEqual(f.bytes);
+    }
+  });
+});

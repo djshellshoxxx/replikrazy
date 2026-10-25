@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { validateIntendedUse, type IntendedUse } from "../src/contracts/intended-use";
+import { exportUseBlockers, validateIntendedUse, type IntendedUse } from "../src/contracts/intended-use";
 import { artifactId, buildManifest } from "../src/contracts/manifest";
 import { buildPublishPlan, isExpired, PLAN_TTL_MS, verifyPlanId } from "../src/contracts/publish-plan";
 import { analyze } from "../src/core/analyze";
 import { buildInventory } from "../src/core/inventory";
-import { buildPlan } from "../src/core/plan";
+import { buildPlan, restorePlanStatuses } from "../src/core/plan";
 import { scanBundle } from "../src/core/scan";
 import { CATALOGUE, getProvider } from "../src/providers/catalogue";
 import { assess } from "../src/providers/select";
@@ -74,5 +74,39 @@ describe("PublishPlan (MK-CTR-005)", () => {
     expect(gh.mode).toBe("disabled");
     expect(gh.diagnostics.some((x) => x.severity === "blocker" && x.code === "MK_POLICY_BLOCKED")).toBe(true);
     expect(p.destinations.find((d) => d.destination.targetId === "netlify")!.mode).toBe("manual");
+  });
+});
+
+
+describe("shared export policy", () => {
+  it("blocks rights and sensitive uses even when the declaration is valid", () => {
+    for (const declaration of [use("public-demo", false), use("payment"), use("token")]) {
+      expect(validateIntendedUse(declaration)).toEqual([]);
+      expect(exportUseBlockers(declaration).length).toBeGreaterThan(0);
+    }
+    expect(exportUseBlockers(use("personal"))).toEqual([]);
+  });
+  it("keeps invalid declaration and private-data gates closed", () => {
+    expect(exportUseBlockers({ ...use("personal"), country: "usa" }).join()).toContain("country");
+    expect(exportUseBlockers({ ...use("personal"), containsPrivateData: true as unknown as false }).join()).toContain("private data");
+  });
+});
+
+
+describe("untrusted saved plan statuses", () => {
+  const fresh = () => buildPlan("sha256:test", facts, false, [getProvider("netlify")!], undefined, use("personal"));
+  it("ignores null, arrays, primitives, inherited keys and unknown statuses", () => {
+    const plan = fresh();
+    for (const value of [null, [], "verified-by-user", 1, { netlify: true }, { netlify: "bogus" }, Object.create({ netlify: "verified-by-user" })]) {
+      expect(restorePlanStatuses(plan, value)).toEqual(plan);
+    }
+  });
+  it("restores known user attestations only through legal transitions", () => {
+    expect(restorePlanStatuses(fresh(), { netlify: "uploaded-by-user" }).destinations[0]!.status).toBe("uploaded-by-user");
+    expect(restorePlanStatuses(fresh(), { netlify: "skipped" }).destinations[0]!.status).toBe("skipped");
+  });
+  it("never overrides a current policy blocker with a saved success", () => {
+    const blocked = buildPlan("sha256:test", facts, false, [getProvider("netlify")!], undefined, use("personal", false));
+    expect(restorePlanStatuses(blocked, { netlify: "verified-by-user" }).destinations[0]!.status).toBe("blocked");
   });
 });

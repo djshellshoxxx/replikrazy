@@ -12,7 +12,7 @@
 // File bytes are never rewritten: no banner, analytics, service worker or
 // manifest is injected.
 
-import { zipSync, type Zippable } from "fflate";
+import { Zip, ZipPassThrough, zipSync, type Zippable } from "fflate";
 import type { ProviderAdapter } from "../providers/types";
 import type { BundleFile } from "./intake";
 import { canonicalBytes } from "../contracts/canonical";
@@ -82,9 +82,27 @@ export function instructionsText(
 }
 
 export function buildPayloadZip(files: readonly BundleFile[]): Uint8Array {
-  const tree: Zippable = {};
-  for (const f of files) tree[f.path] = [f.bytes, OPT];
-  return zipSync(tree);
+  // zipSync flattens into an ordinary object internally, so even a null-
+  // prototype input cannot preserve a literal "__proto__" filename. The
+  // entry stream API stores filenames as values, never as object properties.
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  const archive = new Zip((error, chunk) => {
+    if (error) throw error;
+    chunks.push(chunk);
+    length += chunk.length;
+  });
+  for (const f of files) {
+    const entry = new ZipPassThrough(f.path);
+    entry.mtime = FIXED_MTIME;
+    archive.add(entry);
+    entry.push(f.bytes, true);
+  }
+  archive.end();
+  const output = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) { output.set(chunk, offset); offset += chunk.length; }
+  return output;
 }
 
 export function buildExport(
@@ -97,7 +115,7 @@ export function buildExport(
   publishPlan?: PublishPlan,
 ): Uint8Array {
   const enc = new TextEncoder();
-  const tree: Zippable = {};
+  const tree: Zippable = Object.create(null);
   for (const f of files) tree[`${APP_DIR}/${f.path}`] = [f.bytes, OPT];
   // Canonical bytes exactly as hashed for artifactId (no trailing newline).
   tree[`${CONTROL_DIR}/artifact-manifest.json`] = [canonicalBytes(manifest), OPT];

@@ -60,6 +60,7 @@ export const SCAN_LIMITS = {
   maxTextBytes: 2 * 1024 * 1024,
   maxRefsPerFile: 5000,
   maxFindings: 10_000,
+  maxDependencyReferences: 10_000,
 } as const;
 
 const TEXT_EXT = /\.(html?|xhtml|css|m?js|cjs|json|webmanifest|svg|txt|xml|map)$/i;
@@ -233,6 +234,7 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
     else truncated = true;
   };
   const deps = new Map<string, ExternalDependency>();
+  let dependencyReferences = 0;
   const missing: MissingRef[] = [];
   const skipped: string[] = [];
   let rootRefs = 0;
@@ -284,7 +286,9 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
       if (/\bnew\s+(WebSocket|EventSource|RTCPeerConnection)\b/.test(text)) realtime = true;
     }
 
-    const refs = (isHtml ? htmlRefs(text) : CSS_EXT.test(f.path) ? cssRefs(text) : JS_EXT.test(f.path) ? jsRefs(text) : []).slice(0, SCAN_LIMITS.maxRefsPerFile);
+    const allRefs = isHtml ? htmlRefs(text) : CSS_EXT.test(f.path) ? cssRefs(text) : JS_EXT.test(f.path) ? jsRefs(text) : [];
+    if (allRefs.length > SCAN_LIMITS.maxRefsPerFile) truncated = true;
+    const refs = allRefs.slice(0, SCAN_LIMITS.maxRefsPerFile);
     for (const { url: raw, role } of refs) {
       const url = raw.trim();
       if (!url || url.startsWith("#") || url.startsWith("?") || IGNORED_SCHEME.test(url) || DYNAMIC.test(url)) continue;
@@ -292,9 +296,14 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
       if (abs) {
         const scheme = (abs[1] ?? "https").toLowerCase();
         const origin = `${scheme}://${abs[2]!.toLowerCase()}`;
-        const d = deps.get(origin) ?? { origin, roles: [], files: [], discovery: "literal" as const };
+        const existing = deps.get(origin);
+        if (!existing?.files.includes(f.path) && dependencyReferences >= SCAN_LIMITS.maxDependencyReferences) {
+          truncated = true;
+          continue;
+        }
+        const d = existing ?? { origin, roles: [], files: [], discovery: "literal" as const };
         if (!d.roles.includes(role)) d.roles.push(role);
-        if (!d.files.includes(f.path)) d.files.push(f.path);
+        if (!d.files.includes(f.path)) { d.files.push(f.path); dependencyReferences++; }
         deps.set(origin, d);
         if (scheme === "ws" || scheme === "wss") realtime = true;
         continue;
@@ -315,7 +324,10 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
         resolved === "" ? present.has("index.html")
         : pathPart.endsWith("/") ? present.has(`${resolved}/index.html`)
         : present.has(resolved) || (dirs.has(resolved) && present.has(`${resolved}/index.html`)) || present.has(`${resolved}.html`);
-      if (!ok && missing.length < SCAN_LIMITS.maxFindings) missing.push({ from: f.path, ref: url, resolved: resolved || "/" });
+      if (!ok) {
+        if (missing.length < SCAN_LIMITS.maxFindings) missing.push({ from: f.path, ref: url, resolved: resolved || "/" });
+        else truncated = true;
+      }
     }
   }
 

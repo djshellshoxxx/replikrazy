@@ -1,5 +1,28 @@
 # Replikrazy — restart handoff
 
+## Continued local security batch — 2026-10-25
+
+A disjoint read-only reviewer found five reproducible issues at `d54a3f7`.
+All five now have fixes and regressions: global policy gates on both export
+forms; safe stored-status parsing; exact prototype-related ZIP filenames;
+fail-closed scan truncation with bounded origin/file relationships; rejection
+of invalid reference bundles in comparison. See
+[`../reviews/2026-10-25-focused-security.md`](../reviews/2026-10-25-focused-security.md)
+for original reproductions, failed first fix and scope limitations.
+
+Validation: 152 tests / 12 files, typecheck, build and diff check pass. Committed
+browser runner gives 22 checks, zero page errors and zero external requests.
+Run `BROWSER_TEST_TOOLS=/tmp/replikrazy-browser node scripts/browser-regressions.mjs`
+against production preview on port 4173; tooling is external to the repo.
+
+Library clarification: resolved-reference `prepare_materialize` targeted
+`/workspace/library-files/replikrazy-private`; preparation was called twice,
+then the current bundled helper ran **once**, targeting `checkpoint.zip` in
+that directory. It returned `library file transfer failed: download failed`.
+No transfer retry has been attempted. The directory remains empty. This is a
+transfer error, not an explicit access denial; no bytes/hash were recovered.
+Parent is examining supported options; do not retry or invent storage URLs.
+
 ## ChatGPT local continuation — 2026-10-25
 
 Current continuation branch: `chatgpt/lean-reliability-20261025`, based on

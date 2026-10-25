@@ -4,7 +4,7 @@
 // works there (research MK-POL-001/002).
 
 import type { BundleFacts } from "../core/analyze";
-import { SENSITIVE_USES, type IntendedUse } from "../contracts/intended-use";
+import { exportUseBlockers, type IntendedUse } from "../contracts/intended-use";
 import type { ScanReport } from "../core/scan";
 import type { ProviderAdapter } from "./types";
 
@@ -47,15 +47,14 @@ export function assess(p: ProviderAdapter, f: BundleFacts, scan?: ScanReport, us
   if (f.hasCnameFile && p.id !== "github-pages") warnings.push("CNAME file is a GitHub Pages convention and has no effect here");
 
   if (use) {
-    if (!use.ownerHasRights) blockers.push("you have not confirmed you have the rights to publish this site");
-    if (SENSITIVE_USES.includes(use.category))
-      blockers.push(`no destination is qualified for ${use.category} apps (sensitive profile: needs a verified no-injection, header and origin-isolation review)`);
+    blockers.push(...exportUseBlockers(use));
     const banned = p.blockedUses?.value ?? [];
     if (banned.includes(use.category))
       blockers.push(`provider terms exclude ${use.category} use (${p.blockedUses!.evidence}${p.blockedUses!.observed ? `, ${p.blockedUses!.observed}` : ""}): ${p.blockedUses!.note ?? ""}`);
   } else unknowns.push("intended use not declared");
 
   if (scan) {
+    if (scan.truncated) blockers.push("scan output exceeded its safety limits; reduce the bundle before export");
     // Never strip or neutralise these: the owner must supply a static-only build.
     const executes = scan.reservedPaths.filter((r) => p.serverExecutablePaths.includes(r));
     if (executes.length) blockers.push(`this host would run ${executes.join(", ")} as server code; supply a static-only build`);

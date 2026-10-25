@@ -28,3 +28,13 @@ export function validateIntendedUse(u: IntendedUse): string[] {
   if (u.country !== undefined && !/^[A-Z]{2}$/.test(u.country)) errors.push("country must be a two-letter ISO 3166-1 code");
   return errors;
 }
+
+// Shared by destination assessment and both export actions. Record validity
+// alone is not permission to export: rights and sensitive-use gates also apply.
+export function exportUseBlockers(u: IntendedUse): string[] {
+  const blockers = validateIntendedUse(u);
+  if (u.ownerHasRights !== true) blockers.push("you have not confirmed you have the rights to publish this site");
+  if (SENSITIVE_USES.includes(u.category))
+    blockers.push(`no destination is qualified for ${u.category} apps (sensitive profile: needs a verified no-injection, header and origin-isolation review)`);
+  return blockers;
+}

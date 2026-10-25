@@ -1,7 +1,7 @@
 // UI wiring. Invariant: imported file names/contents only ever reach the DOM
 // through textContent (never innerHTML), and file contents are never rendered.
 
-import { USE_CATEGORIES, validateIntendedUse, type IntendedUse, type UseCategory } from "../contracts/intended-use";
+import { USE_CATEGORIES, exportUseBlockers, type IntendedUse, type UseCategory } from "../contracts/intended-use";
 import { buildPublishPlan } from "../contracts/publish-plan";
 import { artifactId, buildManifest, defaultEntrypoint, htmlCandidates, ID_RE, type ArtifactManifest } from "../contracts/manifest";
 import { analyze, factIssues } from "../core/analyze";
@@ -10,7 +10,7 @@ import type { BundleFile, IntakeIssue, IntakeOptions, IntakeResult } from "../co
 import { compareInventories, isIdentical } from "../core/compare";
 import { type AnalysisInput, type Progress } from "../core/pipeline";
 import type { Inventory } from "../core/inventory";
-import { allowedTransitions, buildPlan, transition, type DryRunPlan } from "../core/plan";
+import { allowedTransitions, buildPlan, restorePlanStatuses, transition, type DryRunPlan } from "../core/plan";
 import type { ScanReport } from "../core/scan";
 import { AnalysisStopped, AnalysisTask } from "./analysis-task";
 import { filterCatalogue, getProvider } from "../providers/catalogue";
@@ -64,21 +64,8 @@ function savePlan() {
   } catch { /* storage unavailable: statuses simply aren't remembered */ }
 }
 function restoreStatuses(plan: DryRunPlan): DryRunPlan {
-  let saved: Record<string, string> = {};
-  try { saved = JSON.parse(localStorage.getItem(storeKey(plan.artifactId)) ?? "{}"); } catch { return plan; }
-  let p = plan;
-  for (const d of plan.destinations) {
-    const want = saved[d.providerId];
-    // Replay only along valid paths; anything else is ignored.
-    for (const step of ["ready-for-manual-export", "uploaded-by-user", "verified-by-user"] as const) {
-      const cur = p.destinations.find((x) => x.providerId === d.providerId)!;
-      if (!want || cur.status === want) break;
-      if (want === "skipped" && allowedTransitions(cur).includes("skipped")) { p = transition(p, d.providerId, "skipped"); break; }
-      if (!allowedTransitions(cur).includes(step)) break;
-      p = transition(p, d.providerId, step);
-    }
-  }
-  return p;
+  try { return restorePlanStatuses(plan, JSON.parse(localStorage.getItem(storeKey(plan.artifactId)) ?? "{}")); }
+  catch { return plan; }
 }
 
 const fmtBytes = (n: number) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KiB` : `${(n / 1048576).toFixed(1)} MiB`);
@@ -179,7 +166,7 @@ async function refreshIdentity() {
     } else issues.push(...m.errors.map((message) => ({ severity: "error", message: `manifest: ${message}` })));
   }
   // Suspected live credentials block export just like intake errors.
-  state.hasErrors = !state.artifactId || issues.some((i) => i.severity === "error") || state.scan.findings.some((f) => f.severity === "blocker");
+  state.hasErrors = !state.artifactId || issues.some((i) => i.severity === "error") || state.scan.truncated || state.scan.findings.some((f) => f.severity === "blocker");
   renderIdentity(inv);
   renderInventory(inv, issues);
   rebuildPlan();
@@ -219,6 +206,7 @@ function renderCompat(scan: ScanReport) {
     `Browser storage: ${h.usesOriginStorage ? "used" : "not detected"}. Realtime connections: ${h.usesRealtime ? "used" : "not detected"}. ` +
     "External dependency list complete: no (static inspection only).";
   $("compat-findings").replaceChildren(
+    ...(scan.truncated ? [el("li", "BLOCKER: scan output exceeded its safety limits. Reduce the bundle before export.", "error")] : []),
     ...scan.findings.map((f) => el("li", `${f.severity.toUpperCase()} [${f.certainty}]: ${f.message}${f.path ? ` (${f.path})` : ""}`, f.severity === "blocker" ? "error" : f.severity === "warning" ? "warning" : "")),
   );
   $("compat-deps").replaceChildren(...scan.dependencies.map((d) => el("li", `${d.origin} — ${d.roles.join(", ")} — used by ${d.files.slice(0, 5).join(", ")}${d.files.length > 5 ? ", …" : ""}`)));
@@ -330,7 +318,7 @@ function renderPlan() {
       return card;
     }),
   );
-  const useErrors = validateIntendedUse(state.use);
+  const useErrors = exportUseBlockers(state.use);
   const gate = state.hasErrors ? "Fix the errors above first."
     : useErrors.length ? useErrors.join(" ")
     : !state.publicDataReviewed ? "Confirm the public-data review in step 5 first."
@@ -343,7 +331,8 @@ function renderPlan() {
 }
 
 async function download() {
-  if (!state.plan || !state.inv || state.hasErrors || !state.publicDataReviewed || validateIntendedUse(state.use).length) return;
+  if (!state.plan || !state.inv || state.hasErrors || !state.publicDataReviewed || exportUseBlockers(state.use).length) return;
+  if (!state.plan.destinations.some((d) => d.status !== "blocked" && d.status !== "skipped")) return;
   const plan = state.plan, inv = state.inv, use = state.use;
   const revision = identityGeneration;
   const providers = state.plan.destinations.map((d) => getProvider(d.providerId)!);
@@ -356,7 +345,7 @@ async function download() {
 
 function downloadPayload() {
   if (!state.inv || state.hasErrors) return;
-  if (!state.artifactId || !state.publicDataReviewed || validateIntendedUse(state.use).length) return;
+  if (!state.artifactId || !state.publicDataReviewed || exportUseBlockers(state.use).length) return;
   saveZip(buildPayloadZip(state.files), `replikrazy-app-${state.artifactId.slice(7, 19)}.zip`);
 }
 
@@ -400,6 +389,7 @@ $("research").addEventListener("toggle", async (ev) => {
 async function compareCopy(input: AnalysisInput) {
   const out = $("compare-result");
   if (!state.inv) { out.textContent = "Load the original site first."; return; }
+  if (state.intakeIssues.some((i) => i.severity === "error")) { out.textContent = "The original input has errors. Load a valid original before comparing a copy."; return; }
   const reference = state.inv;
   const gen = ++compareGeneration;
   compareTask.cancel();

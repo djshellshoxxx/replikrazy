@@ -78,3 +78,28 @@ export function transition(plan: DryRunPlan, providerId: string, to: Destination
     }),
   };
 }
+
+// Storage is optional, untrusted convenience data. Restore only exact known
+// user attestations along currently allowed transitions; never turn unknown
+// values into a request to advance every step, or weaken a fresh assessment.
+export function restorePlanStatuses(plan: DryRunPlan, saved: unknown): DryRunPlan {
+  if (!saved || typeof saved !== "object" || Array.isArray(saved)) return plan;
+  let restored = plan;
+  for (const d of plan.destinations) {
+    if (!Object.prototype.hasOwnProperty.call(saved, d.providerId)) continue;
+    const want: unknown = (saved as Record<string, unknown>)[d.providerId];
+    if (!["needs-review", "ready-for-manual-export", "uploaded-by-user", "verified-by-user", "skipped"].includes(want as string)) continue;
+    for (const step of ["ready-for-manual-export", "uploaded-by-user", "verified-by-user"] as const) {
+      const current = restored.destinations.find((x) => x.providerId === d.providerId)!;
+      if (current.status === want) break;
+      if (want === "skipped") {
+        if (allowedTransitions(current).includes("skipped")) restored = transition(restored, d.providerId, "skipped");
+        break;
+      }
+      // A saved earlier status cannot advance a more-ready current status.
+      if (want === "needs-review" || !allowedTransitions(current).includes(step)) break;
+      restored = transition(restored, d.providerId, step);
+    }
+  }
+  return restored;
+}
