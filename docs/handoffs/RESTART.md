@@ -51,11 +51,11 @@ ROUTE_CONTRACT, browser-profile addendum), `v13/guest-host-catalog`,
 | 7 | T-POL-02 provider-reserved executables | **done** for Cloudflare (`_worker.js`, `functions/`, `_routes.json`); others warn only |
 | 8 | MK-ART-006 export layout `app/` + `mirrorkit-control/`, payload-only ZIP | **done** |
 | 9 | Research catalogue mapper (62 profiles / 311 leads, source pins, MK-POL-006 pinned snapshot digest) | **open**; blocked on the owner approving publication of research data |
-| 10 | MK-POL-003/004: sensitive-use profile, intended use, free/trial/paid, country/language/jurisdiction fields | **open** (needs #9) |
+| 10 | MK-POL-003/004 | **partial**. Done: IntendedUse declaration, payment/token blocked everywhere, GitHub Pages commercial/payment exclusion (cited), rights and public-data confirmations. **Open** (needs #9): free/trial/paid, country/language/jurisdiction catalogue fields. |
 | 11 | T-ART-06 cancellation, worker-thread hashing, `MK_INPUT_CHANGED` for ZIP re-reads | partial (folder size-change check only) |
 | 12 | T-ART-01 folder and ZIP give the same artifact | **done** at unit level (stored/deflated/reordered ZIP and folder → one artifactId); no browser folder-picker test |
 | 13 | Gate M: accessibility, RTL, keyboard, independent security review | **open** |
-| 14 | Contract records | **ArtifactManifest + artifactId done** (`src/contracts/`, RFC 8785 subset, T-ART-01 test). `PublishPlan` planId/expiry/consent, `Diagnostic` messageKey/requirementId shape and `ScanReport` contract fields remain **open**. |
+| 14 | Contract records | **ArtifactManifest + artifactId done** (`src/contracts/`, RFC 8785 subset, T-ART-01 test). `PublishPlan` with planId/24 h expiry/catalogDigests **done** (`src/contracts/publish-plan.ts`, manual/disabled modes only). **Open:** ConsentReceipt (only needed for future API writes), a contract-shaped ScanReport, and Diagnostic message keys. |
 
 ## Completed
 
@@ -71,6 +71,25 @@ Milestone 2 (this update):
 - `src/providers/select.ts`: scan-aware assessment (reserved paths block, routing/nesting/storage/realtime/deps/missing warnings).
 - `src/core/exporter.ts`: `app/` + `mirrorkit-control/` handoff (adds `scan.json`, per-destination compatibility notes), `buildPayloadZip`.
 - UI: root choice, "Will the copy still work?" panel, app-only ZIP button, limit/evidence lines on provider cards.
+
+## Milestone 4 (intended use + PublishPlan), 2026-10-25
+
+- `src/contracts/intended-use.ts`: IntendedUse, validation, `SENSITIVE_USES`.
+- `assess(..., use)`: no rights means blocked; payment/token means blocked everywhere; provider `blockedUses` (GitHub Pages: commercial, payment; researched-lead, official URL) means blocked; an undeclared use is unknown.
+- `src/contracts/publish-plan.ts`: contract PublishPlan with these fields:
+  - `planId`: sha256 of the canonical plan without planId; `verifyPlanId` checks it.
+  - `createdAt`, and `expiresAt` 24 h later.
+  - `catalogDigests`: digest of the catalogue snapshot.
+  - One TargetPlan per destination: mode manual or disabled; `publicFiles` equal to the manifest list; operations limited to manual-handoff and verify, never a remote mutation; cost unknown; external dependencies from the scan.
+- Export: adds `publish-plan.json` (canonical bytes). `plan.json` is renamed `handoff-status.json` (user attestations, not a contract record).
+- UI: intended-use fieldset. Export stays disabled until rights and the public-data review are confirmed, and shows why.
+- Tests: 6 files, **114 passed**. Browser smoke confirmed:
+  - blocked until rights are ticked;
+  - gated until the public-data review is ticked;
+  - payment blocks every destination;
+  - commercial blocks only GitHub Pages;
+  - the export carries `publish-plan.json` with netlify:manual and github-pages:disabled;
+  - 0 console errors.
 
 ## Milestone 3 (contract identity), 2026-10-25
 
@@ -116,8 +135,8 @@ review, any provider account/upload (forbidden).
    MK-POL-006 mapper (pinned snapshot + digest, ids/source pins verbatim,
    unknowns stay unknown) and replace hand-written adapter data; if no, keep
    citing official URLs per claim.
-2. Remaining contract records (gap 14): `PublishPlan` planId/expiry,
-   ConsentReceipt, Diagnostic/ScanReport contract shape.
+2. Remaining contract records (gap 14): contract-shaped ScanReport and
+   Diagnostic message keys. ConsentReceipt waits for any future API route.
 3. Worker-thread hashing + cancel (T-ART-06); ZIP64 fixtures if wanted.
 4. Gate M items: accessibility/RTL/keyboard pass, independent security review.
 5. Optional verify mode: user re-selects the published files offline and

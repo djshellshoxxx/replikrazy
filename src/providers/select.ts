@@ -4,6 +4,7 @@
 // works there (research MK-POL-001/002).
 
 import type { BundleFacts } from "../core/analyze";
+import { SENSITIVE_USES, type IntendedUse } from "../contracts/intended-use";
 import type { ScanReport } from "../core/scan";
 import type { ProviderAdapter } from "./types";
 
@@ -17,7 +18,7 @@ export interface Assessment {
   unknowns: string[];
 }
 
-export function assess(p: ProviderAdapter, f: BundleFacts, scan?: ScanReport): Assessment {
+export function assess(p: ProviderAdapter, f: BundleFacts, scan?: ScanReport, use?: IntendedUse): Assessment {
   const blockers: string[] = [];
   const warnings: string[] = [];
   const unknowns: string[] = [];
@@ -44,6 +45,15 @@ export function assess(p: ProviderAdapter, f: BundleFacts, scan?: ScanReport): A
     else if (p.headersFile.value === null) unknowns.push("_headers support not verified");
   }
   if (f.hasCnameFile && p.id !== "github-pages") warnings.push("CNAME file is a GitHub Pages convention and has no effect here");
+
+  if (use) {
+    if (!use.ownerHasRights) blockers.push("you have not confirmed you have the rights to publish this site");
+    if (SENSITIVE_USES.includes(use.category))
+      blockers.push(`no destination is qualified for ${use.category} apps (sensitive profile: needs a verified no-injection, header and origin-isolation review)`);
+    const banned = p.blockedUses?.value ?? [];
+    if (banned.includes(use.category))
+      blockers.push(`provider terms exclude ${use.category} use (${p.blockedUses!.evidence}${p.blockedUses!.observed ? `, ${p.blockedUses!.observed}` : ""}): ${p.blockedUses!.note ?? ""}`);
+  } else unknowns.push("intended use not declared");
 
   if (scan) {
     // Never strip or neutralise these: the owner must supply a static-only build.

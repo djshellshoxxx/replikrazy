@@ -5,8 +5,9 @@ Resume `djshellshoxxx/replikrazy` on branch `claude/trusting-goodall-9jdwxu`
 `docs/research/PROVENANCE.md` first. Check `git log`/`git ls-remote` for the
 current head rather than trusting any SHA written here.
 
-**Do NOT redo (done, 106 tests pass):** contract `ArtifactManifest` + RFC 8785
-canonical JSON + `artifactId` with app id / entry-page selection (`src/contracts/`), bounded ZIP reader with spec caps,
+**Do NOT redo (done, 114 tests pass):** contract `ArtifactManifest` + RFC 8785
+canonical JSON + `artifactId` with app id / entry-page selection, intended-use
+policy gates and contract `PublishPlan` with planId/expiry (`src/contracts/`), bounded ZIP reader with spec caps,
 MK-ART-002 path rules, UTF-8-ordered SHA-256 inventory, explicit root choice,
 compatibility/secret scan (`src/core/scan.ts`), 10 provider adapters with
 evidence ladder, scan-aware assessment, dry-run plan, `app/` +
@@ -18,7 +19,7 @@ pack (unpublished). If you need it and it isn't attached, ask the owner.
 Never commit the pack, private review packets or secrets to this public repo.
 
 **Do next:** follow "Next steps" in RESTART.md. First, ask the owner whether
-the research catalogue data may be published. Then do the remaining contract records (gap 14: plan id/expiry/consent).
+the research catalogue data may be published. Then worker-thread hashing + cancel (T-ART-06) and the Gate M accessibility pass.
 
 **Rules:** browser-only; no backend, no credential collection, no live
 provider writes or deploys; imported HTML/JS never executes in the app origin;

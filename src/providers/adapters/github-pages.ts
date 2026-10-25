@@ -22,6 +22,13 @@ export const adapter: ProviderAdapter = {
   spaFallback: claim(false, "unreviewed", "a custom 404.html is served instead; no rewrite to index.html"),
   defaultUrlNested: claim(true, "unreviewed", "project sites publish under /<repo>/; user/org sites and custom domains are at the root"),
   researchId: "github_pages",
+  blockedUses: claim(
+    ["commercial", "payment"],
+    "researched-lead",
+    "GitHub Pages is not for sites primarily facilitating commercial transactions or commercial SaaS, and warns against sensitive transactions such as passwords or card numbers",
+    "https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits",
+    "2026-10-25",
+  ),
   maxFileBytes: unknown(),
   maxFiles: unknown(),
   prerequisites: ["A GitHub account", "A repository you control (public unless your plan allows private Pages)"],

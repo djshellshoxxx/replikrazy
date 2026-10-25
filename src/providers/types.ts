@@ -25,6 +25,8 @@ export interface Claim<T> {
   observed?: string; // ISO date the source was read (research date, not a check by this app)
 }
 
+import type { UseCategory } from "../contracts/intended-use";
+
 export type ProviderKind = "static-host" | "git-pages" | "content-addressed" | "self-hosted-anonymity" | "self-hosted";
 
 export type MethodId = "manual-web-upload" | "cli" | "git-push" | "self-host";
@@ -62,6 +64,8 @@ export interface ProviderAdapter {
   defaultUrlNested: Claim<boolean>;
   // Research catalogue record id, kept verbatim for provenance (MK-POL-006).
   researchId?: string;
+  // Declared uses the provider's own terms exclude (a blocking policy fact).
+  blockedUses?: Claim<UseCategory[]>;
   maxFileBytes: Claim<number>;
   maxFiles: Claim<number>;
   prerequisites: string[];

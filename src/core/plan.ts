@@ -4,6 +4,7 @@
 import { assess, type Assessment } from "../providers/select";
 import type { ProviderAdapter } from "../providers/types";
 import type { BundleFacts } from "./analyze";
+import type { IntendedUse } from "../contracts/intended-use";
 import type { ScanReport } from "./scan";
 
 export type DestinationStatus =
@@ -39,11 +40,12 @@ export function buildPlan(
   bundleHasErrors: boolean,
   providers: readonly ProviderAdapter[],
   scan?: ScanReport,
+  use?: IntendedUse,
 ): DryRunPlan {
   return {
     artifactId,
     destinations: providers.map((p) => {
-      const assessment = assess(p, facts, scan);
+      const assessment = assess(p, facts, scan, use);
       const base = initialStatus(assessment, bundleHasErrors);
       return { providerId: p.id, status: base, baseStatus: base, assessment };
     }),

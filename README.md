@@ -33,6 +33,7 @@ deployment or production readiness is claimed.
 | Functional-compatibility scan: missing assets, external origins, root/relative paths, `<base>`, history/hash routing, service worker, browser storage, realtime backends, WASM, source maps, provider-reserved server paths, content secret patterns | implemented, unit-tested, browser smoke-tested; heuristic and explicitly incomplete |
 | Provider catalogue, filtering, capability-aware assessment | implemented, unit-tested; Cloudflare/Netlify carry dated `researched-lead` claims with official URLs, the rest are `unreviewed` |
 | Dry-run plan with user-attested per-destination status | implemented, unit-tested |
+| Intended-use declaration + policy gates (rights, public-data review, payment/token blocked everywhere, GitHub Pages commercial exclusion with cited source); contract `PublishPlan` with `planId`, 24 h expiry, manual-only non-mutating operations | implemented, unit-tested, browser smoke-tested |
 | Handoff ZIP (`app/` + `mirrorkit-control/` incl. `artifact-manifest.json`) and app-only payload ZIP | implemented, unit-tested, browser smoke-tested |
 | Any live deployment / provider API | **not implemented, by design** |
 

@@ -1,6 +1,8 @@
 // UI wiring. Invariant: imported file names/contents only ever reach the DOM
 // through textContent (never innerHTML), and file contents are never rendered.
 
+import { USE_CATEGORIES, validateIntendedUse, type IntendedUse, type UseCategory } from "../contracts/intended-use";
+import { buildPublishPlan } from "../contracts/publish-plan";
 import { artifactId, buildManifest, defaultEntrypoint, htmlCandidates, ID_RE, type ArtifactManifest } from "../contracts/manifest";
 import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
@@ -38,10 +40,15 @@ interface State {
   entrypoint: string | null;
   manifest: ArtifactManifest | null;
   artifactId: string | null;
+  use: IntendedUse;
+  // Owner confirms a public-data review (MK-ART-005); export stays off until then.
+  publicDataReviewed: boolean;
 }
 const state: State = {
   files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, reload: null, stripRoot: false,
   intakeIssues: [], appId: "site", entrypoint: null, manifest: null, artifactId: null,
+  use: { category: "public-demo", containsPrivateData: false, ownerHasRights: false, description: "" },
+  publicDataReviewed: false,
 };
 
 // Per-viewer convenience only: remembers statuses for a given artifactId.
@@ -224,7 +231,7 @@ function rebuildPlan() {
   if (!state.inv) return;
   const providers = [...state.selected].map((id) => getProvider(id)!).filter(Boolean);
   state.plan = providers.length
-    ? restoreStatuses(buildPlan(state.artifactId ?? "none", analyze(state.inv.entries, state.entrypoint), state.hasErrors, providers, state.scan ?? undefined))
+    ? restoreStatuses(buildPlan(state.artifactId ?? "none", analyze(state.inv.entries, state.entrypoint), state.hasErrors, providers, state.scan ?? undefined, state.use))
     : null;
   renderPlan();
 }
@@ -266,21 +273,30 @@ function renderPlan() {
       return card;
     }),
   );
-  const exportable = !state.hasErrors && plan.destinations.some((d) => d.status !== "blocked" && d.status !== "skipped");
+  const useErrors = validateIntendedUse(state.use);
+  const gate = state.hasErrors ? "Fix the errors above first."
+    : useErrors.length ? useErrors.join(" ")
+    : !state.publicDataReviewed ? "Confirm the public-data review in step 5 first."
+    : "";
+  const anyOpen = plan.destinations.some((d) => d.status !== "blocked" && d.status !== "skipped");
+  $("export-gate").textContent = gate || (anyOpen ? "" : "Every selected destination is blocked or skipped; see the blockers above.");
+  const exportable = !gate && anyOpen;
   ($("export-btn") as HTMLButtonElement).disabled = !exportable;
-  ($("payload-btn") as HTMLButtonElement).disabled = state.hasErrors;
+  ($("payload-btn") as HTMLButtonElement).disabled = !!gate;
 }
 
-function download() {
+async function download() {
   if (!state.plan || !state.inv) return;
   const providers = state.plan.destinations.map((d) => getProvider(d.providerId)!);
   if (!state.manifest || !state.artifactId) return;
-  saveZip(buildExport(state.files, state.inv, state.manifest, state.plan, providers, state.scan ?? undefined), `replikrazy-handoff-${state.artifactId.slice(7, 19)}.zip`);
+  const id = state.artifactId as `sha256:${string}`;
+  const pp = await buildPublishPlan(state.manifest, id, state.use, state.plan, providers, state.scan ?? undefined, Date.now());
+  saveZip(buildExport(state.files, state.inv, state.manifest, state.plan, providers, state.scan ?? undefined, pp), `replikrazy-handoff-${state.artifactId.slice(7, 19)}.zip`);
 }
 
 function downloadPayload() {
   if (!state.inv || state.hasErrors) return;
-  if (!state.artifactId) return;
+  if (!state.artifactId || !state.publicDataReviewed) return;
   saveZip(buildPayloadZip(state.files), `replikrazy-app-${state.artifactId.slice(7, 19)}.zip`);
 }
 
@@ -305,7 +321,24 @@ $("dir-input").addEventListener("change", (ev) => {
   if (list?.length) void loadBundle((opts) => intakeFolder([...list], opts));
 });
 for (const id of ["f-text", "f-noacct", "f-domain", "f-method"]) $(id).addEventListener("input", renderProviders);
-$("export-btn").addEventListener("click", download);
+$("export-btn").addEventListener("click", () => void download());
+function readUse() {
+  const country = ($("use-country") as HTMLInputElement).value.trim().toUpperCase();
+  state.use = {
+    category: ($("use-category") as HTMLSelectElement).value as UseCategory,
+    containsPrivateData: false,
+    ownerHasRights: ($("use-rights") as HTMLInputElement).checked,
+    description: ($("use-description") as HTMLInputElement).value,
+    ...(country ? { country } : {}),
+  };
+  state.publicDataReviewed = ($("use-public") as HTMLInputElement).checked;
+  rebuildPlan();
+}
+{
+  const sel = $("use-category") as HTMLSelectElement;
+  sel.replaceChildren(...USE_CATEGORIES.map((c) => { const o = el("option", c); o.value = c; return o; }));
+  for (const id of ["use-category", "use-rights", "use-public", "use-country", "use-description"]) $(id).addEventListener("change", readUse);
+}
 $("app-id").addEventListener("change", (ev) => {
   const v = (ev.target as HTMLInputElement).value.trim();
   state.appId = v;

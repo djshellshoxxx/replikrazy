@@ -171,7 +171,7 @@ describe("plan and export", () => {
     const names = back.entries.map((e) => e.name).sort();
     expect(names).toEqual([
       "app/css/a.css", "app/img/x.bin", "app/index.html",
-      "mirrorkit-control/MANIFEST.txt", "mirrorkit-control/artifact-manifest.json", "mirrorkit-control/instructions/netlify.txt", "mirrorkit-control/instructions/tor-onion.txt", "mirrorkit-control/plan.json",
+      "mirrorkit-control/MANIFEST.txt", "mirrorkit-control/artifact-manifest.json", "mirrorkit-control/handoff-status.json", "mirrorkit-control/instructions/netlify.txt", "mirrorkit-control/instructions/tor-onion.txt",
     ]);
     const appFiles = back.entries.filter((e) => e.name.startsWith("app/")).map((e) => ({ path: e.name.slice(4), bytes: e.bytes }));
     expect((await buildInventory(appFiles)).bundleDigest).toBe(inv.bundleDigest);

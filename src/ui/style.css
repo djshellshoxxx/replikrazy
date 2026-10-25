@@ -19,3 +19,5 @@ button:disabled { cursor: not-allowed; }
 ul { padding-left: 20px; }
 .hash { font-family: ui-monospace, monospace; word-break: break-all; }
 .identity input, .identity select { font: inherit; max-width: 100%; }
+fieldset.use { border: 1px solid var(--line); border-radius: 6px; margin: 8px 0; }
+fieldset.use label { display: block; }

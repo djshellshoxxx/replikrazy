@@ -66,10 +66,20 @@
     </section>
     <section id="plan" hidden>
       <h2>5. Dry-run plan</h2>
+      <fieldset class="use">
+        <legend>Intended use (your declaration; it sets policy checks)</legend>
+        <label>Use <select id="use-category"></select></label>
+        <label><input id="use-rights" type="checkbox" /> I have the rights to publish this site</label>
+        <label><input id="use-public" type="checkbox" /> I reviewed every file: it contains no private data or credentials, and source maps are intended to be public</label>
+        <label>Country (optional, two letters) <input id="use-country" type="text" maxlength="2" size="3" autocomplete="off" /></label>
+        <label>Note (optional) <input id="use-description" type="text" maxlength="2000" autocomplete="off" /></label>
+        <p class="hint">Payment and token/key apps are blocked on every destination until one is qualified for them. The scan cannot prove a bundle is free of secrets.</p>
+      </fieldset>
       <div id="plan-list"></div>
+      <p id="export-gate" class="warning" role="status"></p>
       <button id="export-btn" type="button">Download handoff ZIP</button>
       <button id="payload-btn" type="button">Download app-only ZIP</button>
-      <p class="hint">Handoff ZIP: <code>app/</code> (exact bytes, the only part to upload) plus <code>mirrorkit-control/</code> (manifest, plan, scan, instructions — never upload). App-only ZIP: just your site files at the root, for hosts that accept a ZIP.</p>
+      <p class="hint">Handoff ZIP: <code>app/</code> (exact bytes, the only part to upload) plus <code>mirrorkit-control/</code> (manifest, plan, scan, instructions — never upload). The handoff ZIP includes a contract <code>publish-plan.json</code> (plan id, 24-hour expiry). App-only ZIP: just your site files at the root, for hosts that accept a ZIP.</p>
     </section>
   </main>
   <script type="module" src="/src/ui/main.ts"></script>
