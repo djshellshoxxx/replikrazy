@@ -5,7 +5,7 @@
 
 import { intakeFolder, intakeZip, type IntakeOptions, type IntakeResult, type PickedFile } from "./intake";
 import { buildInventory, canonicalManifest, sha256Hex, type Inventory } from "./inventory";
-import { scanBundle, type ScanReport } from "./scan";
+import { scanBundle, type CompatibilityScan } from "./scan";
 import { DEFAULT_ZIP_LIMITS } from "./zip";
 
 // Folder entries carry their relative path explicitly: structured cloning a
@@ -23,7 +23,7 @@ export interface AnalysisResult {
   sourceDigest: string;
   intake: IntakeResult;
   inv: Inventory;
-  scan: ScanReport;
+  scan: CompatibilityScan;
 }
 
 export type Progress = (stage: "reading" | "hashing" | "scanning", done: number, total: number) => void;

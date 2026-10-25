@@ -36,6 +36,7 @@ deployment or production readiness is claimed.
 | Research catalogue browser: 62 MirrorKit v13 profiles mapped (ids/source pins verbatim, prose kept as text, gaps null) into a pinned snapshot with source SHA-256; lazy-loaded, read-only, enables nothing | implemented, unit-tested (snapshot regenerates exactly), browser smoke-tested |
 | Provider catalogue, filtering, capability-aware assessment | implemented, unit-tested; Cloudflare/Netlify carry dated `researched-lead` claims with official URLs, the rest are `unreviewed` |
 | Dry-run plan with user-attested per-destination status | implemented, unit-tested |
+| Contract ScanReport sidecar with diagnostic keys, complete severity counts and bounded detail | implemented, unit-tested; heuristic scanner metadata, not a guarantee of compatibility or secret detection |
 | Intended-use declaration + policy gates (rights, public-data review, payment/token blocked everywhere, GitHub Pages commercial exclusion with cited source); contract `PublishPlan` with `planId`, 24 h expiry, manual-only non-mutating operations | implemented, unit-tested, browser smoke-tested |
 | Handoff ZIP (`app/` + `mirrorkit-control/` incl. `artifact-manifest.json`) and app-only payload ZIP | implemented, unit-tested, browser smoke-tested |
 | Offline "compare a copy" with exact changed-file hashes and cancellation: owner-supplied mirror files vs the artifact (matching / changed / missing / extra) | implemented, unit-tested, browser smoke-tested; a byte match is not proof the mirror works |

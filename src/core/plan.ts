@@ -5,7 +5,7 @@ import { assess, type Assessment } from "../providers/select";
 import type { ProviderAdapter } from "../providers/types";
 import type { BundleFacts } from "./analyze";
 import type { IntendedUse } from "../contracts/intended-use";
-import type { ScanReport } from "./scan";
+import type { CompatibilityScan } from "./scan";
 
 export type DestinationStatus =
   | "blocked" // incompatible bundle, or bundle has errors
@@ -39,7 +39,7 @@ export function buildPlan(
   facts: BundleFacts,
   bundleHasErrors: boolean,
   providers: readonly ProviderAdapter[],
-  scan?: ScanReport,
+  scan?: CompatibilityScan,
   use?: IntendedUse,
 ): DryRunPlan {
   return {

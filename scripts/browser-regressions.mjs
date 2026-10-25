@@ -2,10 +2,10 @@
 // outside this repo, set BROWSER_TEST_TOOLS to that directory, build, then run
 // against `vite preview`. No provider access or imported content execution.
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { zipSync } from 'fflate';
+import { zipSync, unzipSync } from 'fflate';
 import { browserEngine, launchBrowser } from './browser-tools.mjs';
 const browser = await launchBrowser();
 const origin = 'http://127.0.0.1:4173';
@@ -63,6 +63,17 @@ try {
   await page.locator('#use-rights').check();
   check(await page.locator('#export-btn').isEnabled(), true);
   check(await page.locator('#payload-btn').isEnabled(), true);
+  const [handoff] = await Promise.all([page.waitForEvent('download'), page.locator('#export-btn').click()]);
+  const exportedPath = join(fixtureDir, 'handoff.zip');
+  await handoff.saveAs(exportedPath);
+  const archive = unzipSync(await readFile(exportedPath));
+  const report = JSON.parse(new TextDecoder().decode(archive['mirrorkit-control/scan.json']));
+  check(report.artifactId, latestArtifact.replace('Artifact id: ', ''));
+  check(Object.keys(report).sort(), ['artifactId', 'diagnostics', 'diagnosticCounts', 'diagnosticsTruncated', 'dependencies', 'fileMetadata', 'hints', 'scannerVersion'].sort());
+  check(report.diagnostics.every(d => typeof d.messageKey === 'string' && typeof d.remediationKey === 'string'), true);
+  check(report.hints.externalDependenciesComplete, false);
+  check(new TextDecoder().decode(archive['app/index.html']), '<script>globalThis.pwned=true</script><h1>Hello</h1>');
+
   for (const use of ['payment', 'token']) {
     await page.locator('#use-category').selectOption(use);
     check(await page.locator('#payload-btn').isEnabled(), false);

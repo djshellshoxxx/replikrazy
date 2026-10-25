@@ -1,10 +1,6 @@
 import type { AnalysisInput, AnalysisOptions, AnalysisResult, Progress } from "../core/pipeline";
 
-export class AnalysisStopped extends Error {
-  constructor(readonly reason: "cancelled" | "timeout" | "unavailable" | "failed") {
-    super(reason);
-  }
-}
+import { analysisError, inputError, type MKError, type Result } from "../contracts/diagnostic";
 
 // Each view owns its worker. Never run untrusted synchronous scanning on the
 // page thread: cancellation and the time budget require a terminable worker.
@@ -18,38 +14,38 @@ export class AnalysisTask {
 
   cancel() { this.stop?.(); }
 
-  run(input: AnalysisInput, opts: AnalysisOptions, progress: Progress): Promise<AnalysisResult> {
+  run(input: AnalysisInput, opts: AnalysisOptions, progress: Progress): Promise<Result<AnalysisResult>> {
     this.cancel();
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       let worker: Worker;
       try { worker = this.createWorker(); }
-      catch { reject(new AnalysisStopped("unavailable")); return; }
+      catch { resolve({ ok: false, error: analysisError("unavailable") }); return; }
       const deadline = this.now() + this.budgetMs;
       let settled = false;
-      const finish = (error?: AnalysisStopped, result?: AnalysisResult) => {
+      const finish = (error?: MKError, result?: AnalysisResult) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
         worker.terminate();
         if (this.stop === cancel) this.stop = null;
-        if (error) reject(error); else resolve(result!);
+        if (error) resolve({ ok: false, error }); else resolve({ ok: true, value: result! });
       };
-      const cancel = () => finish(new AnalysisStopped("cancelled"));
-      const timer = setTimeout(() => finish(new AnalysisStopped("timeout")), this.budgetMs);
+      const cancel = () => finish(analysisError("cancelled"));
+      const timer = setTimeout(() => finish(analysisError("timeout")), this.budgetMs);
       this.stop = cancel;
       worker.onmessage = (ev: MessageEvent) => {
         if (settled) return;
         // Timers can be delayed by tab suspension; reject late messages too.
-        if (this.now() >= deadline) { finish(new AnalysisStopped("timeout")); return; }
+        if (this.now() >= deadline) { finish(analysisError("timeout")); return; }
         const m = ev.data;
         if (m.type === "progress") progress(m.stage, m.done, m.total);
         else if (m.type === "done") finish(undefined, m.result);
-        else finish(new AnalysisStopped("failed"));
+        else finish(m.error?.messageKey === "analysis.input-changed" ? analysisError("changed") : inputError(m.error?.code));
       };
-      worker.onerror = () => finish(new AnalysisStopped("failed"));
-      worker.onmessageerror = () => finish(new AnalysisStopped("failed"));
+      worker.onerror = () => finish(analysisError("failed"));
+      worker.onmessageerror = () => finish(analysisError("failed"));
       try { worker.postMessage({ input, opts }); }
-      catch { finish(new AnalysisStopped("failed")); }
+      catch { finish(analysisError("failed")); }
     });
   }
 }

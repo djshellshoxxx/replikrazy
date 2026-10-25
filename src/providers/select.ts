@@ -5,7 +5,7 @@
 
 import type { BundleFacts } from "../core/analyze";
 import { exportUseBlockers, type IntendedUse } from "../contracts/intended-use";
-import type { ScanReport } from "../core/scan";
+import type { CompatibilityScan } from "../core/scan";
 import type { ProviderAdapter } from "./types";
 
 export type Verdict = "compatible" | "incompatible" | "unknown";
@@ -18,7 +18,7 @@ export interface Assessment {
   unknowns: string[];
 }
 
-export function assess(p: ProviderAdapter, f: BundleFacts, scan?: ScanReport, use?: IntendedUse): Assessment {
+export function assess(p: ProviderAdapter, f: BundleFacts, scan?: CompatibilityScan, use?: IntendedUse): Assessment {
   const blockers: string[] = [];
   const warnings: string[] = [];
   const unknowns: string[] = [];

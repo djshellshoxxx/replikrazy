@@ -6,7 +6,7 @@
 
 import { sha256Hex } from "../core/inventory";
 import type { DryRunPlan } from "../core/plan";
-import type { ScanReport } from "../core/scan";
+import type { CompatibilityScan } from "../core/scan";
 import { CATALOGUE } from "../providers/catalogue";
 import type { ProviderAdapter } from "../providers/types";
 import { canonicalBytes } from "./canonical";
@@ -17,18 +17,8 @@ export const POLICY_VERSION = "replikrazy-policy-0.1";
 // Proposed plan lifetime: provider facts are dated, so plans go stale.
 export const PLAN_TTL_MS = 24 * 60 * 60 * 1000;
 
-type Severity = "info" | "warning" | "blocker";
-
-export interface Diagnostic {
-  id: string;
-  requirementId: string;
-  severity: Severity;
-  certainty: "definite" | "heuristic" | "unknown";
-  code: string;
-  messageKey: string;
-  params: Record<string, string>;
-  remediationKey: string;
-}
+import { isDiagnostic, type Diagnostic, type ErrorCode, type Severity } from "./diagnostic";
+import { contractDependencies, type ExternalDependency } from "./scan-report";
 
 export interface TargetPlan {
   destination: { targetId: string; siteLabel: string; pathPrefix: string; createResource: boolean };
@@ -45,7 +35,7 @@ export interface TargetPlan {
   };
   costSnapshot: { status: "unknown"; sourceRefs: string[]; notes: string; paidActionRequired: boolean };
   requiredScopes: string[];
-  externalDependencies: { urlPattern: string; role: string; discovery: "literal"; required: "unknown" }[];
+  externalDependencies: ExternalDependency[];
   operations: { id: string; kind: "manual-handoff" | "verify"; description: string; remoteMutation: false; irreversible: false; costMayAccrue: boolean }[];
   diagnostics: Diagnostic[];
   rollbackStrategy: "manual-republish";
@@ -72,7 +62,7 @@ const utc = (ms: number) => new Date(ms).toISOString();
 export const catalogueDigest = () => sha(CATALOGUE);
 
 function diagnostics(a: DryRunPlan["destinations"][number]["assessment"]): Diagnostic[] {
-  const mk = (severity: Severity, certainty: Diagnostic["certainty"], code: string, text: string, i: number): Diagnostic => ({
+  const mk = (severity: Severity, certainty: Diagnostic["certainty"], code: ErrorCode, text: string, i: number): Diagnostic => ({
     id: `${a.providerId}.${i}`,
     requirementId: "MK-POL-002",
     severity,
@@ -90,7 +80,7 @@ function diagnostics(a: DryRunPlan["destinations"][number]["assessment"]): Diagn
   ];
 }
 
-function targetPlan(p: ProviderAdapter, d: DryRunPlan["destinations"][number], m: ArtifactManifest, artifactId: Digest, scan: ScanReport | undefined, backupConfirmed: boolean): TargetPlan {
+function targetPlan(p: ProviderAdapter, d: DryRunPlan["destinations"][number], m: ArtifactManifest, artifactId: Digest, scan: CompatibilityScan | undefined, backupConfirmed: boolean): TargetPlan {
   const unknownFields = ["maxArtifactBytes", "maxPathUtf8Bytes", "bandwidth", "quotaScope", "overage"];
   if (p.maxFileBytes.value === null) unknownFields.push("maxFileBytes");
   if (p.maxFiles.value === null) unknownFields.push("maxFiles");
@@ -110,7 +100,7 @@ function targetPlan(p: ProviderAdapter, d: DryRunPlan["destinations"][number], m
     },
     costSnapshot: { status: "unknown", sourceRefs: [], notes: "cost not verified; check the provider's current plan before uploading", paidActionRequired: false },
     requiredScopes: [],
-    externalDependencies: (scan?.dependencies ?? []).map((x) => ({ urlPattern: x.origin, role: x.roles[0] ?? "unknown", discovery: "literal", required: "unknown" })),
+    externalDependencies: scan ? contractDependencies(scan) : [],
     operations: [
       { id: "handoff", kind: "manual-handoff", description: "Owner uploads app/ using the provider's own site and account", remoteMutation: false, irreversible: false, costMayAccrue: true },
       { id: "verify", kind: "verify", description: "Owner opens the published site and checks pages and features", remoteMutation: false, irreversible: false, costMayAccrue: false },
@@ -127,13 +117,14 @@ export async function buildPublishPlan(
   use: IntendedUse,
   dry: DryRunPlan,
   providers: readonly ProviderAdapter[],
-  scan: ScanReport | undefined,
+  scan: CompatibilityScan | undefined,
   nowMs: number,
   backupConfirmed = false,
 ): Promise<PublishPlan> {
   const destinations = dry.destinations
     .filter((d) => d.status !== "skipped")
     .map((d) => targetPlan(providers.find((p) => p.id === d.providerId)!, d, manifest, artifactId, scan, backupConfirmed));
+  if (destinations.some((d) => !d.diagnostics.every(isDiagnostic))) throw new Error("invalid plan diagnostic");
   const body = {
     schemaVersion: "1.0" as const,
     artifactId,

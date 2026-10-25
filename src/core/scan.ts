@@ -19,6 +19,7 @@ export interface Finding {
   certainty: Certainty;
   path?: string;
   message: string;
+  secretClass?: string;
 }
 
 export type DepRole = "script" | "style" | "font" | "image" | "media" | "api" | "worker" | "navigation" | "unknown";
@@ -46,7 +47,8 @@ export interface CompatibilityHints {
   externalDependenciesComplete: false;
 }
 
-export interface ScanReport {
+export interface CompatibilityScan {
+  diagnosticCounts: { info: number; warning: number; blocker: number; total: number };
   hints: CompatibilityHints;
   dependencies: ExternalDependency[];
   missing: MissingRef[];
@@ -81,14 +83,14 @@ export const RESERVED_PATTERNS: { re: RegExp; label: string }[] = [
 
 // Content patterns that indicate live credentials. Only the class and path are
 // ever reported; the matched value is never stored or displayed (T-ART-08).
-const SECRET_PATTERNS: { re: RegExp; label: string; severity: Severity }[] = [
-  { re: /-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY( BLOCK)?-----/, label: "private key block", severity: "blocker" },
-  { re: /\bAKIA[0-9A-Z]{16}\b/, label: "AWS access key id", severity: "blocker" },
-  { re: /\bgh[pousr]_[A-Za-z0-9]{36}\b/, label: "GitHub token", severity: "blocker" },
-  { re: /\bxox[abprs]-[A-Za-z0-9-]{10,}/, label: "Slack token", severity: "blocker" },
-  { re: /\b[sr]k_live_[0-9A-Za-z]{20,}/, label: "Stripe live secret key", severity: "blocker" },
+const SECRET_PATTERNS: { re: RegExp; label: string; severity: Severity; kind: string }[] = [
+  { kind: "private-key", re: /-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY( BLOCK)?-----/, label: "private key block", severity: "blocker" },
+  { kind: "aws-access-key-id", re: /\bAKIA[0-9A-Z]{16}\b/, label: "AWS access key id", severity: "blocker" },
+  { kind: "github-token", re: /\bgh[pousr]_[A-Za-z0-9]{36}\b/, label: "GitHub token", severity: "blocker" },
+  { kind: "slack-token", re: /\bxox[abprs]-[A-Za-z0-9-]{10,}/, label: "Slack token", severity: "blocker" },
+  { kind: "stripe-live-key", re: /\b[sr]k_live_[0-9A-Za-z]{20,}/, label: "Stripe live secret key", severity: "blocker" },
   // Google browser API keys are commonly public by design; review, not block.
-  { re: /\bAIza[0-9A-Za-z_-]{35}\b/, label: "Google API key (often public; check restrictions)", severity: "warning" },
+  { kind: "google-api-key", re: /\bAIza[0-9A-Za-z_-]{35}\b/, label: "Google API key (often public; check restrictions)", severity: "warning" },
 ];
 
 const decoder = new TextDecoder("utf-8", { fatal: false });
@@ -220,7 +222,7 @@ function jsRefs(text: string): Ref[] {
   return out;
 }
 
-export function scanBundle(files: readonly BundleFile[]): ScanReport {
+export function scanBundle(files: readonly BundleFile[]): CompatibilityScan {
   const present = new Set(files.map((f) => f.path));
   const dirs = new Set<string>();
   for (const p of present) {
@@ -229,7 +231,10 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
   }
   const findings: Finding[] = [];
   let truncated = false;
+  const diagnosticCounts = { info: 0, warning: 0, blocker: 0, total: 0 };
   const add = (f: Finding) => {
+    diagnosticCounts[f.severity]++;
+    diagnosticCounts.total++;
     if (findings.length < SCAN_LIMITS.maxFindings) findings.push(f);
     else truncated = true;
   };
@@ -266,7 +271,7 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
 
     for (const s of SECRET_PATTERNS) {
       if (s.re.test(text))
-        add({ code: "MK_SECRET_SUSPECTED", severity: s.severity, certainty: "heuristic", path: f.path, message: `possible ${s.label} in file contents (value not shown)` });
+        add({ code: "MK_SECRET_SUSPECTED", secretClass: s.kind, severity: s.severity, certainty: "heuristic", path: f.path, message: `possible ${s.label} in file contents (value not shown)` });
     }
     if (!TEXT_EXT.test(f.path) || /\.map$/i.test(f.path)) continue;
 
@@ -295,15 +300,18 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
       const abs = ABSOLUTE.exec(url);
       if (abs) {
         const scheme = (abs[1] ?? "https").toLowerCase();
-        const origin = `${scheme}://${abs[2]!.toLowerCase()}`;
+        let origin: string;
+        try { origin = new URL(`${scheme}://${abs[2]!}`).origin; } catch { continue; }
+        if (origin.length > 2048) { truncated = true; continue; }
         const existing = deps.get(origin);
-        if (!existing?.files.includes(f.path) && dependencyReferences >= SCAN_LIMITS.maxDependencyReferences) {
+        if ((!existing?.files.includes(f.path) || !existing?.roles.includes(role)) && dependencyReferences >= SCAN_LIMITS.maxDependencyReferences) {
           truncated = true;
           continue;
         }
         const d = existing ?? { origin, roles: [], files: [], discovery: "literal" as const };
+        if (!d.roles.includes(role) || !d.files.includes(f.path)) dependencyReferences++;
         if (!d.roles.includes(role)) d.roles.push(role);
-        if (!d.files.includes(f.path)) { d.files.push(f.path); dependencyReferences++; }
+        if (!d.files.includes(f.path)) d.files.push(f.path);
         deps.set(origin, d);
         if (scheme === "ws" || scheme === "wss") realtime = true;
         continue;
@@ -349,6 +357,7 @@ export function scanBundle(files: readonly BundleFile[]): ScanReport {
 
   const assetBase = rootRefs && relRefs ? "mixed" : rootRefs ? "root" : relRefs ? "relative" : "unknown";
   return {
+    diagnosticCounts,
     hints: {
       assetBase,
       routing: history ? "history" : hash ? "hash" : files.some((f) => HTML_EXT.test(f.path)) ? "documents" : "unknown",

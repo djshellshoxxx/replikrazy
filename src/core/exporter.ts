@@ -17,10 +17,11 @@ import type { ProviderAdapter } from "../providers/types";
 import type { BundleFile } from "./intake";
 import { canonicalBytes } from "../contracts/canonical";
 import type { ArtifactManifest } from "../contracts/manifest";
+import { buildScanReport } from "../contracts/scan-report";
 import type { PublishPlan } from "../contracts/publish-plan";
 import { canonicalManifest, type Inventory } from "./inventory";
 import type { DryRunPlan } from "./plan";
-import type { ScanReport } from "./scan";
+import type { CompatibilityScan } from "./scan";
 
 // Fixed timestamp => identical inputs give an identical export ZIP.
 const FIXED_MTIME = new Date("1980-01-01T00:00:00Z");
@@ -111,7 +112,7 @@ export function buildExport(
   manifest: ArtifactManifest,
   plan: DryRunPlan,
   providers: readonly ProviderAdapter[],
-  scan?: ScanReport,
+  scan?: CompatibilityScan,
   publishPlan?: PublishPlan,
 ): Uint8Array {
   const enc = new TextEncoder();
@@ -123,7 +124,7 @@ export function buildExport(
   // User-attested progress (not a contract record).
   tree[`${CONTROL_DIR}/handoff-status.json`] = [enc.encode(JSON.stringify(plan, null, 2) + "\n"), OPT];
   if (publishPlan) tree[`${CONTROL_DIR}/publish-plan.json`] = [canonicalBytes(publishPlan), OPT];
-  if (scan) tree[`${CONTROL_DIR}/scan.json`] = [enc.encode(JSON.stringify(scan, null, 2) + "\n"), OPT];
+  if (scan) tree[`${CONTROL_DIR}/scan.json`] = [canonicalBytes(buildScanReport(plan.artifactId as `sha256:${string}`, scan)), OPT];
   for (const d of plan.destinations) {
     if (d.status === "skipped") continue;
     const p = providers.find((x) => x.id === d.providerId);

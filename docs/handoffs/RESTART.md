@@ -1,5 +1,37 @@
 # Replikrazy — restart handoff
 
+## Latest local contract slice — 2026-10-25
+
+Continue local branch `chatgpt/lean-reliability-20261025` after `432870e`; inspect
+`git log` for the newest checkpoint. Claude/main/PR refs remain unchanged.
+No source publication, provider operation or additional download attempt.
+
+The parent supplied **01_CONTRACTS.md and 02_ARTIFACTS.md directly in a private
+message**. This unblocked only their small contract slice; this executor did
+not recover/hash the archive and does not have the broader pack. Exact source
+hashes, provenance distinction, original review failure and remaining normative
+differences are in [`../reviews/2026-10-25-contract-boundary.md`](../reviews/2026-10-25-contract-boundary.md).
+Full private reference text is not in git.
+
+Completed: canonical contract ScanReport export bound to artifact identity;
+shared Diagnostic/MKError/Result types and bounded validators; safe code/key
+mapping; complete severity counts before truncation plus deterministic warning
+and blocking summaries; safe dependency roles/origins; typed worker failures.
+No MIME verification is claimed (`fileMetadata` empty). Artifact bytes/identity,
+rights/public-data/payment/token gates and manual-only scope remain unchanged.
+
+Validation: **167 tests / 13 files**, typecheck/build/diff check pass. Chromium
+**33 regression checks** (including handoff sidecar download), **16 axe/reflow
+scans**, **156 keyboard controls**, zero violations/page errors/external requests.
+Independent focused reviewer verified the fixed URL-bound regression and found
+no remaining concrete issue in this slice; not a full audit.
+
+Still open: exact full Unicode fold, intake ordering versus proposed spec,
+active-time/continue semantics, full public-operation Result migration, other
+record/version boundaries and broader detector coverage. Do not infer policy
+from absent specs. Manual screen reader/cross-browser/real suspension remain
+unverified; prior download denial and exhausted Library retry remain stopped.
+
 ## Latest local browser/transfer follow-up — 2026-10-25
 
 Continuation remains `chatgpt/lean-reliability-20261025`; inspect local `git log`

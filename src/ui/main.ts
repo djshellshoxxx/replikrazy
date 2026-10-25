@@ -11,8 +11,9 @@ import { compareInventories, isIdentical } from "../core/compare";
 import { type AnalysisInput, type Progress } from "../core/pipeline";
 import type { Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, restorePlanStatuses, transition, type DryRunPlan } from "../core/plan";
-import type { ScanReport } from "../core/scan";
-import { AnalysisStopped, AnalysisTask } from "./analysis-task";
+import type { CompatibilityScan } from "../core/scan";
+import { isMKError } from "../contracts/diagnostic";
+import { AnalysisTask } from "./analysis-task";
 import { filterCatalogue, getProvider } from "../providers/catalogue";
 import type { MethodId, ProviderAdapter } from "../providers/types";
 
@@ -31,7 +32,7 @@ interface State {
   hasErrors: boolean;
   selected: Set<string>;
   plan: DryRunPlan | null;
-  scan: ScanReport | null;
+  scan: CompatibilityScan | null;
   // Current selection, so intake can re-run with new options (root choice)
   // without the user picking files again.
   input: AnalysisInput | null;
@@ -79,10 +80,14 @@ let compareGeneration = 0;
 let identityGeneration = 0;
 
 function failureMessage(e: unknown): string {
-  if (e instanceof AnalysisStopped) {
-    if (e.reason === "cancelled") return "Cancelled. Nothing was kept; select the input again to retry.";
-    if (e.reason === "timeout") return "Analysis exceeded the 60 second limit. Nothing was kept; try a smaller input.";
-    if (e.reason === "unavailable") return "Analysis requires Web Worker support. Nothing was kept.";
+  if (isMKError(e)) {
+    if (e.code === "MK_ZIP_CORRUPT") return "Could not read this ZIP. Select a valid, uncorrupted archive.";
+    if (e.code === "MK_INPUT_EMPTY") return "The input contains no usable files. Select a finished static site.";
+    if (e.messageKey === "input.limit-exceeded") return "Input exceeds a safety limit. Select a smaller site.";
+    if (e.code === "MK_INPUT_CHANGED") return "Input changed while being read. Select it again.";
+    if (e.messageKey === "analysis.cancelled") return "Cancelled. Nothing was kept; select the input again to retry.";
+    if (e.messageKey === "analysis.time-limit") return "Analysis exceeded the 60 second limit. Nothing was kept; try a smaller input.";
+    if (e.messageKey === "analysis.worker-unavailable") return "Analysis requires Web Worker support. Nothing was kept.";
   }
   return "Could not read this input.";
 }
@@ -122,10 +127,12 @@ async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourc
   state.input = input;
   state.stripRoot = stripRoot;
   try {
-    const { intake: r, inv, scan, sourceDigest } = await intakeTask.run(input, { stripRoot, expectedSourceDigest }, (stage, done, total) => {
+    const analysis = await intakeTask.run(input, { stripRoot, expectedSourceDigest }, (stage, done, total) => {
       if (gen === generation) status.textContent = `${stage[0]!.toUpperCase()}${stage.slice(1)}… ${done} / ${total}`;
     });
     if (gen !== generation) return; // a newer selection replaced this one
+    if (!analysis.ok) throw analysis.error;
+    const { intake: r, inv, scan, sourceDigest } = analysis.value;
     state.files = r.files;
     state.sourceDigest = r.issues.some((i) => i.severity === "error") ? null : sourceDigest;
     state.inv = inv;
@@ -202,13 +209,14 @@ function renderRootChoice(r: IntakeResult) {
   box.append(label);
 }
 
-function renderCompat(scan: ScanReport) {
+function renderCompat(scan: CompatibilityScan) {
   $("compat").hidden = false;
   const h = scan.hints;
   $("compat-hints").textContent =
     `Asset paths: ${h.assetBase}. Routing: ${h.routing}. Service worker: ${h.serviceWorker}. ` +
     `Browser storage: ${h.usesOriginStorage ? "used" : "not detected"}. Realtime connections: ${h.usesRealtime ? "used" : "not detected"}. ` +
-    "External dependency list complete: no (static inspection only).";
+    "External dependency list complete: no (static inspection only). " +
+    `Detected findings: ${scan.diagnosticCounts.blocker} blockers, ${scan.diagnosticCounts.warning} warnings, ${scan.diagnosticCounts.info} informational. Counts include undisplayed details.`;
   $("compat-findings").replaceChildren(
     ...(scan.truncated ? [el("li", "BLOCKER: scan output exceeded its safety limits. Reduce the bundle before export.", "error")] : []),
     ...scan.findings.map((f) => el("li", `${f.severity.toUpperCase()} [${f.certainty}]: ${f.message}${f.path ? ` (${f.path})` : ""}`, f.severity === "blocker" ? "error" : f.severity === "warning" ? "warning" : "")),
@@ -405,13 +413,17 @@ async function compareCopy(input: AnalysisInput) {
     const progress: Progress = (stage, done, total) => { if (gen === compareGeneration) out.textContent = `Copy: ${stage} ${done} / ${total}`; };
     // A copy may or may not be wrapped in one folder; keep whichever reading
     // matches more of the original.
-    const plain = await compareTask.run(input, { stripRoot: false }, progress);
+    const plainResult = await compareTask.run(input, { stripRoot: false }, progress);
     if (gen !== compareGeneration) return;
+    if (!plainResult.ok) throw plainResult.error;
+    const plain = plainResult.value;
     if (plain.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
     let best = compareInventories(reference.entries, plain.inv.entries);
     if (plain.intake.candidateRoot) {
-      const stripped = await compareTask.run(input, { stripRoot: true, expectedSourceDigest: plain.sourceDigest }, progress);
+      const strippedResult = await compareTask.run(input, { stripRoot: true, expectedSourceDigest: plain.sourceDigest }, progress);
       if (gen !== compareGeneration) return;
+      if (!strippedResult.ok) throw strippedResult.error;
+      const stripped = strippedResult.value;
       if (stripped.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
       const c = compareInventories(reference.entries, stripped.inv.entries);
       if (c.matching.length > best.matching.length) best = c;

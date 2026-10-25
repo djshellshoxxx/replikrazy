@@ -24,7 +24,7 @@ describe("analysis worker lifecycle", () => {
     const { task, workers } = setup();
     const progress = vi.fn();
     const result = task.run(input, {}, progress);
-    const rejected = expect(result).rejects.toMatchObject({ reason: "cancelled" });
+    const rejected = expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_CANCELLED", messageKey: "analysis.cancelled" } });
     task.cancel();
     workers[0]!.send({ type: "progress", stage: "reading", done: 1, total: 1 });
     workers[0]!.send({ type: "done", result: {} });
@@ -34,17 +34,17 @@ describe("analysis worker lifecycle", () => {
   });
   it("supersedes one job without letting its queued result cancel the replacement", async () => {
     const { task, workers } = setup();
-    const first = expect(task.run(input, {}, vi.fn())).rejects.toMatchObject({ reason: "cancelled" });
+    const first = expect(task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_CANCELLED", messageKey: "analysis.cancelled" } });
     const second = task.run(input, {}, vi.fn());
     workers[0]!.send({ type: "done", result: { stale: true } });
     workers[1]!.send({ type: "done", result: { current: true } });
     await first;
-    await expect(second).resolves.toEqual({ current: true });
+    await expect(second).resolves.toEqual({ ok: true, value: { current: true } });
   });
   it("stops a worker that never responds at the unchanged 60 second limit", async () => {
     vi.useFakeTimers();
     const { task, workers } = setup();
-    const result = expect(task.run(input, {}, vi.fn())).rejects.toMatchObject({ reason: "timeout" });
+    const result = expect(task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_LIMIT_EXCEEDED", messageKey: "analysis.time-limit" } });
     vi.advanceTimersByTime(60_000);
     await result;
     expect(workers[0]!.terminate).toHaveBeenCalledTimes(1);
@@ -52,29 +52,46 @@ describe("analysis worker lifecycle", () => {
   it("rejects a late result before a suspended timer gets its turn", async () => {
     let time = 0;
     const { task, workers } = setup(() => time);
-    const result = expect(task.run(input, {}, vi.fn())).rejects.toMatchObject({ reason: "timeout" });
+    const result = expect(task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_LIMIT_EXCEEDED", messageKey: "analysis.time-limit" } });
     time = 60_001;
     workers[0]!.send({ type: "done", result: {} });
     await result;
   });
   it("keeps cancellation local to its owner", async () => {
     const a = setup(), b = setup();
-    const stopped = expect(a.task.run(input, {}, vi.fn())).rejects.toMatchObject({ reason: "cancelled" });
+    const stopped = expect(a.task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_CANCELLED", messageKey: "analysis.cancelled" } });
     const live = b.task.run(input, {}, vi.fn());
     a.task.cancel();
     b.workers[0]!.send({ type: "done", result: {} });
     await stopped;
-    await expect(live).resolves.toEqual({});
+    await expect(live).resolves.toEqual({ ok: true, value: {} });
   });
   it("fails closed if workers are unavailable", async () => {
     const task = new AnalysisTask(() => { throw new Error("worker denied"); });
-    await expect(task.run(input, {}, vi.fn())).rejects.toMatchObject({ reason: "unavailable" });
+    await expect(task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_CAPABILITY_UNSUPPORTED", messageKey: "analysis.worker-unavailable" } });
   });
   it("cleans up failed message dispatch", async () => {
     const w = new FakeWorker();
     w.postMessage.mockImplementation(() => { throw new Error("clone failed"); });
     const task = new AnalysisTask(() => w as unknown as Worker);
-    await expect(task.run(input, {}, vi.fn())).rejects.toMatchObject({ reason: "failed" });
+    await expect(task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_INTERNAL", messageKey: "analysis.failed" } });
     expect(w.terminate).toHaveBeenCalledTimes(1);
   });
+});
+
+
+it("maps worker errors to safe typed records without forwarding raw params or details", async () => {
+  const { task, workers } = setup();
+  const result = task.run(input, {}, vi.fn());
+  workers[0]!.send({ type: "error", error: { code: "MK_INPUT_CHANGED", messageKey: "unsafe", params: { secret: "private-value" }, safeDetail: "private-value" } });
+  await expect(result).resolves.toEqual({ ok: false, error: { code: "MK_INPUT_CHANGED", messageKey: "input.input-changed", params: {}, retry: "after-user-action" } });
+  expect(JSON.stringify(await result)).not.toContain("private-value");
+});
+
+it("maps unrecognized worker error codes to a fixed internal error", async () => {
+  const { task, workers } = setup();
+  const result = task.run(input, {}, vi.fn());
+  workers[0]!.send({ type: "error", error: { code: "private-value" } });
+  await expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_INTERNAL", messageKey: "analysis.failed" } });
+  expect(JSON.stringify(await result)).not.toContain("private-value");
 });
