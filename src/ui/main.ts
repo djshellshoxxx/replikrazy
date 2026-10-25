@@ -7,6 +7,7 @@ import { artifactId, buildManifest, defaultEntrypoint, htmlCandidates, ID_RE, ty
 import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
 import type { BundleFile, IntakeIssue, IntakeOptions, IntakeResult } from "../core/intake";
+import { compareInventories, isIdentical } from "../core/compare";
 import { runAnalysis, type AnalysisInput, type AnalysisResult, type Progress } from "../core/pipeline";
 import type { Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, transition, type DryRunPlan } from "../core/plan";
@@ -361,6 +362,54 @@ $("dir-input").addEventListener("change", (ev) => {
 for (const id of ["f-text", "f-noacct", "f-domain", "f-method"]) $(id).addEventListener("input", renderProviders);
 $("export-btn").addEventListener("click", () => void download());
 $("cancel-btn").addEventListener("click", () => cancelActive?.());
+
+// Compare a copy (e.g. files saved back from a mirror) with the loaded
+// artifact. Offline: the user supplies the files; nothing is fetched.
+async function compareCopy(input: AnalysisInput) {
+  const out = $("compare-result");
+  if (!state.inv) { out.textContent = "Load the original site first."; return; }
+  out.textContent = "Reading the copy…";
+  try {
+    const progress: Progress = (stage, done, total) => { out.textContent = `Copy: ${stage} ${done} / ${total}`; };
+    // A copy may or may not be wrapped in one folder; keep whichever reading
+    // matches more of the original.
+    const plain = await analyzeOffThread(input, { stripRoot: false }, progress);
+    let best = compareInventories(state.inv.entries, plain.inv.entries);
+    if (plain.intake.candidateRoot) {
+      const stripped = await analyzeOffThread(input, { stripRoot: true }, progress);
+      const c = compareInventories(state.inv.entries, stripped.inv.entries);
+      if (c.matching.length > best.matching.length) best = c;
+    }
+    const list = (title: string, items: string[]) => {
+      const d = el("details");
+      d.append(el("summary", `${title}: ${items.length}`));
+      const ul = el("ul");
+      ul.append(...items.slice(0, 1000).map((t) => el("li", t)));
+      d.append(ul);
+      return d;
+    };
+    out.replaceChildren(
+      el("p", isIdentical(best)
+        ? "Every file matches byte for byte. This shows the copy is intact; it does not show the mirror works — open it and test it."
+        : "The copy differs. Hosts can legitimately change served files (analytics, minification, injected snippets); check each difference.",
+        isIdentical(best) ? "okay" : "warning"),
+      list("Matching", best.matching),
+      list("Changed", best.changed.map((c) => `${c.path} (expected ${c.expectedSize} bytes, got ${c.actualSize})`)),
+      list("Missing from the copy", best.missing),
+      list("Extra in the copy", best.extra),
+    );
+  } catch (e) {
+    out.textContent = e instanceof Cancelled ? "Cancelled." : "Could not read the copy.";
+  }
+}
+$("cmp-zip").addEventListener("change", (ev) => {
+  const f = (ev.target as HTMLInputElement).files?.[0];
+  if (f) void compareCopy({ kind: "zip", file: f });
+});
+$("cmp-dir").addEventListener("change", (ev) => {
+  const list = (ev.target as HTMLInputElement).files;
+  if (list?.length) void compareCopy({ kind: "folder", entries: [...list].map((f) => ({ path: f.webkitRelativePath, blob: f })) });
+});
 function readUse() {
   const country = ($("use-country") as HTMLInputElement).value.trim().toUpperCase();
   state.use = {

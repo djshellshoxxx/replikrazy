@@ -72,6 +72,13 @@ Milestone 2 (this update):
 - `src/core/exporter.ts`: `app/` + `mirrorkit-control/` handoff (adds `scan.json`, per-destination compatibility notes), `buildPayloadZip`.
 - UI: root choice, "Will the copy still work?" panel, app-only ZIP button, limit/evidence lines on provider cards.
 
+## Milestone 8 (compare a copy), 2026-10-25
+
+- `src/core/compare.ts`: `compareInventories` / `isIdentical`.
+- UI section 6: the owner loads a copy (ZIP or folder) they saved from a mirror. It runs in the worker; a wrapped copy is detected by keeping the reading that matches more files. Results show matching, changed, missing and extra files. The wording states that a byte match proves the copy is intact, not that the mirror works, and that hosts may legitimately alter served files.
+- Nothing is fetched; the user supplies the files.
+- Tests: 10 files, **132 passed**. Browser smoke: a wrapped identical copy showed 2/2 matching; a modified copy showed 1 changed, 1 missing, 1 extra; 0 page errors.
+
 ## Milestone 7 (security self-review: scanner ReDoS), 2026-10-25
 
 - **Finding (fixed):** eight scanner patterns were quadratic on hostile text within the 2 MiB per-file cap, each over 15 s and in practice never finishing:
@@ -174,8 +181,9 @@ review, any provider account/upload (forbidden).
    Diagnostic message keys. ConsentReceipt waits for any future API route.
 3. Rest of T-ART-06 (60 s soft limit, content-change detection); ZIP64 fixtures if wanted.
 4. Gate M items: manual screen-reader check, RTL, independent security review.
-5. Optional verify mode: user re-selects the published files offline and
-   Replikrazy compares against `MANIFEST.txt`.
+5. Done: offline compare (milestone 8). Possible follow-up: also accept a
+   handoff ZIP's `mirrorkit-control/artifact-manifest.json` as the reference
+   without reloading the original files.
 
 ## Deferred / out of scope (do not start without owner approval)
 

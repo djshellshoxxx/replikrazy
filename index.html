@@ -82,6 +82,13 @@
       <button id="payload-btn" type="button">Download app-only ZIP</button>
       <p class="hint">Handoff ZIP: <code>app/</code> (exact bytes, the only part to upload) plus <code>mirrorkit-control/</code> (manifest, plan, scan, instructions — never upload). The handoff ZIP includes a contract <code>publish-plan.json</code> (plan id, 24-hour expiry). App-only ZIP: just your site files at the root, for hosts that accept a ZIP.</p>
     </section>
+    <section id="compare">
+      <h2>6. Compare a copy (optional)</h2>
+      <p class="hint">After publishing, save the mirror's files with your own tools and load them here to compare against the original. Nothing is downloaded by Replikrazy.</p>
+      <label>Copy as ZIP <input id="cmp-zip" type="file" accept=".zip,application/zip" /></label>
+      <label>or folder <input id="cmp-dir" type="file" webkitdirectory multiple /></label>
+      <div id="compare-result" role="status" aria-live="polite"></div>
+    </section>
   </main>
   <script type="module" src="/src/ui/main.ts"></script>
 </body>

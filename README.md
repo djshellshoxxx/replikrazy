@@ -35,6 +35,7 @@ deployment or production readiness is claimed.
 | Dry-run plan with user-attested per-destination status | implemented, unit-tested |
 | Intended-use declaration + policy gates (rights, public-data review, payment/token blocked everywhere, GitHub Pages commercial exclusion with cited source); contract `PublishPlan` with `planId`, 24 h expiry, manual-only non-mutating operations | implemented, unit-tested, browser smoke-tested |
 | Handoff ZIP (`app/` + `mirrorkit-control/` incl. `artifact-manifest.json`) and app-only payload ZIP | implemented, unit-tested, browser smoke-tested |
+| Offline "compare a copy": owner-supplied mirror files vs the artifact (matching / changed / missing / extra) | implemented, unit-tested, browser smoke-tested; a byte match is not proof the mirror works |
 | Any live deployment / provider API | **not implemented, by design** |
 
 ### Evidence levels
