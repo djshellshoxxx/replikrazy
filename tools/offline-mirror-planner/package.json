@@ -1,0 +1,17 @@
+{
+  "name": "offline-mirror-planner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-based offline planner and exporter for static-site mirror deployment plans. Not a publisher.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test tests/unit/",
+    "test:e2e": "node tests/e2e/ui.e2e.js",
+    "build:demo": "node scripts/build-demo-data.js",
+    "export:examples": "node scripts/export-examples.js",
+    "check": "npm test && npm run test:e2e"
+  }
+}
