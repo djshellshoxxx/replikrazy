@@ -122,7 +122,7 @@ Every exported destination carries `"verified": false`.
 
 ### 4.5 Limits (`inventory.LIMITS`, all enforced before reading bytes)
 
-maxFiles 5000 · maxFileBytes 50 MiB · maxTotalBytes 250 MiB ·
+maxEntriesScanned 20000 (fatal) · maxFiles 5000 (publishable, fatal) · maxFileBytes 50 MiB · maxTotalBytes 250 MiB ·
 maxPathLength 512 · maxSegmentLength 255 · maxDepth 32 ·
 maxDestinations 50 · maxImportBytes 256 KiB · maxTextScanBytes 2 MiB ·
 maxHeaders 20.
@@ -145,3 +145,23 @@ after reading.
 - `README.txt` — what the bundle is / is not
 
 `zip.createZip(files)` bundles them (store-only, deterministic).
+
+## 6. Core API (browser: `OMP.*`, Node: `require('./src/core/<name>.js')`)
+
+| Module | Function | Purpose |
+|---|---|---|
+| `inventory` | `LIMITS`, `formatBytes(n)` | Limits and display helper |
+| `inventory` | `entriesFromFileList(fileList)` → `{rootName, entries}` | `<input webkitdirectory>` files → entries (strips root folder) |
+| `inventory` | `entriesFromDemo(OMP.demoData)` → entries | Built-in demo |
+| `inventory` | `prepareEntries(entries)` | Sync pre-check (throws `PlannerError {code,message}` on fatal limits) |
+| `inventory` | `await build(entries, {label, source, onProgress})` → inventory | Validate, exclude, read, hash, analyse |
+| `destinations` | `TYPES`, `TYPE_KEYS`, `FIELDS`, `CAPABILITIES`, `CAP_KEYS`, `CAP_VALUES`, `STATUS`, `STATUS_LABELS`, `MAX_DESTINATIONS` | Schema for forms |
+| `destinations` | `createDestination(type, overrides)`, `uniqueId(base, ids)` | New records |
+| `destinations` | `validate(d)` → `{errors, warnings, normalized}` | Field errors `{field, code, message}` |
+| `destinations` | `evaluate(d, {facts, stats, requiredHeaders})` → `{status, statusLabel, errors, warnings, requirements, blockers, unknowns, normalized}` | Status + checklist |
+| `destinations` | `parseImport(text, existingIds)` → `{destinations, errors, warnings}` | Import JSON (bounded) |
+| `plan` | `DEFAULT_HEADERS`, `validateHeaders(list)` → `{errors, headers}` | Plan settings |
+| `plan` | `buildPlan({inventory, destinations, settings:{planName, requiredHeaders}, generatedAt})` | Throws `PlannerError` if no site / no destinations / bad headers |
+| `plan` | `buildExportFiles(plan)` → `[{name, text}]`, `renderInstructions(plan, fileId)`, `renderSha256Sums(files)` | Export texts |
+| `zip` | `createZip([{name, data}], {date})` → `Uint8Array` | Store-only ZIP |
+| `sha256` | `sha256Hex(bytes)` (async), `sha256HexSync(bytes)` | Hashing |

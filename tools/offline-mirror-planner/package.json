@@ -8,7 +8,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test tests/unit/",
+    "test": "node --test tests/unit/*.test.js",
     "test:e2e": "node tests/e2e/ui.e2e.js",
     "build:demo": "node scripts/build-demo-data.js",
     "export:examples": "node scripts/export-examples.js",
