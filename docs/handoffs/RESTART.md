@@ -1,3 +1,7 @@
+## 2026-10-27 strict recovery-source checkpoint
+
+Added duplicate-key-safe bounded record JSON parsing, integrated into saved statuses, plus source-preserving read-only recovery-envelope inspection (no hydration/import UI). Broker scanner proposal evaluated: original timing gate passes; scanner unchanged. [Evidence and next boundary](../reviews/2026-10-27-recovery-source.md). Latest: 251 tests / 19 files, typecheck/build and 39 Chromium checks passed.
+
 ## 2026-10-27 internal-result and retention checkpoint
 
 Same local continuation branch. Internal worker result structure is validated; existing manual-status persistence has a version/identity boundary, preserves legacy and rejected source, and offers read-only source backup. [Scope and evidence](../reviews/2026-10-27-result-retention.md). Latest: 230 tests / 17 files, typecheck/build and 39 Chromium checks passed. Full RecoveryRecord import remains unimplemented; scanner stays broker-owned.

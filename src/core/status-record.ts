@@ -1,7 +1,8 @@
 // Local manual-attestation convenience data. This is NOT a RecoveryRecord,
 // consent receipt, verified remote evidence, or a second lifecycle engine.
+import { parseRecordJson, RECORD_MAX_BYTES } from "../contracts/record-json";
 import { exactKeys, isId, isRecord } from "../contracts/diagnostic";
-export const STATUS_RECORD_MAX_BYTES = 10 * 1024 * 1024;
+export const STATUS_RECORD_MAX_BYTES = RECORD_MAX_BYTES;
 export const statusKey = (id: string) => `replikrazy.status.v1.${id}`;
 export const legacyStatusKey = (id: string) => `replikrazy.plan.${id}`;
 const digest = (x: unknown) => typeof x === "string" && /^sha256:[0-9a-f]{64}$/.test(x);
@@ -18,7 +19,7 @@ export function readStatusRecord(raw: string | null, artifactId: string, legacy 
   if (raw.length > STATUS_RECORD_MAX_BYTES || new TextEncoder().encode(raw).length > STATUS_RECORD_MAX_BYTES)
     return { kind: "retained", statuses: null, reason: "oversized" };
   let x: unknown;
-  try { x = JSON.parse(raw); } catch { return { kind: "retained", statuses: null, reason: "invalid" }; }
+  try { x = parseRecordJson(raw); } catch { return { kind: "retained", statuses: null, reason: "invalid" }; }
   if (!digest(artifactId)) return { kind: "retained", statuses: null, reason: "invalid" };
   if (legacy) return statusesValid(x) ? { kind: "legacy", statuses: x } : { kind: "retained", statuses: null, reason: "invalid" };
   if (!isRecord(x)) return { kind: "retained", statuses: null, reason: "invalid" };
