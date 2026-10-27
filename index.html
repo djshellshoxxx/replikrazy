@@ -96,6 +96,21 @@
       <button id="compare-cancel-btn" type="button" hidden>Cancel comparison</button>
       <div id="compare-result" role="status" aria-live="polite"></div>
     </section>
+    <section id="recovery">
+      <h2>7. Inspect recovery metadata (optional)</h2>
+      <p class="hint">Read a saved recovery JSON file locally (up to 10 MiB). This view does not restore files, statuses, consent or plans. It does not contact providers. Treat records and signatures as untrusted claims.</p>
+      <p class="hint">Recovery metadata does not include site file contents. To continue working with an artifact, <a href="#intake">load its matching ZIP or folder in step 1</a>.</p>
+      <label>Recovery JSON <input id="recovery-file" type="file" accept=".json,application/json" /></label>
+      <details><summary>Optional local verification checks</summary>
+        <label><input id="recovery-profile" type="checkbox" /> Check replikrazy-local-verify/1</label>
+        <p class="hint">Select only when the file's producer explicitly used this profile. Legacy records are never converted or given new IDs.</p>
+      </details>
+      <p id="recovery-result" role="status" aria-live="polite">No recovery file selected.</p>
+      <button id="recovery-cancel" type="button" hidden>Cancel inspection</button>
+      <button id="recovery-source" type="button" disabled>Save original recovery file</button>
+      <button id="recovery-clear" type="button">Clear recovery preview</button>
+      <p class="hint">The original download preserves every byte, even for rejected files. It may contain private material. Clearing this preview releases the selected file here; it does not delete your original.</p>
+    </section>
   </main>
   <script type="module" src="/src/ui/main.ts"></script>
 </body>

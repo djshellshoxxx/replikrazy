@@ -1,3 +1,4 @@
+import { mountRecovery } from "./recovery";
 // UI wiring. Invariant: imported file names/contents only ever reach the DOM
 // through textContent (never innerHTML), and file contents are never rendered.
 
@@ -521,3 +522,5 @@ $("entrypoint").addEventListener("change", (ev) => {
   void refreshIdentity();
 });
 $("payload-btn").addEventListener("click", downloadPayload);
+
+mountRecovery();

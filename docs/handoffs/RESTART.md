@@ -1,3 +1,7 @@
+## 2026-10-27 user-facing recovery preview
+
+Optional step 7 now inspects recovery JSON in a dedicated bounded/cancellable worker, presents safe counts/messages and preserves exact original downloads. Explicit profile opt-in; no active-state writes. [Evidence and workflow](../reviews/2026-10-27-recovery-preview.md). Latest: 341 unit tests / 26 files, typecheck/build, 39 existing and 25 recovery Chromium checks passed. Local production preview at 127.0.0.1:4173, not externally published.
+
 ## 2026-10-27 opt-in local validation profile
 
 Defined `replikrazy-local-verify/1` after reconciling preserved contracts/producers; exact JCS/SHA-256 keys and conservative snapshot/pair validation, no legacy rewrite. [Contract](../contracts/LOCAL_VERIFY_PROFILE_1.md), [evidence](../reviews/2026-10-27-local-verify-profile.md). Latest: 333 tests / 25 files, typecheck/build and 39 Chromium checks passed. Mechanical local-profile definitions are resolved; hydration/provider execution remain separately gated.
