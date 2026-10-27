@@ -1,0 +1,14 @@
+{
+  "name": "replikrazy-offline-mirror-planner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone, offline, browser-based mirror deployment planner. Plans only; never publishes.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "node --test tests/unit/",
+    "test:unit": "node --test tests/unit/",
+    "test:e2e": "node tests/e2e/run.cjs",
+    "samples": "node scripts/export-samples.cjs",
+    "demo-site": "node scripts/write-demo-site.cjs"
+  }
+}
