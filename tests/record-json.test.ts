@@ -20,18 +20,18 @@ describe("strict record JSON", () => {
   });
 });
 describe("recovery source envelope", () => {
-  it("recognizes current headers only as read-only unvalidated data", () => {
+  it("recognizes current headers only as read-only unvalidated data", async () => {
     const source = JSON.stringify(envelope);
-    expect(inspectRecoverySource(source)).toMatchObject({ source, result: { ok: true, value: { disposition: "read-only-unvalidated" } } });
+    expect(await inspectRecoverySource(source)).toMatchObject({ source, result: { ok: true, value: { disposition: "read-only-unvalidated" } } });
   });
   it.each([
     [{ schemaVersion: "2.0", future: true }, "MK_SCHEMA_UNSUPPORTED"],
     [{ ...envelope, extra: true }, "MK_RECORD_CORRUPT"],
     [{ ...envelope, exportedAt: "2026-02-30T00:00:00.000Z" }, "MK_RECORD_CORRUPT"],
     [{ ...envelope, operations: Array.from({ length: 1001 }, () => ({})) }, "MK_LIMIT_EXCEEDED"],
-  ])("retains rejected source and never echoes it in an error", (data, code) => {
+  ])("retains rejected source and never echoes it in an error", async (data, code) => {
     const source = JSON.stringify(data);
-    const r = inspectRecoverySource(source);
+    const r = await inspectRecoverySource(source);
     expect(r.source).toBe(source);
     expect(r.result).toMatchObject({ ok: false, error: { code, params: {} } });
   });

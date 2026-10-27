@@ -13,6 +13,11 @@ describe("canonicalJson (RFC 8785 subset)", () => {
     // although code-point/UTF-8 order would not. JCS requires UTF-16 order.
     expect(canonicalJson({ "\uff5e": 1, "\u{1F600}": 2 })).toBe('{"\u{1F600}":2,"\uff5e":1}');
   });
+  it("canonicalizes null-prototype JSON records identically", () => {
+    const nested = Object.assign(Object.create(null), { b: 2, a: 1 });
+    const record = Object.assign(Object.create(null), { nested, key: "value" });
+    expect(canonicalJson(record)).toBe(canonicalJson({ nested: { a: 1, b: 2 }, key: "value" }));
+  });
   it("escapes strings like ECMAScript JSON.stringify", () => {
     expect(canonicalJson("a\"b\\c\n\u0001é")).toBe('"a\\"b\\\\c\\n\\u0001é"');
   });
