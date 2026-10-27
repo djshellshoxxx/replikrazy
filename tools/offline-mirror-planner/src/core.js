@@ -51,7 +51,10 @@
 
   var WINDOWS_RESERVED = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
   // C0 controls, DEL, C1 controls, and Unicode bidi overrides / line separators.
-  var CONTROL_CHARS = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
+  var CONTROL_CLASS = '[\\u0000-\\u001f\\u007f-\\u009f\\u00ad\\u061c\\u200b-\\u200f\\u2028\\u2029\\u202a-\\u202e\\u2060-\\u2069\\ufeff]';
+  var CONTROL_CHARS = new RegExp(CONTROL_CLASS);
+  var CONTROL_CHARS_G = new RegExp(CONTROL_CLASS, 'g');
+  function has(obj, key) { return Object.prototype.hasOwnProperty.call(obj, key); }
 
   /**
    * Validate a site-relative path (forward slashes, no leading slash).
@@ -59,17 +62,19 @@
    * The path is never rewritten except that it must already be in canonical
    * form; anything ambiguous is rejected rather than "fixed".
    */
-  function validateRelativePath(p) {
+  function validateRelativePath(p, opts) {
+    var maxLen = LIMITS.maxPathLength + (opts && opts.extraLength || 0);
+    var maxDepth = LIMITS.maxPathDepth + (opts && opts.extraDepth || 0);
     if (typeof p !== 'string') return { ok: false, reason: 'Path is not a string.' };
     if (p.length === 0) return { ok: false, reason: 'Path is empty.' };
-    if (p.length > LIMITS.maxPathLength) return { ok: false, reason: 'Path is longer than ' + LIMITS.maxPathLength + ' characters.' };
-    if (CONTROL_CHARS.test(p)) return { ok: false, reason: 'Path contains control or bidirectional-override characters.' };
+    if (p.length > maxLen) return { ok: false, reason: 'Path is longer than ' + maxLen + ' characters.' };
+    if (CONTROL_CHARS.test(p)) return { ok: false, reason: 'Path contains control, invisible or bidirectional-formatting characters.' };
     if (p.indexOf('\\') !== -1) return { ok: false, reason: 'Path contains a backslash.' };
     if (p.charAt(0) === '/') return { ok: false, reason: 'Path is absolute (starts with "/").' };
     if (/^[A-Za-z]:/.test(p)) return { ok: false, reason: 'Path starts with a drive letter.' };
     if (p.normalize && p.normalize('NFC') !== p) return { ok: false, reason: 'Path is not Unicode NFC-normalised; rename the file.' };
     var segs = p.split('/');
-    if (segs.length > LIMITS.maxPathDepth) return { ok: false, reason: 'Path is nested deeper than ' + LIMITS.maxPathDepth + ' levels.' };
+    if (segs.length > maxDepth) return { ok: false, reason: 'Path is nested deeper than ' + maxDepth + ' levels.' };
     for (var i = 0; i < segs.length; i++) {
       var s = segs[i];
       if (s === '') return { ok: false, reason: 'Path contains an empty segment ("//" or trailing "/").' };
@@ -106,6 +111,7 @@
       if (first === null) first = top;
       else if (top !== first) return { root: '', paths: paths.slice() };
     }
+    if (!validateRelativePath(first).ok) return { root: '', paths: paths.slice() };
     return { root: first, paths: paths.map(function (p) { return String(p).slice(first.length + 1); }) };
   }
 
@@ -126,7 +132,7 @@
       var seg = segs[i];
       if (seg === '') return { ok: false, reason: 'Base path contains an empty segment ("//").' };
       if (seg === '.' || seg === '..') return { ok: false, reason: 'Base path may not contain "." or ".." segments.' };
-      if (!/^[A-Za-z0-9._~-]+$/.test(seg)) return { ok: false, reason: 'Base path segment "' + seg + '" may only use letters, digits and . _ ~ -' };
+      if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(seg)) return { ok: false, reason: 'Base path segment "' + safeDisplay(seg).slice(0, 60) + '" must start with a letter or digit and may only use letters, digits and . _ -' };
     }
     return { ok: true, basePath: s };
   }
@@ -140,14 +146,17 @@
     { category: 'credentials', reason: 'Environment / credential file', test: nameAny(/^(\.env(\..*)?|\.envrc|\.npmrc|\.pypirc|\.netrc|_netrc|\.htpasswd|\.git-credentials|\.dockercfg|(credentials|secrets?|service[-_]?account)(\.(json|ya?ml|toml|ini|txt|env|conf|cfg|xml|properties))?|.*\.secrets?)$/) },
     { category: 'credentials', reason: 'Credential directory', test: segDir(/^(\.aws|\.ssh|\.gnupg|\.docker|\.kube|\.config)$/) },
     { category: 'private-key', reason: 'Private key or certificate bundle', test: nameAny(/(\.pem|\.key|\.p12|\.pfx|\.jks|\.keystore|\.ppk|\.asc|\.gpg|\.pgp|\.kdbx|\.kdb)$|^id_(rsa|dsa|ecdsa|ed25519)(\.pub)?$/) },
-    { category: 'onion-or-i2p-key', reason: 'Tor onion-service or I2P key material', test: nameAny(/^(hs_ed25519_secret_key|hs_ed25519_public_key|private_key|client_keys|authorized_clients|onion_v3_private_key|.*keys?\.dat|privatekeys\.dat|eepsite.*\.dat|router\.keys.*)$/) },
-    { category: 'onion-or-i2p-key', reason: 'Tor onion-service directory', test: segDir(/^(hidden_service.*|onion_service.*|hs_.*|tor-keys?|i2p-keys?|i2pd-keys?)$/) },
     { category: 'wallet', reason: 'Cryptocurrency wallet / seed material', test: nameAny(/^(wallet\.dat|.*\.wallet|seed(phrase)?\.txt|mnemonic\.txt)$/) },
+    { category: 'onion-or-i2p-key', reason: 'Tor onion-service or I2P key material (I2P keys use .dat files)', test: nameAny(/^(hs_ed25519_secret_key|hs_ed25519_public_key|private_key|client_keys|authorized_clients|onion_v3_private_key|.*\.dat|router\.keys.*)$/) },
+    { category: 'onion-or-i2p-key', reason: 'Tor onion-service directory', test: segDir(/^(hidden_service.*|onion_service.*|hs_.*|tor-keys?|i2p-keys?|i2pd-keys?)$/) },
     { category: 'database', reason: 'Database file or dump', test: nameAny(/(\.sqlite3?|\.db|\.db3|\.sql|\.sql\.gz|\.dump|\.mdb|\.accdb|\.frm|\.ibd|\.myd|\.ldb|\.rdb|-wal|-shm|-journal)$/) },
     { category: 'backup', reason: 'Backup, editor swap or temporary file', test: nameAny(/(\.bak|\.backup|\.old|\.orig|\.swp|\.swo|\.tmp|~)$|^#.*#$/) },
     { category: 'backup', reason: 'Backup archive', test: nameAny(/(backup|bkp|dump|snapshot).*\.(zip|tar|tgz|gz|bz2|xz|7z|rar)$/) },
     { category: 'backup', reason: 'Backup directory', test: segDir(/^(backups?|bak|\.backup)$/) },
-    { category: 'os-metadata', reason: 'Operating-system metadata', test: nameAny(/^(\.ds_store|thumbs\.db|desktop\.ini|\._.*|\.spotlight-v100|\.trashes)$/) }
+    { category: 'os-metadata', reason: 'Operating-system metadata', test: nameAny(/^(\.ds_store|thumbs\.db|desktop\.ini|\._.*|\.spotlight-v100|\.trashes)$/) },
+    { category: 'server-side-code', reason: 'Server-side code or server configuration (a static mirror must not serve it)', test: nameAny(/(\.php\d?|\.phtml|\.cgi|\.pl|\.asp|\.aspx|\.jsp|\.py|\.rb|\.sh|\.htaccess|\.user\.ini|web\.config)$/) },
+    // Any other hidden file or folder, except the public /.well-known/ convention.
+    { category: 'hidden-file', reason: 'Hidden file or folder (only .well-known/ is published)', test: function (lower, segs) { for (var i = 0; i < segs.length; i++) { if (segs[i].charAt(0) === '.' && !(i === 0 && segs[i] === '.well-known' && segs.length > 1)) return true; } return false; } }
   ];
 
   function nameAny(re) { return function (lower, segs) { return re.test(segs[segs.length - 1]); }; }
@@ -191,6 +200,8 @@
     if (typeof text === 'string' && text) {
       if (/\b(pass(word|wd)?|secret|token|api[_-]?key|private[_-]?key|auth|bearer|cookie|session)\b\s*[:=]\s*\S{4,}/i.test(text)) hits.push('Looks like a "name = secret" credential assignment');
       if (/\bbearer\s+[A-Za-z0-9._~+\/-]{16,}/i.test(text)) hits.push('Looks like a bearer token');
+      if (/\b[a-z][a-z0-9+.-]{1,20}:\/\/[^\s\/@:]*:[^\s\/@]*@/i.test(text)) hits.push('Contains a URL with an embedded username and password');
+      if (/[?&](token|key|secret|sig|signature|password|auth|access_token|api_key)=/i.test(text)) hits.push('Contains a URL query parameter that usually carries a credential');
       var long = text.match(/[A-Za-z0-9+_-]{40,}={0,2}/g) || [];
       for (var i = 0; i < long.length; i++) {
         if (/[A-Z]/.test(long[i]) && /[a-z]/.test(long[i]) && /[0-9]/.test(long[i])) { hits.push('Contains a long mixed-case key-like string'); break; }
@@ -225,7 +236,8 @@
   }
 
   function mediaTypeFor(p) {
-    return MEDIA_TYPES[extensionOf(p)] || 'application/octet-stream';
+    var ext = extensionOf(p);
+    return has(MEDIA_TYPES, ext) ? MEDIA_TYPES[ext] : 'application/octet-stream';
   }
 
   // --------------------------------------------------------------- hashing
@@ -314,6 +326,10 @@
     function progress(path) { if (typeof options.onProgress === 'function') { try { options.onProgress({ done: idx, total: total, path: path }); } catch (e) { /* ignore UI errors */ } } }
 
     // Returns null after recording a rejection/exclusion, or a Promise for a file being read and hashed.
+    // If the selected folder itself is sensitive (e.g. ".git", ".ssh", "backups"), exclude everything in it.
+    var rootSensitive = stripped.root ? classifySensitivePath(stripped.root + '/placeholder-file') : null;
+    if (rootSensitive) rootSensitive = { category: rootSensitive.category, reason: rootSensitive.reason + ' (the selected folder "' + safeDisplay(stripped.root) + '" itself)' };
+
     function processOne(entry, path, displayPath) {
       var v = validateRelativePath(path);
       if (!v.ok) { rejected.push({ path: safeDisplay(displayPath), reason: v.reason, category: 'unsafe-path' }); return null; }
@@ -325,7 +341,7 @@
         rejected.push({ path: path, reason: 'File size is unknown or invalid.', category: 'invalid-size' }); return null;
       }
 
-      var sens = classifySensitivePath(path);
+      var sens = rootSensitive || classifySensitivePath(path);
       if (sens) { excluded.push({ path: path, size: size, category: sens.category, reason: sens.reason + ' — excluded; bytes were not read.' }); return null; }
 
       if (size > lim.maxFileBytes) {
@@ -348,22 +364,27 @@
           }
           var ext = extensionOf(path);
           var analysis = { flags: [], notes: [] };
-          if (TEXT_EXTENSIONS[ext] || ext === '') {
-            var scanBytes = bytes.byteLength > lim.maxTextScanBytes ? bytes.subarray(0, lim.maxTextScanBytes) : bytes;
-            var text = utf8DecodeLossy(scanBytes);
-            var secretHits = scanTextForSecrets(text);
-            if (secretHits.length) {
-              excluded.push({ path: path, size: size, category: 'secret-content', reason: secretHits.join('; ') + ' — excluded from plan and bundle.' });
-              return;
-            }
-            if (TEXT_EXTENSIONS[ext]) analysis = analyseText(path, text);
+          var isText = has(TEXT_EXTENSIONS, ext);
+          // Every file (text or binary) has its first bytes scanned for secret markers.
+          var scanBytes = bytes.byteLength > lim.maxTextScanBytes ? bytes.subarray(0, lim.maxTextScanBytes) : bytes;
+          var text = utf8DecodeLossy(scanBytes);
+          var secretHits = scanTextForSecrets(text);
+          if (secretHits.length) {
+            excluded.push({ path: path, size: size, category: 'secret-content', reason: secretHits.join('; ') + ' \u2014 excluded from plan and bundle.' });
+            return;
+          }
+          if (isText) {
+            analysis = analyseText(path, text);
             if (bytes.byteLength > lim.maxTextScanBytes) analysis.notes.push('Only the first ' + formatBytes(lim.maxTextScanBytes) + ' were scanned for secrets and links.');
           }
           return sha256Hex(bytes).then(function (hash) {
-            totalBytes += size;
             var lower = path.toLowerCase();
-            if (seenLower[lower]) warnings.push({ path: path, message: 'Differs only by letter case from "' + seenLower[lower] + '"; it will collide on case-insensitive file systems.' });
-            else seenLower[lower] = path;
+            if (seenLower[lower]) {
+              rejected.push({ path: path, reason: 'Differs only by letter case from "' + seenLower[lower] + '"; it would overwrite that file on case-insensitive file systems. Rename one of them.', category: 'case-collision' });
+              return;
+            }
+            seenLower[lower] = path;
+            totalBytes += size;
             var rec = { path: path, size: size, sha256: hash, mediaType: mediaTypeFor(path), flags: analysis.flags };
             var adv = pathAdvisories(path).concat(analysis.notes);
             if (adv.length) rec.notes = adv;
@@ -441,7 +462,7 @@
   function byPath(a, b) { return a.path < b.path ? -1 : a.path > b.path ? 1 : 0; }
 
   function safeDisplay(s) {
-    return String(s).replace(CONTROL_CHARS, function (c) { return '\\u' + ('000' + c.charCodeAt(0).toString(16)).slice(-4); }).slice(0, 300);
+    return String(s).replace(CONTROL_CHARS_G, function (c) { return '\\u' + ('000' + c.charCodeAt(0).toString(16)).slice(-4); }).slice(0, 300);
   }
 
   function formatBytes(n) {
@@ -453,7 +474,8 @@
 
   // --------------------------------------------------------------- headers
 
-  var HEADER_NAME = /^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/;
+  // Stricter than RFC 9110 tchar on purpose: names are written unquoted into server templates.
+  var HEADER_NAME = /^[A-Za-z][A-Za-z0-9-]*$/;
   var FORBIDDEN_HEADERS = /^(set-cookie|authorization|proxy-authorization|cookie|content-length|transfer-encoding|connection|host|upgrade|te|trailer|keep-alive)$/i;
 
   /** Validate one response header the plan asks destinations to send. */
@@ -464,12 +486,13 @@
     var value = typeof h.value === 'string' ? h.value.trim() : '';
     if (!name) errors.push('Header name is required.');
     else if (name.length > LIMITS.maxHeaderNameLength) errors.push('Header name is longer than ' + LIMITS.maxHeaderNameLength + ' characters.');
-    else if (!HEADER_NAME.test(name)) errors.push('Header name "' + safeDisplay(name) + '" contains characters not allowed in HTTP header names.');
+    else if (!HEADER_NAME.test(name)) errors.push('Header name must start with a letter and contain only letters, digits and hyphens.');
+    else if (scanFieldForSecrets(name).length) errors.push('Header name looks like it contains a credential.');
     else if (FORBIDDEN_HEADERS.test(name)) errors.push('Header "' + name + '" is connection-level or credential-bearing and cannot be part of a plan.');
     if (!value) errors.push('Header value is required.');
     else if (value.length > LIMITS.maxHeaderValueLength) errors.push('Header value is longer than ' + LIMITS.maxHeaderValueLength + ' characters.');
     else if (/[\r\n\u0000]/.test(value) || CONTROL_CHARS.test(value.replace(/\t/g, ''))) errors.push('Header value contains line breaks or control characters.');
-    else if (/["\\`${}]/.test(value)) errors.push('Header value may not contain " \\ ` $ { or } (keeps generated server templates safe to quote).');
+    else if (/["\\`${}%]/.test(value)) errors.push('Header value may not contain " \\ ` $ { } or % (keeps generated server templates safe to quote).');
     if (value && scanFieldForSecrets(value).length) errors.push('Header value looks like it contains a credential; plans never carry credentials.');
     return errors;
   }
@@ -479,6 +502,8 @@
     LIMITS: LIMITS,
     PlannerError: PlannerError,
     validateRelativePath: validateRelativePath,
+    hasControlChars: function (s) { return CONTROL_CHARS.test(String(s)); },
+    has: has,
     pathAdvisories: pathAdvisories,
     stripCommonRoot: stripCommonRoot,
     normaliseBasePath: normaliseBasePath,

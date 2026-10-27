@@ -32,18 +32,18 @@ test('credential-looking notes / labels / free-text fields are redacted in the p
   // Case-sensitive here; the lower-cased label slug leak is covered by the next (todo) test.
   noCanary(text, ['CANARYPROV1', 'CANARYDEP12', 'CANARYLBL1', 'CANARYNOTE1'], 'export', true);
   noCanary(text, ['CANARYPROV1', 'CANARYDEP12', 'CANARYNOTE1']);
-  assert.match(JSON.stringify(p), /redacted by planner/);
+  assert.match(JSON.stringify(p), /(redacted|omitted) by planner/);
   assert.strictEqual(p.destinations[0].state, 'needs-configuration');
 });
 
-test('a credential in a label does not leak through the generated directory slug / file paths', { todo: 'ENGINE-BUG: fileSlug(d) slugifies the RAW label, so a token label (redacted in plan.label) still appears lower-cased in instructionsFile/templates paths and every exported path' }, () => {
+test('a credential in a label does not leak through the generated directory slug / file paths', () => {
   const d = dest.sanitizeDestination(raw('generic-static', { address: 'https://s.example/' }, { id: 'slug', label: GH }));
   const { text, plan: p } = exportAll({ destinations: [d], settings: demo.settings() });
   assert.notStrictEqual(p.destinations[0].label, GH);
   noCanary(text, [GH.slice(4, 24)]);
 });
 
-test('URLs with userinfo are rejected and never echoed into any export (address and publicUrl)', { todo: 'ENGINE-BUG: destinationForExport copies config.address/publicUrl verbatim (redact() does not catch https://user:pass@); also printed in INSTRUCTIONS.md "Public URL"' }, () => {
+test('URLs with userinfo are rejected and never echoed into any export (address and publicUrl)', () => {
   const ds = [
     dest.sanitizeDestination(raw('generic-static', { address: 'https://alice:CANARYURLPW1@s.example/' }, { id: 'u1' })),
     dest.sanitizeDestination(raw('local-server', { listenAddress: '127.0.0.1:8080', documentRoot: '/srv/x', publicUrl: 'https://bob:CANARYURLPW2@l.example/' }, { id: 'u2' }))
@@ -53,14 +53,14 @@ test('URLs with userinfo are rejected and never echoed into any export (address 
   noCanary(text, ['CANARYURLPW1', 'CANARYURLPW2', 'alice:', 'bob:']);
 });
 
-test('rejected URLs with tokens in the query string are not echoed into exports', { todo: 'ENGINE-BUG: an address rejected for its query string (https://host/?token=…) is still exported verbatim in record.config.address' }, () => {
+test('rejected URLs with tokens in the query string are not echoed into exports', () => {
   const d = dest.sanitizeDestination(raw('generic-static', { address: 'https://s.example/?access_token=CANARYQUERY1' }, { id: 'q' }));
   assert.ok(dest.validateDestination(d).errors.some((e) => e.field === 'address'));
   const { text } = exportAll({ destinations: [d], settings: demo.settings() });
   noCanary(text, ['CANARYQUERY1']);
 });
 
-test('credential-looking header values (and names) are redacted from every export', { todo: 'ENGINE-BUG: header values flagged as credentials are still exported verbatim in plan.settings.headers, destinations.json, requiredHeaders, headers.txt and server templates; header names are not scanned at all' }, () => {
+test('credential-looking header values (and names) are redacted from every export', () => {
   const settings = { siteLabel: 'x', headers: [
     { name: 'X-Api-Key', value: GH },
     { name: 'X-Debug', value: 'Bearer CANARYBEARERTOKEN12345' },
@@ -71,7 +71,7 @@ test('credential-looking header values (and names) are redacted from every expor
   noCanary(text, [GH.slice(4, 30), 'CANARYBEARERTOKEN12345']);
 });
 
-test('free-text URLs with userinfo in notes / deployMethod are redacted', { todo: 'ENGINE-BUG: scanFieldForSecrets misses https://user:pass@host, so notes/deployMethod carrying it are exported verbatim' }, () => {
+test('free-text URLs with userinfo in notes / deployMethod are redacted', () => {
   const d = dest.sanitizeDestination(raw('generic-static', { address: 'https://s.example/', deployMethod: 'rsync to sftp://deploy:CANARYDEPPW@h.example/' }, { id: 'n', notes: 'upload via https://admin:CANARYNOTEPW@h.example/' }));
   const { text } = exportAll({ destinations: [d], settings: demo.settings() });
   noCanary(text, ['CANARYNOTEPW', 'CANARYDEPPW']);

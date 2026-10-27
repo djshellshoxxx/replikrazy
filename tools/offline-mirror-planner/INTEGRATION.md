@@ -19,7 +19,7 @@ This tool is deliberately standalone: it imports nothing from, and changes nothi
    - never treat `pending-operator-generation` onion/I2P addresses as known.
 4. **Recovery.** `destinations.json` plus the bundle is enough to rebuild a plan offline; a recovery workflow can store those two artifacts (the bundle excludes credentials, keys, databases and backups by design — those need their own secure backup path).
 5. **Provider knowledge.** If the project later builds a reviewed provider-capability catalogue, load it as *suggestions* the user confirms, keeping the user-declared/unverified distinction in the plan. Do not pre-fill `yes` for anything without a cited, dated source.
-6. **CI.** Run `node --test tests/unit/`, `node scripts/export-samples.cjs --check` and `node tests/e2e/run.cjs` from `tools/offline-mirror-planner/`. They need no network.
+6. **CI.** Run `npm test` (or `node --test "tests/unit/*.test.js"`), `node scripts/export-samples.cjs --check` and `node tests/e2e/run.cjs` from `tools/offline-mirror-planner/`. They need no network.
 
 ## Things to keep true
 

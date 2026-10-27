@@ -8,8 +8,8 @@
 - Address status: user-entered-unverified
 - Effective base URL: `http://127.0.0.1:8080/` (user-entered, unverified)
 - Base path: `/`
-- Site: Lantern Community Library (fictional demo) — 13 files, 3.8 KiB
-- Manifest SHA-256 (of SHA256SUMS): `b6c4f31f603febc26dffa90a87acfd1e2fde63d312251f365aa3be33807bfb91`
+- Site: Lantern Community Library (fictional demo) — 14 files, 3.9 KiB
+- Manifest SHA-256 (of SHA256SUMS): `22b732ca46e5b57cfdf7e44d757d6245744c7f2105b675c3ec30d54735403e7c`
 - Plan generated: 2026-10-27T00:00:00.000Z
 
 ## 1. Open items before anything else
@@ -37,7 +37,7 @@ Check each "unknown" item against the destination's own documentation or configu
 
 1. Use the exported bundle's `site/` folder, or the original source folder. Do not edit, minify, re-encode or "optimise" any file.
 2. Verify every file against the manifest before copying: `cd site && sha256sum -c ../SHA256SUMS` (on macOS: `shasum -a 256 -c ../SHA256SUMS`). Every line must say OK.
-3. 9 file(s) were excluded as sensitive (see plan.json → site.excluded). Make sure none of them exist on the destination.
+3. 11 file(s) were excluded as sensitive (see plan.json → site.excluded). Make sure none of them exist on the destination.
 4. Copy the files so that `index.html` is served at `/`.
 
 ## 4. Configure this destination

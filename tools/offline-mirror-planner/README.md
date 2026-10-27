@@ -41,8 +41,8 @@ The plan is `ready-for-manual-review` only when the inventory has no rejected fi
 
 - **Bytes preserved.** Files are hashed (SHA-256) and, in the bundle, stored verbatim (ZIP *store* method). Before bundling, each file is re-read and re-hashed; a mismatch aborts the export. Base paths are a server setting — site links are never rewritten (files with root-absolute links are flagged instead).
 - **Bounded input.** Max 5,000 files, 50 MiB per file, 500 MiB total, 1,024-character paths, 32 levels deep, 50 destinations, 40 headers, 5 MiB imports (`LIMITS` in `src/core.js`).
-- **Safe paths.** Traversal, absolute paths, drive letters, backslashes, control/bidi characters, empty segments, trailing dots/spaces, Windows device names, non-NFC names and duplicates are rejected with a clear reason. The ZIP writer refuses unsafe entry names.
-- **Secrets kept out.** VCS metadata, `.env`/credential files, private keys and certificates, Tor/I2P key material, wallets, databases, backups and OS metadata are excluded **without reading their bytes**; text files containing private-key blocks or common token formats are excluded too. Excluded files appear only as path + reason. Destination records have no credential fields; unknown imported fields are dropped; credential-looking free text is flagged and redacted on export; URLs with `user:pass@` are rejected.
+- **Safe paths.** Traversal, absolute paths, drive letters, backslashes, control/bidi/zero-width characters, empty segments, trailing dots/spaces, Windows device names, non-NFC names, duplicates and case-only collisions are rejected with a clear reason. The ZIP writer refuses unsafe entry names.
+- **Secrets kept out.** Hidden files and folders (except `.well-known/`), server-side code and server config (`.php`, `.cgi`, `.htaccess`, …), VCS metadata, `.env`/credential files, private keys and certificates, Tor/I2P key material, wallets, databases, backups and OS metadata are excluded **without reading their bytes**; every other file has its first 2 MiB scanned, and files containing private-key blocks or common token formats are excluded too. Selecting a sensitive folder itself (e.g. `.git`) excludes everything in it. Only header and destination values that pass validation are written into exports or templates; invalid values are omitted, never echoed. Excluded files appear only as path + reason. Destination records have no credential fields; unknown imported fields are dropped; credential-looking free text is flagged and redacted on export; URLs with `user:pass@` are rejected.
 - **No network.** The page's Content-Security-Policy sets `connect-src 'none'` and loads nothing external; the e2e test asserts the page makes no non-`file:` requests.
 - **Honest limits.** Exports state that mirrors are separate origins and **do not share browser storage**, and that Tor/I2P **do not make blockchain transactions anonymous**.
 
@@ -67,7 +67,7 @@ tests/e2e/            Playwright browser tests
 From this directory (Node 22+):
 
 ```
-node --test tests/unit/                 # engine tests, no dependencies
+node --test "tests/unit/*.test.js"     # engine tests, no dependencies (or: npm test)
 node scripts/export-samples.cjs --check # committed samples match the engine
 node tests/e2e/run.cjs                  # browser tests; needs Playwright + Chromium
 ```

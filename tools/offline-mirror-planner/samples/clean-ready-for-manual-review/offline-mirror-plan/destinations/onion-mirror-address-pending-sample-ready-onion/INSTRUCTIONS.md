@@ -8,8 +8,8 @@
 - Address status: pending-operator-generation
 - Effective base URL: not known yet
 - Base path: `/`
-- Site: Lantern Community Library (fictional demo) — 13 files, 3.8 KiB
-- Manifest SHA-256 (of SHA256SUMS): `b6c4f31f603febc26dffa90a87acfd1e2fde63d312251f365aa3be33807bfb91`
+- Site: Lantern Community Library (fictional demo) — 14 files, 3.9 KiB
+- Manifest SHA-256 (of SHA256SUMS): `22b732ca46e5b57cfdf7e44d757d6245744c7f2105b675c3ec30d54735403e7c`
 - Plan generated: 2026-10-27T00:00:00.000Z
 
 ## 1. Open items before anything else

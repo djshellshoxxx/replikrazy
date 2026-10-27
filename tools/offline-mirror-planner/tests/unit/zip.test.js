@@ -109,7 +109,7 @@ test('createZip refuses unsafe entry paths (zip-slip) and duplicates', () => {
   assert.throws(() => zip.createZip([{ path: 'a', bytes: new Uint8Array(1) }, { path: 'a', bytes: new Uint8Array(2) }]), (e) => e.code === 'ZIP_DUP');
 });
 
-test('every inventory-accepted site path can be bundled under offline-mirror-plan/site/', { todo: 'ENGINE-BUG: inventory allows depth 32 / 1024 chars but the bundle prefix "offline-mirror-plan/site/" adds 2 levels and 25 chars, so createZip throws ZIP_BAD_PATH for valid deep/long site files' }, async () => {
+test('every inventory-accepted site path can be bundled under offline-mirror-plan/site/', async () => {
   const deep = Array(core.LIMITS.maxPathDepth).fill('d').join('/');
   const parts = ['x'.repeat(200), 'y'.repeat(200), 'z'.repeat(200), 'w'.repeat(200)];
   const long = parts.join('/') + '/' + 'v'.repeat(core.LIMITS.maxPathLength - parts.join('/').length - 1);
@@ -121,7 +121,7 @@ test('every inventory-accepted site path can be bundled under offline-mirror-pla
   }
 });
 
-test('createZip rejects non-binary bytes instead of silently writing an empty file', { todo: 'ENGINE-BUG (hardening): createZip does new Uint8Array(e.bytes); a string (e.g. an exportArtifacts content) becomes a 0-byte entry with no error' }, () => {
+test('createZip rejects non-binary bytes instead of silently writing an empty file', () => {
   assert.throws(() => zip.createZip([{ path: 'plan.json', bytes: '{"a":1}' }]));
   assert.throws(() => zip.createZip([{ path: 'x', bytes: undefined }]));
 });

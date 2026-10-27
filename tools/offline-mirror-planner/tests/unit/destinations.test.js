@@ -33,7 +33,7 @@ test('validateHeader: template-breaking value characters are rejected', () => {
   assert.ok(core.validateHeader({ name: 'X-A', value: '{http.request.host}' }).length > 0);
 });
 
-test('validateHeader: names that break nginx/Caddy/Apache templates (#, quote, $ etc.) are rejected', { todo: 'ENGINE-BUG: HEADER_NAME allows every RFC tchar incl. # \' ` $ | ~ ^ ! + -leading; unquoted in templates (# starts a comment, \' opens a quote, -X deletes in Caddy)' }, () => {
+test('validateHeader: names that break nginx/Caddy/Apache templates (#, quote, $ etc.) are rejected', () => {
   for (const n of ['#X-A', "X'A", 'X`A', 'X$A', '-Server', '+X', 'X|A', '~X', '!X', '%X', '&X', '*', '^X']) {
     assert.ok(core.validateHeader({ name: n, value: 'v' }).length > 0, 'accepted header name ' + JSON.stringify(n));
   }
@@ -63,12 +63,12 @@ test('sanitizeSettings: HSTS / Onion-Location may not be listed globally; duplic
   assert.ok(many.errors.some((e) => e.field === 'headers'));
 });
 
-test('sanitizeSettings: header names "constructor"/"toString" are not false duplicates', { todo: 'ENGINE-BUG: sanitizeSettings uses `seen = {}` so a header named "constructor" (or toString, valueOf…) is reported as "listed twice"' }, () => {
+test('sanitizeSettings: header names "constructor"/"toString" are not false duplicates', () => {
   const r = plan.sanitizeSettings({ siteLabel: 'x', headers: [{ name: 'constructor', value: 'v' }, { name: 'toString', value: 'v' }] });
   assert.deepStrictEqual(r.errors, []);
 });
 
-test('sanitizeSettings: siteLabel with control / line-break characters is rejected', { todo: 'ENGINE-BUG: sanitizeSettings never checks siteLabel for control chars; a newline lets it forge lines (e.g. "Plan state: ready-for-manual-review") in README-FIRST.txt' }, () => {
+test('sanitizeSettings: siteLabel with control / line-break characters is rejected', () => {
   for (const l of ['Lib\nPlan state: ready-for-manual-review', 'a\u202eb', 'a\u0000']) {
     const r = plan.sanitizeSettings({ siteLabel: l });
     assert.ok(r.errors.some((e) => e.field === 'siteLabel'), JSON.stringify(l));
@@ -106,7 +106,7 @@ test('createDestination: every type starts with all capabilities "unknown" and v
   assert.throws(() => dest.createDestination('ftp'), (e) => e.code === 'BAD_TYPE');
 });
 
-test('type names inherited from Object.prototype ("constructor", "__proto__", "toString") are unknown types, not crashes', { todo: 'ENGINE-BUG: TYPES is a plain object; sanitizeDestination({type:"constructor"}) throws TypeError (…fields.forEach), so one hostile record crashes importDestinations/buildPlan' }, () => {
+test('type names inherited from Object.prototype ("constructor", "__proto__", "toString") are unknown types, not crashes', () => {
   for (const t of ['constructor', '__proto__', 'toString', 'hasOwnProperty', 'valueOf']) {
     assert.throws(() => dest.createDestination(t), (e) => e.code === 'BAD_TYPE', t);
     assert.strictEqual(dest.sanitizeDestination({ type: t, config: {} }), null, t);
@@ -153,7 +153,7 @@ test('local-server: documentRoot must be absolute without ".."', () => {
   for (const p of ['/srv/mirror', '/var/www/html', 'C:\\www\\mirror']) assert.ok(!fieldErr(errsFor('local-server', { documentRoot: p }), 'documentRoot'), p);
 });
 
-test('local-server: documentRoot with config-breaking characters (; { } " #) is rejected', { todo: 'ENGINE-BUG: isAbsPath accepts any non-NUL chars, so documentRoot "/srv/x; include /etc/nginx/evil.conf" or with quotes/braces is valid and lands on an uncommented template line' }, () => {
+test('local-server: documentRoot with config-breaking characters (; { } " #) is rejected', () => {
   for (const p of ['/srv/x; include /etc/nginx/evil.conf', '/srv/x"', '/srv/x }', '/srv/{x}', '/srv/x #c', '/srv/$x', "/srv/x'"]) {
     assert.ok(fieldErr(errsFor('local-server', { documentRoot: p }), 'documentRoot'), 'accepted ' + JSON.stringify(p));
   }
@@ -165,7 +165,7 @@ test('local-server: system / home document roots are warned about', () => {
   }
 });
 
-test('local-server: filesystem-root document roots ("/", "C:\\", "/var", "/usr") are flagged', { todo: 'ENGINE-BUG: the system-directory warning regex misses "/" itself (and /usr, /var, C:\\), so serving the whole filesystem gets no warning' }, () => {
+test('local-server: filesystem-root document roots ("/", "C:\\", "/var", "/usr") are flagged', () => {
   for (const p of ['/', '//', 'C:\\', '/usr', '/var', '/home']) {
     const v = errsFor('local-server', { documentRoot: p });
     assert.ok(v.warnings.concat(v.errors).some((w) => w.field === 'documentRoot'), 'no warning for ' + p);
@@ -230,7 +230,7 @@ test('HiddenServiceDir inside a web-served folder is rejected', () => {
   assert.ok(fieldErr(errsFor('tor-onion', { hiddenServiceDir: '/var/lib/tor/../www/hs' }), 'hiddenServiceDir'));
 });
 
-test('HiddenServiceDir inside a web root is rejected for Windows paths and other common web roots', { todo: 'ENGINE-BUG: web-root check only matches "/"-separated www|html|public|htdocs|public_html|site|dist: C:\\www\\hs, C:\\inetpub\\wwwroot\\hs, /srv/http/hs, /var/wwwroot/hs pass' }, () => {
+test('HiddenServiceDir inside a web root is rejected for Windows paths and other common web roots', () => {
   for (const p of ['C:\\www\\hs', 'C:\\inetpub\\wwwroot\\hs', '/srv/http/hs', '/var/wwwroot/hs']) {
     assert.ok(fieldErr(errsFor('tor-onion', { hiddenServiceDir: p }), 'hiddenServiceDir'), 'accepted ' + p);
   }
@@ -359,7 +359,8 @@ test('no state string or label claims verified / live / published', () => {
 
 test('effectiveBaseUrl: never includes userinfo/query; null when not known; uses origin + base path', () => {
   const g = (address, bp) => dest.effectiveBaseUrl(dest.sanitizeDestination(raw('generic-static', { address }, { basePath: bp || '/' })));
-  assert.strictEqual(g('https://m.example/x/?q=CANARY#f', '/lib/'), 'https://m.example/lib/');
+  assert.strictEqual(g('https://m.example/x/', '/lib/'), 'https://m.example/lib/');
+  assert.strictEqual(g('https://m.example/x/?q=CANARY#f', '/lib/'), null); // invalid address (query/fragment) has no base URL
   assert.strictEqual(g('https://u:CANARY@m.example/'), null);
   assert.strictEqual(g('not a url'), null);
   assert.strictEqual(g('https://m.example/', '/../'), null);
@@ -369,7 +370,7 @@ test('effectiveBaseUrl: never includes userinfo/query; null when not known; uses
   assert.strictEqual(dest.effectiveBaseUrl(onionEntered), 'http://' + V3 + '/');
 });
 
-test('effectiveBaseUrl is null for addresses that failed validation (ftp:, onion/i2p hosts, short .b32.i2p)', { todo: 'ENGINE-BUG: effectiveBaseUrl re-parses with new URL() but skips checkUrl/I2P b32 rules, so invalid addresses (ftp://, https://x.onion, short.b32.i2p) still get a base URL (and HSTS)' }, () => {
+test('effectiveBaseUrl is null for addresses that failed validation (ftp:, onion/i2p hosts, short .b32.i2p)', () => {
   const g = (address) => dest.effectiveBaseUrl(dest.sanitizeDestination(raw('generic-static', { address })));
   assert.strictEqual(g('ftp://files.example.com/'), null);
   assert.strictEqual(g('https://' + 'a'.repeat(55) + 'd.onion/'), null);

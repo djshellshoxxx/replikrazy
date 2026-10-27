@@ -41,22 +41,30 @@
         "value": "same-origin"
       }
     ],
-    "errors": []
+    "errors": [],
+    "headersOmittedAsInvalid": 0
   },
   "site": {
     "rootFolder": "lantern-community-library",
     "totals": {
-      "fileCount": 13,
-      "totalBytes": 3862,
+      "fileCount": 14,
+      "totalBytes": 4008,
       "largestFileBytes": 771,
       "excludedCount": 0,
       "rejectedCount": 0,
-      "inputCount": 13
+      "inputCount": 14
     },
-    "manifestSha256": "b6c4f31f603febc26dffa90a87acfd1e2fde63d312251f365aa3be33807bfb91",
+    "manifestSha256": "22b732ca46e5b57cfdf7e44d757d6245744c7f2105b675c3ec30d54735403e7c",
     "manifestFormat": "sha256sum -c compatible, file \"SHA256SUMS\"; manifestSha256 is the SHA-256 of that file",
     "bytePreservation": "Files are listed and bundled verbatim. The planner never rewrites, minifies or re-encodes site bytes.",
     "files": [
+      {
+        "path": ".well-known/security.txt",
+        "size": 146,
+        "sha256": "f06b1ca98eec2d60af78a30af3439d1c66eb8224292e8ff5adc0f3ee03ba7ef4",
+        "mediaType": "text/plain; charset=utf-8",
+        "flags": []
+      },
       {
         "path": "404.html",
         "size": 508,

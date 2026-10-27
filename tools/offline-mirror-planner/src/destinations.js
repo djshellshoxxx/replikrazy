@@ -101,6 +101,7 @@
     }
   };
   var TYPE_KEYS = Object.keys(TYPES);
+  function hasType(t) { return typeof t === 'string' && Object.prototype.hasOwnProperty.call(TYPES, t); }
 
   // Which capabilities apply to which type ('n/a' otherwise).
   var TYPE_CAPS = {
@@ -129,7 +130,7 @@
     return out || 'destination';
   }
 
-  var CONTROL = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
+  var CONTROL = { test: function (s) { return core.hasControlChars(s); } };
 
   function str(v, max) {
     if (v === undefined || v === null) return '';
@@ -152,7 +153,7 @@
 
   /** A fresh destination of the given type with every capability "unknown". */
   function createDestination(type, overrides) {
-    if (!TYPES[type]) throw core.PlannerError('BAD_TYPE', 'Unknown destination type "' + core.safeDisplay(type) + '".');
+    if (!hasType(type)) throw core.PlannerError('BAD_TYPE', 'Unknown destination type "' + core.safeDisplay(type) + '".');
     var caps = {};
     TYPE_CAPS[type].forEach(function (k) { if (!DERIVED_CAPS[k]) caps[k] = 'unknown'; });
     var d = { id: newId(), type: type, label: TYPES[type].label, basePath: '/', notes: '', config: defaultsFor(type), capabilities: caps };
@@ -177,8 +178,8 @@
    */
   function sanitizeDestination(raw) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
-    var type = typeof raw.type === 'string' ? raw.type : '';
-    if (!TYPES[type]) return null;
+    var type = raw.type;
+    if (!hasType(type)) return null;
     var srcCfg = raw.config && typeof raw.config === 'object' ? raw.config : {};
     var cfg = defaultsFor(type);
     TYPES[type].fields.forEach(function (f) {
@@ -189,7 +190,7 @@
     var srcCaps = raw.capabilities && typeof raw.capabilities === 'object' ? raw.capabilities : {};
     TYPE_CAPS[type].forEach(function (k) {
       if (DERIVED_CAPS[k]) return;
-      var v = srcCaps[k];
+      var v = Object.prototype.hasOwnProperty.call(srcCaps, k) ? srcCaps[k] : 'unknown';
       if (v && typeof v === 'object' && typeof v.declared === 'string') v = v.declared; // accept plan-export shape
       caps[k] = DECLARED.indexOf(v) !== -1 ? v : 'unknown';
     });
@@ -225,9 +226,11 @@
     return host === 'localhost' || /^127\.\d+\.\d+\.\d+$/.test(host) || host === '::1' || host === '0:0:0:0:0:0:0:1';
   }
 
+  // Conservative character whitelist: these paths are written unquoted into server templates.
   function isAbsPath(s) {
-    if (/^\/[^\u0000]*$/.test(s)) return !/(^|\/)\.\.(\/|$)/.test(s);
-    if (/^[A-Za-z]:\\/.test(s)) return !/(^|\\)\.\.(\\|$)/.test(s);
+    if (typeof s !== 'string') return false;
+    if (/^\/[A-Za-z0-9._~\/@+,=-]*$/.test(s)) return !/(^|\/)\.\.(\/|$)/.test(s) && !/\/\//.test(s);
+    if (/^[A-Za-z]:\\[A-Za-z0-9._~\\@+,=-]*$/.test(s)) return !/(^|\\)\.\.(\\|$)/.test(s);
     return false;
   }
 
@@ -250,6 +253,7 @@
   var ONION_V3 = /^[a-z2-7]{55}d\.onion$/;
   var I2P_B32 = /^[a-z2-7]{52}\.b32\.i2p$/;
   var I2P_NAME = /^(?!-)([a-z0-9-]{1,63}\.)+i2p$/;
+  function isI2pAddress(v) { return I2P_B32.test(v) || (I2P_NAME.test(v) && !/\.b32\.i2p$/.test(v) && v.length <= 67); }
 
   /**
    * Validate a sanitized destination. Returns
@@ -263,7 +267,7 @@
     function err(field, message) { errors.push({ field: field, message: message }); }
     function warn(field, message) { warnings.push({ field: field, message: message }); }
 
-    if (!d || !TYPES[d.type]) return { errors: [{ field: 'type', message: 'Unknown destination type.' }], warnings: [], missing: [], pending: [] };
+    if (!d || !hasType(d.type)) return { errors: [{ field: 'type', message: 'Unknown destination type.' }], warnings: [], missing: [], pending: [] };
     var t = TYPES[d.type];
     var c = d.config || {};
 
@@ -286,6 +290,7 @@
         if (required) missing.push({ field: f.key, label: f.label });
         return;
       }
+      if (f.key === 'address' && (d.type === 'tor-onion' || d.type === 'i2p') && c.addressMode !== 'entered') return; // ignored while pending
       if (typeof v === 'string' && f.max && v.length > f.max) { err(f.key, f.label + ': longer than ' + f.max + ' characters.'); return; }
       if (typeof v === 'string' && CONTROL.test(v)) { err(f.key, f.label + ': contains control characters.'); return; }
       if (typeof v === 'string' && f.kind === 'text' && core.scanFieldForSecrets(v).length) { err(f.key, f.label + ': looks like it contains a credential. Remove it.'); return; }
@@ -327,14 +332,14 @@
           break;
         }
         case 'abspath':
-          if (!isAbsPath(v)) err(f.key, f.label + ': must be an absolute path without ".." segments.');
+          if (!isAbsPath(v)) err(f.key, f.label + ': must be an absolute path without ".." segments, using only letters, digits and . _ ~ / @ + , = - (no spaces, quotes, ; { } # or $).');
           break;
         case 'onion':
           if (/^[a-z2-7]{16}\.onion$/.test(v)) err(f.key, 'This is a retired v2 onion address. Only v3 (56 characters) is supported by current Tor.');
           else if (!ONION_V3.test(v)) err(f.key, 'Not a v3 onion address (56 lowercase base32 characters ending in "d", then ".onion").');
           break;
         case 'i2p':
-          if (!I2P_B32.test(v) && !(I2P_NAME.test(v) && !/\.b32\.i2p$/.test(v) && v.length <= 67)) err(f.key, 'Not an I2P address (52 base32 characters + ".b32.i2p", or a registered name ending in ".i2p").');
+          if (!isI2pAddress(v)) err(f.key, 'Not an I2P address (52 base32 characters + ".b32.i2p", or a registered name ending in ".i2p").');
           break;
         case 'token':
           if (!/^[A-Za-z0-9._-]{1,64}$/.test(v)) err(f.key, f.label + ': only letters, digits and . _ - are allowed.');
@@ -352,11 +357,11 @@
         pending.push({ field: 'address', message: 'Address will be created by the operator\'s own ' + (d.type === 'i2p' ? 'I2P router' : 'Tor') + ' and entered later. The planner never creates it.' });
         if (c.address) warn('address', 'An address is filled in but the mode is "pending-operator"; it will be ignored. Switch the mode to "entered" to use it.');
       }
-      if (c.hiddenServiceDir && /(^|\/)(www|html|public|htdocs|public_html|site|dist)(\/|$)/i.test(c.hiddenServiceDir)) {
+      if (c.hiddenServiceDir && /(^|\/)(www|wwwroot|inetpub|html|http|https|public|htdocs|httpdocs|public_html|site|sites|dist|web|webroot|static|srv\/www)(\/|$)/i.test(c.hiddenServiceDir.replace(/\\/g, '/'))) {
         err('hiddenServiceDir', 'HiddenServiceDir looks like it is inside a web-served folder. Keys must never be reachable from the web server.');
       }
     }
-    if (d.type === 'local-server' && c.documentRoot && /^\/(etc|root|home\/[^/]+\/?$|var\/lib\/tor)/.test(c.documentRoot)) {
+    if (d.type === 'local-server' && c.documentRoot && (/^\/(etc|root|boot|bin|sbin|lib|lib64|proc|sys|dev|home\/[^/]+\/?$|var\/lib\/tor)(\/|$)/.test(c.documentRoot) || /^\/(usr|var|opt|srv|home|tmp)?\/?$/.test(c.documentRoot) || /^[A-Za-z]:\\(windows(\\.*)?|users\\?|program files.*)?$/i.test(c.documentRoot))) {
       warn('documentRoot', 'Document root is a system or home directory; use a dedicated folder for the mirror.');
     }
     return { errors: errors, warnings: warnings, missing: missing, pending: pending };
@@ -369,7 +374,7 @@
    * ctx: { inventory (may be null), headers: [...] }
    */
   function requirementLevel(capKey, d, ctx) {
-    if (TYPE_CAPS[d.type].indexOf(capKey) === -1) return 'not-applicable';
+    if (!hasType(d.type) || TYPE_CAPS[d.type].indexOf(capKey) === -1) return 'not-applicable';
     var inv = ctx && ctx.inventory;
     var paths = inv ? inv.files.map(function (f) { return f.path; }) : [];
     var bp = core.normaliseBasePath(d.basePath);
@@ -468,24 +473,21 @@
     if (!bp.ok) return null;
     var c = d.config || {};
     if (d.type === 'generic-static' || (d.type === 'local-server' && c.publicUrl)) {
-      try {
-        var u = new URL(d.type === 'generic-static' ? c.address : c.publicUrl);
-        if (u.username || u.password) return null;
-        return u.origin + bp.basePath;
-      } catch (e) { return null; }
+      var r = checkUrl(d.type === 'generic-static' ? (c.address || '') : c.publicUrl, d.type === 'local-server');
+      return r.error ? null : r.url.origin + bp.basePath;
     }
     if (d.type === 'local-server') {
       var hp = parseHostPort(c.listenAddress || '');
       return hp ? 'http://' + (c.listenAddress) + bp.basePath : null;
     }
     if ((d.type === 'tor-onion' && c.addressMode === 'entered' && ONION_V3.test(c.address || '')) ||
-        (d.type === 'i2p' && c.addressMode === 'entered' && (I2P_B32.test(c.address || '') || I2P_NAME.test(c.address || '')))) {
+        (d.type === 'i2p' && c.addressMode === 'entered' && isI2pAddress(c.address || ''))) {
       return 'http://' + c.address + bp.basePath;
     }
     return null;
   }
 
-  function capabilityKeysFor(type) { return TYPE_CAPS[type] ? TYPE_CAPS[type].filter(function (k) { return !DERIVED_CAPS[k]; }) : []; }
+  function capabilityKeysFor(type) { return hasType(type) ? TYPE_CAPS[type].filter(function (k) { return !DERIVED_CAPS[k]; }) : []; }
 
   return {
     TYPES: TYPES,
@@ -506,6 +508,8 @@
     isLoopback: isLoopback,
     slugify: slugify,
     newId: newId,
-    isValidId: isValidId
+    isValidId: isValidId,
+    hasType: hasType,
+    isAbsPath: isAbsPath
   };
 });

@@ -31,7 +31,7 @@ test('torrc and i2pd templates: every non-empty line starts with "#" (demo, full
   assert.ok(n >= 6);
 });
 
-test('torrc/i2pd templates stay inert when imported fields contain line breaks', { todo: 'ENGINE-BUG: templates embed raw config even when validation failed; a "\\n" inside hiddenServiceDir/localTarget/virtualPort/tunnelName/keysFile produces an UNCOMMENTED torrc/i2pd line' }, () => {
+test('torrc/i2pd templates stay inert when imported fields contain line breaks', () => {
   const tor = [
     { hiddenServiceDir: '/var/lib/tor/x\nHiddenServiceDir /tmp/evil' },
     { localTarget: '127.0.0.1:8080\nHiddenServicePort 22 127.0.0.1:22' },
@@ -107,7 +107,7 @@ test('an entered onion address appears in instructions (as unverified) but never
   assert.strictEqual(p.destinations[0].addressStatus, 'user-entered-format-checked-unverified');
 });
 
-test('an entered address that FAILED the format check is not described as format-checked', { todo: 'ENGINE-BUG: buildPlan sets addressStatus "user-entered-format-checked-unverified" whenever an address is entered, and instructions say it "passed a format check" even for a v2/garbage address' }, () => {
+test('an entered address that FAILED the format check is not described as format-checked', () => {
   for (const [type, address] of [['tor-onion', 'expyuzz4wqqyqhjn.onion'], ['tor-onion', 'not-an-onion'], ['i2p', 'short.b32.i2p']]) {
     const d = dest.sanitizeDestination(raw(type, { addressMode: 'entered', address, hiddenServiceDir: '/var/lib/tor/x' }, { id: 'x' }));
     const p = plan.buildPlan({ destinations: [d], generatedAt: GENERATED_AT });
@@ -140,7 +140,7 @@ test('nginx/Caddy/Apache templates carry the banner, every planned header, base 
   assert.deepStrictEqual(other.map((t) => t.name), ['headers.txt']);
 });
 
-test('invalid headers (CRLF, forbidden names, template-breaking chars) never reach headers.txt or server templates', { todo: 'ENGINE-BUG: sanitizeSettings only reports header errors; headersFor() copies every header into requiredHeaders, headers.txt and nginx/Caddy/Apache templates (CRLF → injected lines, Set-Cookie/Authorization emitted)' }, () => {
+test('invalid headers (CRLF, forbidden names, template-breaking chars) never reach headers.txt or server templates', () => {
   const settings = { siteLabel: 'x', headers: [
     { name: 'X-Ok', value: 'fine' },
     { name: 'X-Inj', value: 'a\r\nX-Injected: 1' },
@@ -160,7 +160,7 @@ test('invalid headers (CRLF, forbidden names, template-breaking chars) never rea
   }
 });
 
-test('local-server templates never embed a listen address / document root that failed validation', { todo: 'ENGINE-BUG: nginx/Caddy/Apache templates use d.config.listenAddress/documentRoot verbatim even when validateDestination reported errors (directive injection on uncommented lines)' }, () => {
+test('local-server templates never embed a listen address / document root that failed validation', () => {
   const cases = [
     { listenAddress: '127.0.0.1:80 ; include /etc/nginx/evil.conf' },
     { documentRoot: 'srv; include /etc/nginx/evil.conf' },
@@ -176,7 +176,7 @@ test('local-server templates never embed a listen address / document root that f
   }
 });
 
-test('instructions cannot be forged by line breaks in labels or free-text fields', { todo: 'ENGINE-BUG: mdEscape does not neutralise newlines, so an imported label/providerName "x\\n- Verified by planner: yes" adds a forged line to INSTRUCTIONS.md' }, () => {
+test('instructions cannot be forged by line breaks in labels or free-text fields', () => {
   const forged = '- Verified by planner: yes';
   const d = dest.sanitizeDestination(raw('generic-static', { address: 'https://s.example/', providerName: 'P\n' + forged }, { id: 'f', label: 'L\n' + forged }));
   const p = plan.buildPlan({ destinations: [d], generatedAt: GENERATED_AT });
@@ -184,7 +184,7 @@ test('instructions cannot be forged by line breaks in labels or free-text fields
   assert.ok(!lines.includes(forged), 'forged line present');
 });
 
-test('README-FIRST cannot be forged by a site label with line breaks', { todo: 'ENGINE-BUG: siteLabel is not checked for control chars and is written raw into README-FIRST.txt ("Plan state: ready-for-manual-review" can be forged on a draft plan)' }, () => {
+test('README-FIRST cannot be forged by a site label with line breaks', () => {
   const input = { settings: { siteLabel: 'Lib\nPlan state: ready-for-manual-review' }, destinations: [], generatedAt: GENERATED_AT };
   const p = plan.buildPlan(input);
   assert.strictEqual(p.planState, 'draft');

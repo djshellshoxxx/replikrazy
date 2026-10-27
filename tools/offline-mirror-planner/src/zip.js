@@ -52,12 +52,16 @@
     var locals = [], centrals = [];
     var offset = 0, centralSize = 0;
     entries.forEach(function (e) {
-      var v = core.validateRelativePath(e.path);
+      // Headroom for the "offline-mirror-plan/site/" prefix on top of the inventory limits.
+      var v = core.validateRelativePath(e.path, { extraLength: 64, extraDepth: 4 });
       if (!v.ok) throw core.PlannerError('ZIP_BAD_PATH', 'Refusing to write unsafe archive path "' + core.safeDisplay(e.path) + '": ' + v.reason);
       if (seen[e.path]) throw core.PlannerError('ZIP_DUP', 'Duplicate archive path "' + e.path + '".');
       seen[e.path] = true;
       var name = enc.encode(e.path);
-      var data = e.bytes instanceof Uint8Array ? e.bytes : new Uint8Array(e.bytes);
+      var data;
+      if (e.bytes instanceof Uint8Array) data = e.bytes;
+      else if (e.bytes instanceof ArrayBuffer) data = new Uint8Array(e.bytes);
+      else throw core.PlannerError('ZIP_BAD_DATA', 'Archive entry "' + core.safeDisplay(e.path) + '" has no binary data (expected Uint8Array or ArrayBuffer).');
       var crc = crc32(data);
       var lh = new Uint8Array(30 + name.length);
       var lv = new DataView(lh.buffer);
@@ -124,7 +128,9 @@
     var dec = new TextDecoder();
     var out = [];
     var p = cdOff;
+    function need(end) { if (end > bytes.length) throw core.PlannerError('ZIP_BAD', 'Archive is truncated or corrupt.'); }
     for (var i = 0; i < count; i++) {
+      need(p + 46);
       if (v.getUint32(p, true) !== 0x02014b50) throw core.PlannerError('ZIP_BAD', 'Corrupt central directory.');
       var size = v.getUint32(p + 24, true);
       var crc = v.getUint32(p + 16, true);
@@ -132,8 +138,10 @@
       var elen = v.getUint16(p + 30, true);
       var clen = v.getUint16(p + 32, true);
       var lo = v.getUint32(p + 42, true);
+      need(p + 46 + nlen); need(lo + 30);
       var name = dec.decode(bytes.subarray(p + 46, p + 46 + nlen));
       var lnlen = v.getUint16(lo + 26, true), lelen = v.getUint16(lo + 28, true);
+      need(lo + 30 + lnlen + lelen + size);
       var data = bytes.subarray(lo + 30 + lnlen + lelen, lo + 30 + lnlen + lelen + size);
       if (crc32(data) !== crc) throw core.PlannerError('ZIP_CRC', 'CRC mismatch for ' + name);
       out.push({ path: name, bytes: data });

@@ -221,7 +221,7 @@ test('sensitive files are excluded WITHOUT read(), with a category and reason, a
   assert.ok(!JSON.stringify(inv).includes('CANARY-SENSITIVE'));
 });
 
-test('the i2pd keys file name the planner itself suggests (replikrazy-mirror.dat) is excluded without read()', { todo: 'ENGINE-BUG: onion-or-i2p-key rule only matches *key(s).dat/eepsite*.dat; the default keysFile "replikrazy-mirror.dat" (and any custom tunnel .dat) is read, hashed and bundled' }, async () => {
+test('the i2pd keys file name the planner itself suggests (replikrazy-mirror.dat) is excluded without read()', async () => {
   const es = entries([['replikrazy-mirror.dat', new Uint8Array([1, 2, 3])], ['mirror.dat', new Uint8Array([4])], ['index.html', 'x']]);
   const inv = await core.buildInventory(es, { stripRoot: false });
   assert.deepStrictEqual(inv.files.map((f) => f.path), ['index.html']);
@@ -230,10 +230,16 @@ test('the i2pd keys file name the planner itself suggests (replikrazy-mirror.dat
 
 test('ordinary site files are not mis-classified as sensitive', () => {
   for (const p of ['index.html', 'environment.html', 'about/env.html', 'keyboard.css', 'monkey.png', 'docs/keys.html', 'secretary.html',
-    'gitignore.txt', '.gitignore', '.well-known/security.txt', '.htaccess', 'database.html', 'old-news.html', 'wallets.html', 'tor/index.html',
+    'gitignore.txt', '.well-known/security.txt', 'database.html', 'old-news.html', 'wallets.html', 'tor/index.html',
     'img/hs.png', 'backup.html', 'data.json', 'credentials.html']) {
     assert.strictEqual(core.classifySensitivePath(p), null, p);
   }
+  // Lead decision (reused from the earlier planner design): hidden files other than
+  // .well-known/ and server-side code/config are not published by a static mirror.
+  assert.strictEqual(core.classifySensitivePath('.gitignore').category, 'hidden-file');
+  assert.strictEqual(core.classifySensitivePath('a/.well-known/x').category, 'hidden-file');
+  assert.strictEqual(core.classifySensitivePath('.htaccess').category, 'server-side-code');
+  assert.strictEqual(core.classifySensitivePath('cgi/contact.php').category, 'server-side-code');
 });
 
 const PEM = '-----BEGIN ' + 'RSA PRIVATE KEY-----\nMIIBOgIBAAJBAKj34GkxFhD90vcNLYLInFEX6Ppy1tPf9Cnzj4p4WGeKLs1Pt8Qu\n-----END ' + 'RSA PRIVATE KEY-----\n';
@@ -276,14 +282,14 @@ test('a secret in a non-UTF-8 text file is still detected', async () => {
   assert.strictEqual(inv.excluded.length, 1);
 });
 
-test('private keys / tokens in files with other extensions (.yml, .conf, .php, .ini, .sh, .py, .toml, .bin) are excluded', { todo: 'ENGINE-BUG: buildInventory only scans TEXT_EXTENSIONS and extensionless files for secrets; config/script files with keys are published with a hash' }, async () => {
+test('private keys / tokens in files with other extensions (.yml, .conf, .php, .ini, .sh, .py, .toml, .bin) are excluded', async () => {
   const spec = ['config.yml', 'config.yaml', 'nginx.conf', 'wp-config.php', 'settings.ini', 'deploy.sh', 'settings.py', 'app.toml', 'blob.bin', 'page.php']
     .map((p) => [p, 'x: 1\n' + PEM]);
   const inv = await inventory(spec);
   assert.deepStrictEqual(inv.files.map((f) => f.path), [], 'published despite key block: ' + inv.files.map((f) => f.path).join(', '));
 });
 
-test('file extension "constructor"/"__proto__" yields a string media type', { todo: 'ENGINE-BUG: MEDIA_TYPES/TEXT_EXTENSIONS are plain objects; mediaTypeFor("x.constructor") returns the Object function and "x.__proto__" returns Object.prototype' }, async () => {
+test('file extension "constructor"/"__proto__" yields a string media type', async () => {
   assert.strictEqual(typeof core.mediaTypeFor('x.constructor'), 'string');
   assert.strictEqual(typeof core.mediaTypeFor('x.__proto__'), 'string');
   const inv = await inventory({ 'a.constructor': 'x', 'b.__proto__': 'y', 'c.tostring': 'z' });
@@ -334,7 +340,7 @@ test('scanFieldForSecrets flags key=value credentials, bearer tokens and long mi
   assert.deepStrictEqual(core.scanFieldForSecrets({}), []);
 });
 
-test('scanFieldForSecrets flags URLs with userinfo (https://user:pass@host) in free text', { todo: 'ENGINE-BUG: scanFieldForSecrets only catches userinfo for db schemes; https://user:pass@host in notes/deployMethod is exported verbatim' }, () => {
+test('scanFieldForSecrets flags URLs with userinfo (https://user:pass@host) in free text', () => {
   for (const s of ['upload to https://admin:CANARYpw99@ftp.example.com/', 'sftp://deploy:CANARYpw99@host/', 'ftp://u:CANARYpw99@h']) {
     assert.ok(core.scanFieldForSecrets(s).length > 0, s);
   }

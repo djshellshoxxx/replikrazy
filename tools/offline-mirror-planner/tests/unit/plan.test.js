@@ -29,19 +29,19 @@ test('buildPlan is deterministic for fixed generatedAt (and exportArtifacts too)
   assert.strictEqual(JSON.stringify(input.destinations), before);
 });
 
-test('buildPlan is deterministic even for destination records without a valid id', { todo: 'ENGINE-BUG: sanitizeDestination assigns a random newId() to records lacking a valid id, so buildPlan output differs run to run (and exportArtifacts re-sanitizes → ids differ from the plan)' }, () => {
+test('buildPlan is deterministic even for destination records without a valid id', () => {
   const input = { destinations: [{ type: 'generic-static', label: 'x', config: { address: 'https://m.example/' } }], generatedAt: GENERATED_AT };
   const a = plan.buildPlan(input), b = plan.buildPlan(input);
   assert.ok(JSON.stringify(a) === JSON.stringify(b), 'ids differ between runs: ' + a.destinations[0].id + ' vs ' + b.destinations[0].id);
 });
 
-test('exportArtifacts does not crash for destination records without a valid id', { todo: 'ENGINE-BUG: exportArtifacts re-sanitizes input.destinations, gets a new random id, then buildInstructions(plan, id) throws NO_DEST' }, () => {
+test('exportArtifacts does not crash for destination records without a valid id', () => {
   const input = { destinations: [{ type: 'generic-static', label: 'x', config: {} }], generatedAt: GENERATED_AT };
   const p = plan.buildPlan(input);
   assert.doesNotThrow(() => plan.exportArtifacts(p, input));
 });
 
-test('duplicate destination ids: each destination gets its own instructions', { todo: 'ENGINE-BUG: buildPlan keeps duplicate ids (import dedups, buildPlan does not); buildInstructions picks the first match, so the second destination\'s INSTRUCTIONS.md shows the first one\'s state/address' }, async () => {
+test('duplicate destination ids: each destination gets its own instructions', async () => {
   const [local] = fullDestinations();
   const broken = dest.sanitizeDestination(raw('generic-static', { address: 'ftp://bad' }, { id: local.id, label: 'Broken static' }));
   const input = { inventory: await cleanDemoInventory(), destinations: [local, broken], settings: demo.settings(), generatedAt: GENERATED_AT };
@@ -103,7 +103,7 @@ test('buildPlan does not throw for incomplete or junk input', () => {
   }
 });
 
-test('buildPlan does not throw when a local-server Caddy destination has an invalid publicUrl', { todo: 'ENGINE-BUG: caddyTemplate does new URL(d.config.publicUrl).origin without try/catch; an invalid publicUrl makes buildPlan/exportArtifacts throw TypeError' }, () => {
+test('buildPlan does not throw when a local-server Caddy destination has an invalid publicUrl', () => {
   const d = dest.sanitizeDestination(raw('local-server', { serverSoftware: 'caddy', listenAddress: '127.0.0.1:8080', documentRoot: '/srv/x', publicUrl: 'not a url' }));
   const p = plan.buildPlan({ destinations: [d], generatedAt: GENERATED_AT });
   assert.strictEqual(p.destinations[0].state, 'needs-configuration');
@@ -181,7 +181,7 @@ test('Strict-Transport-Security only for https destinations', () => {
   for (const id of ['http', 'local', 'onion', 'i2p']) assert.ok(!names(headersOf(p, id)).includes('strict-transport-security'), id);
 });
 
-test('HSTS / Onion-Location listed globally never reach onion, I2P or http destinations', { todo: 'ENGINE-BUG: invalid global headers are only reported as errors; headersFor/templates still copy them, so a global Strict-Transport-Security lands on the onion/http templates' }, () => {
+test('HSTS / Onion-Location listed globally never reach onion, I2P or http destinations', () => {
   const settings = { siteLabel: 'x', headers: [{ name: 'Strict-Transport-Security', value: 'max-age=1' }] };
   const ds = [dest.sanitizeDestination(raw('tor-onion', { hiddenServiceDir: '/var/lib/tor/x' }, { id: 'onion' })),
     dest.sanitizeDestination(raw('generic-static', { address: 'http://s.example/' }, { id: 'http' }))];

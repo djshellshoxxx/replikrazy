@@ -95,14 +95,16 @@ test('validateRelativePath: non-NFC Unicode is rejected; NFC is accepted unchang
   accepts('Ünïcode-név.txt'.normalize('NFC'));
 });
 
-test('buildInventory: duplicates are rejected and case collisions warned (not silently merged)', async () => {
+test('buildInventory: duplicates and case collisions are rejected (not silently merged)', async () => {
   const es = entries([['a.txt', 'one'], ['a.txt', 'two'], ['A.TXT', 'three'], ['index.html', 'x']]);
   const inv = await core.buildInventory(es, { stripRoot: false });
   assert.strictEqual(inv.files.filter((f) => f.path === 'a.txt').length, 1);
   assert.ok(inv.rejected.some((r) => r.path === 'a.txt' && r.category === 'duplicate'));
   assert.strictEqual(es[1].reads, 0, 'duplicate must not be read');
-  assert.ok(inv.warnings.some((w) => w.path === 'A.TXT' && /letter case/.test(w.message)));
-  assert.ok(inv.files.some((f) => f.path === 'A.TXT'));
+  // Lead decision: a case collision would overwrite a file when a bundle is extracted on
+  // macOS/Windows, so it is a blocking rejection rather than a warning.
+  assert.ok(inv.rejected.some((r) => r.path === 'A.TXT' && r.category === 'case-collision' && /letter case/.test(r.reason)));
+  assert.ok(!inv.files.some((f) => f.path === 'A.TXT'));
 });
 
 test('buildInventory: unsafe paths are rejected without read() and never hashed', async () => {
@@ -118,7 +120,7 @@ test('buildInventory: unsafe paths are rejected without read() and never hashed'
   }
 });
 
-test('buildInventory: rejected display paths escape EVERY control/bidi character', { todo: 'ENGINE-BUG: core.safeDisplay uses a non-global regex, so only the first control/bidi char is escaped' }, async () => {
+test('buildInventory: rejected display paths escape EVERY control/bidi character', async () => {
   const p = 'a\u202eb\u202ec\u0000d\u2066.txt';
   const inv = await core.buildInventory(entries([[p, 'x']]), { stripRoot: false });
   const shown = inv.rejected[0].path;
@@ -145,7 +147,7 @@ test('stripCommonRoot: strips only a single genuinely shared top folder', () => 
   assert.deepStrictEqual(input, ['r/x', 'r/y']);
 });
 
-test('stripCommonRoot / buildInventory: a ".." (or ".", drive letter, control-char) top segment is not stripped, so traversal entries stay rejected', { todo: 'ENGINE-BUG: stripCommonRoot strips any shared first segment, so "../a","../b" become accepted files "a","b"' }, async () => {
+test('stripCommonRoot / buildInventory: a ".." (or ".", drive letter, control-char) top segment is not stripped, so traversal entries stay rejected', async () => {
   for (const top of ['..', '.', 'C:', 'a\u202eb', '']) {
     const r = stripCommonRoot([top + '/a.txt', top + '/b.txt']);
     assert.strictEqual(r.root, '', 'stripped unsafe root ' + JSON.stringify(top));
@@ -156,7 +158,7 @@ test('stripCommonRoot / buildInventory: a ".." (or ".", drive letter, control-ch
   assert.strictEqual(inv.rejected.length, 2);
 });
 
-test('buildInventory: sensitive classification also applies to the stripped root folder', { todo: 'ENGINE-BUG: classifySensitivePath only sees the path after stripCommonRoot, so selecting a ".git"/".ssh"/"backups" folder itself exports its contents' }, async () => {
+test('buildInventory: sensitive classification also applies to the stripped root folder', async () => {
   const es = entries([['.git/config', '[remote]\nurl=x'], ['.git/HEAD', 'ref: refs/heads/main'], ['.git/index.html', 'x']]);
   const inv = await core.buildInventory(es);
   assert.strictEqual(inv.files.length, 0, 'files from a selected .git folder were included: ' + inv.files.map((f) => f.path));
@@ -164,10 +166,12 @@ test('buildInventory: sensitive classification also applies to the stripped root
 });
 
 test('normaliseBasePath: canonical forms', () => {
-  const ok = { '': '/', '/': '/', '  ': '/', site: '/site/', '/site': '/site/', '/site/': '/site/', 'a/b': '/a/b/', '/a-b_c.d~e/': '/a-b_c.d~e/' };
+  const ok = { '': '/', '/': '/', '  ': '/', site: '/site/', '/site': '/site/', '/site/': '/site/', 'a/b': '/a/b/', '/a-b_c.d/': '/a-b_c.d/' };
   for (const [i, o] of Object.entries(ok)) assert.deepStrictEqual(normaliseBasePath(i), { ok: true, basePath: o }, JSON.stringify(i));
   assert.deepStrictEqual(normaliseBasePath(undefined), { ok: true, basePath: '/' });
   assert.deepStrictEqual(normaliseBasePath(null), { ok: true, basePath: '/' });
+  // Segments must start with a letter or digit ("~user" can map to Apache UserDir; "..." is confusing).
+  for (const b of ['/~root/', '/.../', '/.hidden/', '/-x/']) assert.strictEqual(normaliseBasePath(b).ok, false, b);
 });
 
 test('normaliseBasePath: rejects traversal, empty segments, encoded and odd characters', () => {

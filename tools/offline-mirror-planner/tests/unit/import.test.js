@@ -30,7 +30,7 @@ test('importDestinations: size limit (characters) enforced before parsing', () =
   assert.deepStrictEqual(imp(atLimit).destinations, []);
 });
 
-test('importDestinations: size limit is measured in bytes, not UTF-16 code units', { todo: 'ENGINE-BUG: importDestinations compares text.length (chars) with maxImportBytes; 2M "€" chars (6 MB UTF-8) pass the 5 MiB limit' }, () => {
+test('importDestinations: size limit is measured in bytes, not UTF-16 code units', () => {
   const s = JSON.stringify([{ type: 'generic-static', notes: '\u20ac'.repeat(2e6) }]);
   assert.ok(Buffer.byteLength(s) > core.LIMITS.maxImportBytes);
   assert.throws(() => imp(s), (e) => e.code === 'IMPORT_TOO_LARGE');
