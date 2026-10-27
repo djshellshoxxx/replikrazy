@@ -1,3 +1,7 @@
+## 2026-10-27 manifest boundary checkpoint
+
+Same local branch `chatgpt/intake-read-bounds-20261027`: exact manifest records, existing intake count/collision checks, validation before digest. [Evidence and limits](../reviews/2026-10-27-manifest-boundary.md). Latest: 199 tests / 15 files, typecheck/build, 35 Chromium checks passed. Scanner review remains broker-owned; no remote writes.
+
 ## 2026-10-27 local continuation
 
 Resume `chatgpt/intake-read-bounds-20261027`; preserve the published checkpoint and Claude branch. See [read-boundary results](../reviews/2026-10-27-read-boundary.md). Latest validation: 190 tests, typecheck within build, production build and 35 Chromium regressions passed. Broker scan review packet is saved as native Library text outside git and awaits parent relay; missing T-ART-08 source remains unavailable. No push/merge/deployment in this slice.

@@ -4,8 +4,9 @@
 // entry order, compression or ZIP timestamps were.
 
 import { sha256Hex } from "../core/inventory";
-import { compareUtf8, validatePath } from "../core/paths";
+import { compareUtf8, findCaseCollisions, findFileDirConflicts, validatePath } from "../core/paths";
 import { canonicalBytes } from "./canonical";
+import { DEFAULT_ZIP_LIMITS } from "../core/zip";
 
 export interface ArtifactFile {
   path: string;
@@ -38,11 +39,16 @@ export function buildManifest(appId: string, files: readonly ArtifactFile[], ent
   return errors.length ? { ok: false, errors } : { ok: true, manifest };
 }
 
+const plainRecord = (x: unknown): x is Record<string, unknown> =>
+  x !== null && typeof x === "object" && !Array.isArray(x)
+  && (Object.getPrototypeOf(x) === Object.prototype || Object.getPrototypeOf(x) === null);
+
 // Validates a manifest from any source (including a re-imported export).
 export function validateManifest(m: unknown): string[] {
   const errors: string[] = [];
-  if (typeof m !== "object" || m === null) return ["manifest is not an object"];
+  if (!plainRecord(m)) return ["manifest is not a plain object"];
   const r = m as Record<string, unknown>;
+  if (!["schemaVersion", "appId", "files", "entrypoint"].every((k) => Object.hasOwn(r, k))) errors.push("manifest fields must be own properties");
   const extra = Object.keys(r).filter((k) => !["schemaVersion", "appId", "files", "entrypoint"].includes(k));
   if (extra.length) errors.push(`unknown fields: ${extra.join(", ")}`);
   if (r.schemaVersion !== "1.0") errors.push("unsupported schemaVersion");
@@ -51,11 +57,12 @@ export function validateManifest(m: unknown): string[] {
     errors.push("files must be a non-empty array");
     return errors;
   }
+  if (r.files.length > DEFAULT_ZIP_LIMITS.maxEntries) return [...errors, "files exceed intake count limit"];
   const seen = new Set<string>();
   let prev: string | null = null;
   for (const f of r.files as unknown[]) {
     const x = f as Record<string, unknown>;
-    if (typeof x !== "object" || x === null || Object.keys(x).length !== 3) { errors.push("file record must have exactly path, size, sha256"); continue; }
+    if (!plainRecord(x) || Object.keys(x).length !== 3 || !["path", "size", "sha256"].every((k) => Object.hasOwn(x, k))) { errors.push("file record must have exactly path, size, sha256"); continue; }
     if (typeof x.path !== "string" || !validatePath(x.path).ok) { errors.push(`invalid path: ${String(x.path)}`); continue; }
     if (!Number.isSafeInteger(x.size) || (x.size as number) < 0) errors.push(`invalid size for ${x.path}`);
     if (typeof x.sha256 !== "string" || !SHA256_RE.test(x.sha256)) errors.push(`invalid sha256 for ${x.path}`);
@@ -64,12 +71,18 @@ export function validateManifest(m: unknown): string[] {
     seen.add(x.path);
     prev = x.path;
   }
+  const paths = [...seen];
+  if (findCaseCollisions(paths).length) errors.push("paths collide under intake case folding");
+  if (findFileDirConflicts(paths).length) errors.push("path is both a file and a folder");
   if (typeof r.entrypoint !== "string" || !seen.has(r.entrypoint)) errors.push("entrypoint must name one file in the manifest");
   else if (!/\.x?html?$/i.test(r.entrypoint)) errors.push("entrypoint must be an HTML file");
   return errors;
 }
 
 export async function artifactId(m: ArtifactManifest): Promise<Digest> {
+  // Type annotations do not validate imported/runtime values. Canonical hashes
+  // identify admitted manifests only, never silently reinterpreted schemas.
+  if (validateManifest(m).length) throw new Error("invalid artifact manifest");
   return `sha256:${await sha256Hex(canonicalBytes(m))}`;
 }
 
