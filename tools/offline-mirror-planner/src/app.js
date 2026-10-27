@@ -167,7 +167,7 @@
     state.busy = b;
     ['folder-input', 'demo-site', 'demo-site-clean', 'clear-site', 'dl-bundle', 'dl-zip', 'import-input'].forEach(function (id) { $(id).disabled = b; });
     $('drop-zone').classList.toggle('disabled', b);
-    if (!b) renderExportButtons();
+    if (!b) { $('clear-site').disabled = !state.inventory; renderExportButtons(); }
   }
 
   /**
@@ -818,8 +818,37 @@
 
   // ------------------------------------------------------------- export
 
+  /**
+   * Conditions under which nothing may be exported. Works around engine gaps:
+   * plan.js copies URL fields verbatim (so credentials in a URL would be
+   * exported), and its Caddy template throws on an unparsable public URL.
+   */
+  function exportBlockers() {
+    var out = [];
+    state.destinations.forEach(function (d) {
+      var t = D.TYPES[d.type];
+      if (!t) return;
+      var name = 'Destination "' + (d.label || t.label) + '"';
+      t.fields.forEach(function (f) {
+        var v = typeof d.config[f.key] === 'string' ? d.config[f.key].trim() : '';
+        if (f.kind !== 'url' || !v) return;
+        if (/^[a-z][a-z0-9+.-]*:\/\/[^\/?#]*@/i.test(v)) out.push(name + ': "' + f.label + '" contains a username or password. Remove it; exports never carry credentials.');
+      });
+      if (d.type === 'local-server' && d.config.serverSoftware === 'caddy' && d.config.publicUrl && String(d.config.publicUrl).trim()) {
+        try { new URL(String(d.config.publicUrl).trim()); } catch (e) { out.push(name + ': the public URL is not a valid URL yet, so the Caddy template cannot be generated. Fix or clear it.'); }
+      }
+    });
+    return out;
+  }
+
   function currentExport() {
     if (exportCache && exportCache.version === state.version) return exportCache;
+    var blockers = exportBlockers();
+    if (blockers.length) {
+      var be = new Error('Export is paused until this is fixed: ' + blockers.join(' '));
+      be.blockers = blockers;
+      throw be;
+    }
     var generatedAt = new Date().toISOString();
     var input = { inventory: state.inventory, destinations: state.destinations, settings: state.settings };
     var plan = P.buildPlan({ inventory: input.inventory, destinations: input.destinations, settings: input.settings, generatedAt: generatedAt });
@@ -854,18 +883,35 @@
     showMessage($('export-error'), 'error', err ? errorText(err) : null);
   }
 
+  var exportOk = true;
+
   function renderExportButtons() {
     var hasInv = !!state.inventory;
-    $('dl-sums').disabled = !hasInv;
-    $('dl-bundle').disabled = state.busy || !hasInv || !state.sources;
-    $('dl-zip').disabled = state.busy;
+    ['dl-plan', 'dl-dests', 'dl-readme'].forEach(function (id) { $(id).disabled = !exportOk; });
+    $('dl-sums').disabled = !exportOk || !hasInv;
+    $('dl-bundle').disabled = !exportOk || state.busy || !hasInv || !state.sources;
+    $('dl-zip').disabled = !exportOk || state.busy;
     $('dl-sums').title = hasInv ? '' : 'Load a site first.';
     $('dl-bundle').title = hasInv ? '' : 'Load a site first.';
   }
 
+  function renderExportUnavailable(err) {
+    var ps = clear($('plan-state'));
+    ps.appendChild(el('p', null, ['Plan state: ', el('span', { id: 'plan-state-value', class: 'badge state-blocked', 'data-state': 'unavailable', text: 'Export unavailable' })]));
+    var items = err.blockers || ['The plan could not be built: ' + errorText(err)];
+    ps.appendChild(el('ul', { class: 'plain reasons' }, items.map(function (r) { return el('li', { text: r }); })));
+    clear($('export-dest-files'));
+    clear($('preview-select'));
+    $('preview').textContent = '';
+    exportOk = false;
+    renderExportButtons();
+  }
+
   function renderExport() {
     var ex;
-    try { ex = currentExport(); } catch (e) { showExportError(e); return; }
+    try { ex = currentExport(); } catch (e) { renderExportUnavailable(e); return; }
+    showExportError(null);
+    exportOk = true;
     renderExportButtons();
 
     var ps = clear($('plan-state'));

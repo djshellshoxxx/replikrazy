@@ -327,6 +327,20 @@ async function main() {
     await waitState(card, 'unverified');
     await settle();
     assert.ok((await page.locator('#export-dest-files').innerText()).includes('Caddyfile.template'), 'export lists the Caddy template');
+    // Export interlocks: an unparsable Caddy public URL, and credentials in a URL.
+    const planState = () => page.locator('#plan-state-value').getAttribute('data-state');
+    await fieldIn(card, 'publicUrl').fill('not a url');
+    await until(async () => (await planState()) === 'unavailable', 'export paused for invalid Caddy URL');
+    assert.ok((await page.locator('#plan-state').innerText()).includes('Caddy template'));
+    assert.equal(await page.locator('#dl-plan').isDisabled(), true);
+    assert.equal(await page.locator('#dl-bundle').isDisabled(), true);
+    await fieldIn(card, 'publicUrl').fill('https://operator:s3cret@mirror.example.org/');
+    await until(async () => (await page.locator('#plan-state').innerText()).includes('username or password'), 'export paused for credentials in URL');
+    assert.equal(await page.locator('#dl-zip').isDisabled(), true);
+    await fieldIn(card, 'publicUrl').fill('');
+    await until(async () => (await planState()) === 'draft', 'export available again');
+    assert.equal(await page.locator('#dl-plan').isDisabled(), false);
+    assert.equal(await page.locator('#dl-bundle').isDisabled(), false);
     const n = await cards().count();
     await card.locator('[data-action="remove"]').click();
     assert.equal(await cards().count(), n - 1);
