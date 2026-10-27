@@ -30,6 +30,12 @@ const URL_OR_FS_SPECIAL = /[?#%:*"<>|]/;
 
 export function validatePath(raw: string): PathResult {
   if (raw.length === 0) return { ok: false, reason: "empty path" };
+  // TextEncoder replaces unpaired UTF-16 surrogates with U+FFFD. Reject
+  // before encoding so accepted names retain their exact Unicode identity.
+  for (const char of raw) {
+    const point = char.codePointAt(0)!;
+    if (point >= 0xd800 && point <= 0xdfff) return { ok: false, reason: "path contains an unpaired surrogate" };
+  }
   if (utf8Len(raw) > PATH_LIMITS.maxPathBytes) return { ok: false, reason: "path too long" };
   if (raw.includes("\\")) return { ok: false, reason: "backslash in path" };
   if (raw.startsWith("/")) return { ok: false, reason: "absolute path" };

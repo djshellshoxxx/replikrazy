@@ -34,3 +34,25 @@ synthetic fixtures for private-data detector expansion. Full Unicode folding,
 root/entrypoint preflight ordering, broader contract import boundaries, manual
 screen-reader and cross-browser gates remain separate. No new master plan or
 worldwide provider research; no whole-app audit or live publishing claim.
+
+## Subsequent path admission slice
+
+`validatePath` now rejects lone UTF-16 surrogates before TextEncoder can replace
+them with U+FFFD. Valid surrogate pairs (astral Unicode names) remain accepted.
+This closes an exact-name admission gap under MK-CTR-008 / MK-ART-002, not the
+separate full Unicode case-folding gap. Three new rejection regressions failed
+before the fix; the accepted astral-name case passed. Original output remains
+outside git at /workspace/checkpoints/path-surrogate-original-failures.log.
+
+Final source checks: 190 tests / 14 files, typecheck and production build pass.
+Recovered existing Playwright core 1.57.0 from the installed runtime (no download)
+and ran the unchanged regression script with installed Chromium: 35 checks,
+zero page errors and external requests, both at the preceding read-boundary
+commit and after this path change. No new axe/screen-reader/cross-browser pass.
+
+Private scanner review packet saved and native text readability verified. It
+pins all source sections at 43382e675b9d6f5196197a74bc5debe1176fbcc7 and includes
+caller deltas from e437a488. The subsequent path fix does not change scanner
+code or its reference parsing; review remains read-only/disjoint. Library
+identity and section manifest remain in the private checkpoint receipt outside
+git. Parent relays to the sole paid-call broker; this executor made no paid call.

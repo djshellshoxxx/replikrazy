@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import { compareUtf8, findCaseCollisions, findFileDirConflicts, validatePath } from "../src/core/paths";
 
 describe("validatePath", () => {
-  it.each(["index.html", "css/site.css", "a/b/c/d.png", "ünïcode.html", "_redirects", ".well-known/security.txt"])(
+  it.each(["index.html", "css/site.css", "a/b/c/d.png", "ünïcode.html", "\u{1F600}.html", "_redirects", ".well-known/security.txt"])(
     "accepts %s", (p) => expect(validatePath(p).ok).toBe(true));
   it.each([
+    ["\ud800.html", "path contains an unpaired surrogate"],
+    ["x\udc00.html", "path contains an unpaired surrogate"],
+    ["\ud800\ud800.html", "path contains an unpaired surrogate"],
     ["", "empty path"], ["/etc/passwd", "absolute path"], ["../x", "dot segment"], ["a/../../x", "dot segment"],
     ["a/./b", "dot segment"], ["a\\b", "backslash in path"], ["C:/x", "drive-letter path"], ["a//b", "empty path segment"],
     ["a/", "empty path segment"], ["nul.txt", "reserved device name"], ["a/COM1", "reserved device name"],
