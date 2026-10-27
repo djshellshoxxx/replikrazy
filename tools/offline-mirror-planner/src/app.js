@@ -120,7 +120,8 @@
   function sanitizedSettings() { return P.sanitizeSettings(state.settings); }
 
   function assessCtx() {
-    return { inventory: state.inventory, headers: sanitizedSettings().settings.headers };
+    // Only valid headers are ever planned, so requirements follow those.
+    return { inventory: state.inventory, headers: sanitizedSettings().validHeaders };
   }
 
   function assess(d) {
@@ -801,14 +802,14 @@
     });
     var box = $('settings-errors');
     if (res.errors.length) {
-      showMessage(box, 'error', [el('strong', { text: plural(res.errors.length, 'setting problem') + '. ' }), 'The plan stays a draft until they are fixed.'].concat(general.length ? [el('ul', null, general.map(function (g) { return el('li', { text: g }); }))] : []));
+      showMessage(box, 'error', [el('strong', { text: plural(res.errors.length, 'setting problem') + '. ' }), 'Invalid headers are never exported, and the plan stays a draft until they are fixed.'].concat(general.length ? [el('ul', null, general.map(function (g) { return el('li', { text: g }); }))] : []));
     } else showMessage(box, 'error', null);
   }
 
   function renderSettingsStatus() {
     var s = $('onion-location-status');
     if (!state.settings.advertiseOnionLocation) { s.textContent = 'Off. No Onion-Location header will be planned.'; return; }
-    var dests = state.destinations.map(D.sanitizeDestination).filter(Boolean);
+    var dests = P.prepareDestinations(state.destinations);
     var onion = dests.filter(function (d) { return d.type === 'tor-onion' && D.effectiveBaseUrl(d); })[0];
     var https = dests.filter(function (d) { var u = D.effectiveBaseUrl(d); return u && /^https:/.test(u); });
     if (!onion) s.textContent = 'On, but no onion destination has an entered address yet, so no header is planned.';
@@ -818,37 +819,8 @@
 
   // ------------------------------------------------------------- export
 
-  /**
-   * Conditions under which nothing may be exported. Works around engine gaps:
-   * plan.js copies URL fields verbatim (so credentials in a URL would be
-   * exported), and its Caddy template throws on an unparsable public URL.
-   */
-  function exportBlockers() {
-    var out = [];
-    state.destinations.forEach(function (d) {
-      var t = D.TYPES[d.type];
-      if (!t) return;
-      var name = 'Destination "' + (d.label || t.label) + '"';
-      t.fields.forEach(function (f) {
-        var v = typeof d.config[f.key] === 'string' ? d.config[f.key].trim() : '';
-        if (f.kind !== 'url' || !v) return;
-        if (/^[a-z][a-z0-9+.-]*:\/\/[^\/?#]*@/i.test(v)) out.push(name + ': "' + f.label + '" contains a username or password. Remove it; exports never carry credentials.');
-      });
-      if (d.type === 'local-server' && d.config.serverSoftware === 'caddy' && d.config.publicUrl && String(d.config.publicUrl).trim()) {
-        try { new URL(String(d.config.publicUrl).trim()); } catch (e) { out.push(name + ': the public URL is not a valid URL yet, so the Caddy template cannot be generated. Fix or clear it.'); }
-      }
-    });
-    return out;
-  }
-
   function currentExport() {
     if (exportCache && exportCache.version === state.version) return exportCache;
-    var blockers = exportBlockers();
-    if (blockers.length) {
-      var be = new Error('Export is paused until this is fixed: ' + blockers.join(' '));
-      be.blockers = blockers;
-      throw be;
-    }
     var generatedAt = new Date().toISOString();
     var input = { inventory: state.inventory, destinations: state.destinations, settings: state.settings };
     var plan = P.buildPlan({ inventory: input.inventory, destinations: input.destinations, settings: input.settings, generatedAt: generatedAt });
@@ -898,8 +870,7 @@
   function renderExportUnavailable(err) {
     var ps = clear($('plan-state'));
     ps.appendChild(el('p', null, ['Plan state: ', el('span', { id: 'plan-state-value', class: 'badge state-blocked', 'data-state': 'unavailable', text: 'Export unavailable' })]));
-    var items = err.blockers || ['The plan could not be built: ' + errorText(err)];
-    ps.appendChild(el('ul', { class: 'plain reasons' }, items.map(function (r) { return el('li', { text: r }); })));
+    ps.appendChild(el('p', { class: 'message error', text: 'The plan could not be built: ' + errorText(err) }));
     clear($('export-dest-files'));
     clear($('preview-select'));
     $('preview').textContent = '';
@@ -918,6 +889,8 @@
     var ready = ex.plan.planState === 'ready-for-manual-review';
     ps.appendChild(el('p', null, ['Plan state: ', el('span', { id: 'plan-state-value', class: 'badge ' + (ready ? 'state-ready' : 'state-needs'), 'data-state': ex.plan.planState, text: ready ? 'Ready for manual review (nothing verified)' : 'Draft' })]));
     ps.appendChild(el('ul', { class: 'plain reasons' }, ex.plan.planStateReasons.map(function (r) { return el('li', { text: r }); })));
+    var omittedHeaders = ex.plan.settings.headersOmittedAsInvalid || 0;
+    if (omittedHeaders) ps.appendChild(el('p', { class: 'message warning', id: 'omitted-headers', text: plural(omittedHeaders, 'invalid header is', 'invalid headers are') + ' left out of every export until fixed (see Headers & settings).' }));
     ps.appendChild(el('p', { class: 'hint', text: ex.plan.notice }));
 
     // Per-destination files.
@@ -927,8 +900,10 @@
       var dir = pd.instructionsFile.replace(/\/INSTRUCTIONS\.md$/, '');
       var slug = dir.split('/').pop();
       var files = [pd.instructionsFile].concat(pd.templates);
+      var omitted = (pd.record && pd.record.omittedInvalidFields) || [];
       box.appendChild(el('div', { class: 'dest-files', 'data-dest-id': pd.id }, [
         el('p', { class: 'dest-files-title' }, [el('strong', { text: pd.label }), ' — ', el('span', { text: pd.typeLabel })]),
+        omitted.length ? el('p', { class: 'hint omitted-fields', text: 'Not exported because the value is invalid: ' + omitted.map(function (k) { return fieldLabel(pd.type, k); }).join('; ') + '. Fix it in the destination to include it.' }) : null,
         el('div', { class: 'button-row' }, files.map(function (f) {
           var name = f.split('/').pop();
           return el('button', { type: 'button', class: 'secondary', 'data-artifact': f, on: { click: function () { downloadArtifact(f, slug + '-' + name); } } }, ['Download ' + name, el('span', { class: 'visually-hidden', text: ' for ' + pd.label })]);
@@ -951,6 +926,14 @@
     var p = $('preview-select').value;
     var a = ex.artifacts.filter(function (x) { return x.path === p; })[0];
     $('preview').textContent = a ? a.content : '';
+  }
+
+  function fieldLabel(type, key) {
+    if (key === 'basePath') return 'Base path';
+    if (key === 'label') return 'Label';
+    if (key === 'notes') return 'Notes';
+    var f = (D.TYPES[type] ? D.TYPES[type].fields : []).filter(function (x) { return x.key === key; })[0];
+    return f ? f.label : key;
   }
 
   function zipName(withSite) {

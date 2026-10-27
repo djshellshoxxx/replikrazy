@@ -168,7 +168,11 @@ function writeFolder() {
     'img/bin.png': Buffer.from(Array.from({ length: 2048 }, (_, i) => (i * 37 + 11) & 0xff)),
     'notes.txt': Buffer.from('CRLF line one\r\nline two\r\n'),
     '.env': Buffer.from('API_TOKEN=do-not-read-me\n'),
-    '.git/HEAD': Buffer.from('ref: refs/heads/main\n')
+    '.git/HEAD': Buffer.from('ref: refs/heads/main\n'),
+    '.well-known/security.txt': Buffer.from('Contact: mailto:security@example.org\n'),
+    'cgi-bin/form.php': Buffer.from('<?php echo 1; ?>\n'),
+    'Readme.txt': Buffer.from('upper\n'),
+    'readme.txt': Buffer.from('lower\n')
   };
   files[hostileName()] = Buffer.from('<p>hostile name</p>\n');
   for (const [rel, buf] of Object.entries(files)) {
@@ -232,8 +236,11 @@ async function main() {
     await until(async () => (await page.locator('#inv-file-count').count()) && (await text('#inv-file-count')) === String(invFull.totals.fileCount), 'demo inventory');
     assert.equal(await text('#inv-excluded-count'), String(invFull.totals.excludedCount));
     assert.equal(await text('#inv-rejected-count'), String(invFull.totals.rejectedCount));
-    assert.equal(invFull.totals.excludedCount, 9);
-    assert.equal(invFull.totals.rejectedCount, 2);
+    assert.ok(invFull.totals.excludedCount > 0 && invFull.totals.rejectedCount > 0, 'full demo has excluded and rejected entries');
+    // Same numbers when the engine runs inside the page itself.
+    const inPage = await page.evaluate(() => window.OMP.core.buildInventory(window.OMP.demo.entries()).then((i) => i.totals));
+    assert.deepEqual(inPage, invFull.totals);
+    assert.equal(await text('#inv-file-count'), String(inPage.fileCount));
     assert.equal(await text('#inv-manifest'), invFull.manifestSha256);
     assert.equal(await page.locator('#files-table tbody tr').count(), invFull.files.length);
     const filePaths = await page.locator('#files-table tbody td.path').allTextContents();
@@ -259,7 +266,7 @@ async function main() {
     assert.equal(await text('#inv-manifest'), invClean.manifestSha256);
     assert.equal(await page.locator('#excluded-table tbody td.empty').count(), 1);
     await page.click('#demo-site');
-    await until(async () => (await text('#inv-excluded-count')) === '9', 'full demo reloaded');
+    await until(async () => (await text('#inv-excluded-count')) === String(invFull.totals.excludedCount), 'full demo reloaded');
   });
 
   await step('generic static destination: add, validate, declare, block, duplicate, remove', async () => {
@@ -268,9 +275,12 @@ async function main() {
     const id = await lastCardId();
     const card = cardById(id);
     assert.equal(await card.getAttribute('data-type'), 'generic-static');
+    assert.equal(await page.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-field')), 'label', 'focus moves to the new card');
+    await fieldIn(card, 'basePath').fill('/-bad/');
+    await until(async () => (await listText(card, 'error-list')).includes('Base path segment'), 'base path error');
+    await fieldIn(card, 'basePath').fill('/');
     await waitState(card, 'needs-configuration');
     assert.ok((await listText(card, 'missing-list')).includes('Public base URL'));
-    assert.equal(await page.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-field')), 'label', 'focus moves to the new card');
     await fieldIn(card, 'address').fill('ftp://mirror.example.org/');
     await until(async () => (await listText(card, 'error-list')).includes('Only http:// and https://'), 'URL scheme error');
     assert.equal(await fieldIn(card, 'address').getAttribute('aria-invalid'), 'true');
@@ -311,7 +321,8 @@ async function main() {
   await step('local web server destination: add, validate, warn, remove', async () => {
     await page.selectOption('#dest-type', 'local-server');
     await page.click('#dest-add');
-    const card = cardById(await lastCardId());
+    const id = await lastCardId();
+    const card = cardById(id);
     await waitState(card, 'needs-configuration');
     assert.ok((await listText(card, 'missing-list')).includes('Document root'));
     await fieldIn(card, 'documentRoot').fill('relative/path');
@@ -327,20 +338,25 @@ async function main() {
     await waitState(card, 'unverified');
     await settle();
     assert.ok((await page.locator('#export-dest-files').innerText()).includes('Caddyfile.template'), 'export lists the Caddy template');
-    // Export interlocks: an unparsable Caddy public URL, and credentials in a URL.
+    // Invalid values are shown as errors and left out of exports (the engine omits them).
     const planState = () => page.locator('#plan-state-value').getAttribute('data-state');
+    const destFiles = () => page.locator('#export-dest-files .dest-files[data-dest-id="' + id + '"]');
     await fieldIn(card, 'publicUrl').fill('not a url');
-    await until(async () => (await planState()) === 'unavailable', 'export paused for invalid Caddy URL');
-    assert.ok((await page.locator('#plan-state').innerText()).includes('Caddy template'));
-    assert.equal(await page.locator('#dl-plan').isDisabled(), true);
-    assert.equal(await page.locator('#dl-bundle').isDisabled(), true);
-    await fieldIn(card, 'publicUrl').fill('https://operator:s3cret@mirror.example.org/');
-    await until(async () => (await page.locator('#plan-state').innerText()).includes('username or password'), 'export paused for credentials in URL');
-    assert.equal(await page.locator('#dl-zip').isDisabled(), true);
-    await fieldIn(card, 'publicUrl').fill('');
-    await until(async () => (await planState()) === 'draft', 'export available again');
+    await until(async () => (await listText(card, 'error-list')).includes('Not a valid URL'), 'invalid public URL error');
+    await settle();
+    assert.equal(await planState(), 'draft', 'export stays available');
+    assert.ok((await destFiles().innerText()).includes('Not exported because the value is invalid: Public URL'));
     assert.equal(await page.locator('#dl-plan').isDisabled(), false);
-    assert.equal(await page.locator('#dl-bundle').isDisabled(), false);
+    await fieldIn(card, 'publicUrl').fill('https://operator:s3cret@mirror.example.org/');
+    await until(async () => (await listText(card, 'error-list')).includes('username or password'), 'credentials-in-URL error');
+    await settle();
+    await page.selectOption('#preview-select', 'offline-mirror-plan/plan.json');
+    assert.ok(!(await page.locator('#preview').textContent()).includes('s3cret'), 'credential never reaches the plan');
+    const zip = await downloadVia('#dl-zip');
+    assert.ok(!zip.bytes.toString('latin1').includes('s3cret'), 'credential never reaches any exported file');
+    await fieldIn(card, 'publicUrl').fill('');
+    await settle();
+    assert.equal(await destFiles().locator('.omitted-fields').count(), 0);
     const n = await cards().count();
     await card.locator('[data-action="remove"]').click();
     assert.equal(await cards().count(), n - 1);
@@ -474,10 +490,13 @@ async function main() {
     assert.equal(await page.evaluate(() => document.activeElement.getAttribute('data-header-name')), String(n0), 'focus moves to the new header');
     await nameIn.fill('Bad Header');
     await valIn.fill('x');
-    await until(async () => (await rows().nth(n0).innerText()).includes('not allowed'), 'header name error');
+    await until(async () => (await rows().nth(n0).innerText()).includes('must start with a letter'), 'header name error');
     assert.equal(await page.locator('#settings-errors').isVisible(), true);
     await settle();
     assert.ok((await page.locator('#plan-state').innerText()).includes('plan setting error'));
+    assert.ok((await text('#omitted-headers')).includes('1 invalid header is left out'));
+    await page.selectOption('#preview-select', 'offline-mirror-plan/plan.json');
+    assert.ok(!(await page.locator('#preview').textContent()).includes('Bad Header'), 'invalid header not exported');
     await nameIn.fill('Set-Cookie');
     await until(async () => (await rows().nth(n0).innerText()).includes('credential-bearing'), 'forbidden header error');
     await nameIn.fill('X-Frame-Options');
@@ -642,10 +661,13 @@ async function main() {
     assert.ok((await text('#inv-source')).includes('my-site'));
     assert.equal(await page.locator('#site-label').inputValue(), 'my-site');
     const included = await page.locator('#files-table tbody td.path').allTextContents();
-    assert.deepEqual(included, ['404.html', 'img/bin.png', 'index.html', 'notes.txt', 'sub/page.html']);
+    const readmes = included.filter((p) => /^readme\.txt$/i.test(p));
+    assert.equal(readmes.length, 1, 'exactly one of the case-colliding files is included');
+    assert.deepEqual(included.filter((p) => p !== readmes[0]), ['.well-known/security.txt', '404.html', 'img/bin.png', 'index.html', 'notes.txt', 'sub/page.html']);
     const excl = await page.locator('#excluded-table tbody td.path').allTextContents();
-    assert.ok(excl.includes('.env'), '.env excluded (got ' + excl.join(', ') + ')');
-    assert.ok(excl.includes('.git/HEAD'), '.git/HEAD excluded');
+    for (const p of ['.env', '.git/HEAD', 'cgi-bin/form.php']) assert.ok(excl.includes(p), p + ' excluded (got ' + excl.join(', ') + ')');
+    const rejRows = await page.locator('#rejected-table tbody tr').allInnerTexts();
+    assert.ok(rejRows.some((r) => /readme\.txt/i.test(r) && r.includes('case-collision')), 'case collision rejected');
     const rejCodes = await page.locator('#rejected-table tbody td.path code').allTextContents();
     assert.ok(rejCodes.includes(hostileName()), 'hostile file name listed verbatim as text (got ' + rejCodes.join(', ') + ')');
     const dom = await page.evaluate(() => ({ imgs: document.querySelectorAll('img').length }));
@@ -659,7 +681,8 @@ async function main() {
     const site = entries.filter((e) => e.path.startsWith('offline-mirror-plan/site/'));
     assert.deepEqual(site.map((e) => e.path.slice(25)).sort(), included.slice().sort());
     for (const e of site) assert.ok(Buffer.from(e.bytes).equals(files[e.path.slice(25)]), 'bytes preserved for ' + e.path);
-    assert.ok(!entries.some((e) => /\.env$|\.git\/|onerror/.test(e.path)), 'no excluded/rejected entries in bundle');
+    assert.ok(!entries.some((e) => /\.env$|\.git\/|onerror|\.php$/.test(e.path)), 'no excluded/rejected entries in bundle');
+    assert.equal(entries.filter((e) => /readme\.txt$/i.test(e.path)).length, 1, 'only one of the case-colliding files is bundled');
     const sums = entries.find((e) => e.path === 'offline-mirror-plan/SHA256SUMS');
     for (const rel of included) assert.ok(Buffer.from(sums.bytes).toString().includes(sha256(files[rel]) + '  ' + rel));
   });

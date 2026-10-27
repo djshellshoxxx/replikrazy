@@ -51,7 +51,7 @@
 
 <section id="site" class="panel" aria-labelledby="site-title">
   <h2 id="site-title">1. Site folder</h2>
-  <p>Select the folder that contains the built static site (the folder with <code>index.html</code>). Files are read and hashed (SHA-256) inside this tab. Sensitive files — credentials, private keys, onion/I2P key material, wallets, databases, backups, version-control and OS metadata — are excluded without being read.</p>
+  <p>Select the folder that contains the built static site (the folder with <code>index.html</code>). Files are read and hashed (SHA-256) inside this tab. Sensitive files — credentials, private keys, onion/I2P key material, wallets, databases, backups, server-side code and configuration, version-control and OS metadata, and hidden files or folders (except a top-level <code>.well-known/</code>) — are excluded without being read. Files whose content contains secret markers are excluded after scanning; files whose names differ only by letter case are rejected.</p>
   <details class="limits">
     <summary>Limits</summary>
     <ul id="limits-list"></ul>
