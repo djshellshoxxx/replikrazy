@@ -35,3 +35,31 @@ hash-match claim follows. Timestamps are claims, not freshness/trust evidence.
 Plans, operations, provenance, cross-record references and secret exclusions
 still prevent full RecoveryRecord hydration. Next bounded layer may validate
 provenance claims and artifact references without enabling signature trust.
+
+## Adjacent provenance slice
+
+Artifact checkpoint: 0baa4498f89db1f1e2b321d14ad7f39575ded506. Continued with
+source-pinned MK-CTR-003 Provenance: exact required/optional fields, version,
+owner-supplied claim label, UTC timestamp, label/revision/description scalar
+limits and HTTPS source URL without credentials or fragment. artifactId must
+refer to an included, manifest-bound ArtifactHandle. No provider access occurs.
+
+Unknown signature objects remain untrusted opaque sidecars within the 64 KiB
+cap. They are not verified or interpreted as algorithm/key trust. Full import
+and secret-material exclusion remain disabled; passing this metadata layer is
+NOT approval to ingest keys, sign, publish, restore consent or hydrate state.
+No raw signature/source detail enters typed errors. Failed sources stay intact.
+
+Before implementation: ten failures / one pass in new provenance fixtures;
+/workspace/checkpoints/recovery-provenance-original-failures.log retained outside
+git. Final complete source: 276 tests / 21 files, typecheck/build, diff check and
+39 Chromium checks pass; zero browser errors/external requests. No changes to
+scanner, providers, policy gates, thresholds or previously failing fixtures.
+
+This is a coherent read-only boundary handoff. Further accepted engineering
+could validate PublishPlan/OperationRecord shapes and cross-record references,
+but no currently recognized record may be hydrated. Explicitly missing for a
+full importer: complete nested validation, secret/auth-material exclusions,
+ledger consistency and expiry/reconciliation handling. Current work neither
+implements nor authorizes that lifecycle. Missing T-ART-08 still gates detector
+expansion only; no recovery gate is falsely attributed to those missing bytes.

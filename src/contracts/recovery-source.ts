@@ -1,4 +1,5 @@
 // MK-CTR-001/007/008: read-only envelope inspection, never record hydration.
+import { validateProvenance } from "./provenance";
 import { isUtc, validateArtifactHandle } from "./artifact-handle";
 import { boundedText, exactKeys, isRecord, type Result } from "./diagnostic";
 import { parseRecordJson, RecordJsonError } from "./record-json";
@@ -22,11 +23,18 @@ export async function inspectRecoverySource(source: string): Promise<RecoverySou
     if (x[key].length > cap) return reject("MK_LIMIT_EXCEEDED");
     if (!x[key].every(isRecord)) return reject("MK_RECORD_CORRUPT");
   }
+  const artifactIds = new Set<string>();
   for (const artifact of x.artifacts as unknown[]) {
     const checked = await validateArtifactHandle(artifact);
     if (!checked.ok) return { source, result: checked };
+    artifactIds.add(checked.value.artifactId);
   }
-  // Artifact metadata is manifest-bound. Plans, operations, provenance and
-  // cross-record references remain unvalidated. Never apply this value.
+  for (const provenance of x.provenance as unknown[]) {
+    const checked = validateProvenance(provenance, artifactIds);
+    if (!checked.ok) return { source, result: checked };
+  }
+  // Artifact metadata is manifest-bound; provenance remains owner claims.
+  // Plans, operations, signatures and secret exclusions remain unvalidated.
+  // Never apply this value.
   return { source, result: { ok: true, value: { disposition: "read-only-unvalidated", envelope: x } } };
 }

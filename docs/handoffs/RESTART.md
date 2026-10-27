@@ -1,3 +1,7 @@
+## 2026-10-27 provenance metadata checkpoint
+
+Continued from ArtifactHandle checkpoint 0baa4498f89db1f1e2b321d14ad7f39575ded506: validate owner-claim fields and included-artifact references; signatures stay opaque/untrusted. [Evidence and remaining import gates](../reviews/2026-10-27-artifact-binding.md). Latest: 276 tests / 21 files, typecheck/build and 39 Chromium checks passed. Inspection remains read-only-unvalidated; no hydration authority.
+
 ## 2026-10-27 ArtifactHandle binding checkpoint
 
 Read-only recovery inspection validates ArtifactHandle metadata and canonical manifest identity. No payload verification or hydration. [Evidence](../reviews/2026-10-27-artifact-binding.md). Latest: 265 tests / 20 files, typecheck/build and 39 Chromium checks passed. Scanner unchanged.
