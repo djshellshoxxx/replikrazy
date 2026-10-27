@@ -61,23 +61,67 @@
     }
     if (!s.siteLabel) errors.push({ field: 'siteLabel', message: 'Site label is required.' });
     else if (s.siteLabel.length > core.LIMITS.maxLabelLength) errors.push({ field: 'siteLabel', message: 'Site label is longer than ' + core.LIMITS.maxLabelLength + ' characters.' });
+    else if (core.hasControlChars(s.siteLabel)) errors.push({ field: 'siteLabel', message: 'Site label contains line breaks or control characters.' });
     else if (core.scanFieldForSecrets(s.siteLabel).length) errors.push({ field: 'siteLabel', message: 'Site label looks like it contains a credential.' });
     if (s.headers.length > core.LIMITS.maxHeaders) errors.push({ field: 'headers', message: 'At most ' + core.LIMITS.maxHeaders + ' headers.' });
-    var seen = {};
+    var seen = Object.create(null);
+    var valid = [];
     s.headers.forEach(function (h, i) {
-      core.validateHeader(h).forEach(function (m) { errors.push({ field: 'headers.' + i, message: m }); });
+      var errs = core.validateHeader(h);
       var k = h.name.toLowerCase();
-      if (k && seen[k]) errors.push({ field: 'headers.' + i, message: 'Header "' + h.name + '" is listed twice.' });
-      if (k === 'strict-transport-security' || k === 'onion-location') errors.push({ field: 'headers.' + i, message: 'Header "' + h.name + '" is added per destination automatically; do not list it globally.' });
-      seen[k] = true;
+      if (!errs.length && seen[k]) errs.push('Header "' + h.name + '" is listed twice.');
+      if (!errs.length && (k === 'strict-transport-security' || k === 'onion-location')) errs.push('Header "' + h.name + '" is added per destination automatically; do not list it globally.');
+      errs.forEach(function (m) { errors.push({ field: 'headers.' + i, message: m }); });
+      if (k) seen[k] = true;
+      if (!errs.length && i < core.LIMITS.maxHeaders) valid.push({ name: h.name, value: h.value });
     });
-    return { settings: s, errors: errors };
+    // validHeaders: the only headers ever written into exports or templates.
+    var labelOk = !errors.some(function (e) { return e.field === 'siteLabel'; });
+    return { settings: s, errors: errors, validHeaders: valid, exportLabel: labelOk ? s.siteLabel : 'Untitled static site (label needs attention)' };
+  }
+
+  /**
+   * Sanitize a destination list once, with deterministic, unique ids, so the
+   * plan and every exported file refer to the same records.
+   */
+  function prepareDestinations(list) {
+    var out = [], used = Object.create(null);
+    (Array.isArray(list) ? list : []).slice(0, core.LIMITS.maxDestinations).forEach(function (raw, i) {
+      var d = dest.sanitizeDestination(raw);
+      if (!d) return;
+      var id = raw && dest.isValidId(raw.id) && !core.scanFieldForSecrets(raw.id).length ? raw.id : 'dest-' + (i + 1);
+      var base = id, n = 2;
+      while (used[id]) id = base.slice(0, 36) + '-' + (n++);
+      used[id] = true;
+      d.id = id;
+      out.push(d);
+    });
+    return out;
+  }
+
+  /** Fields of a destination that failed validation (never written into templates/exports). */
+  function badFields(d) {
+    var v = dest.validateDestination(d);
+    var bad = Object.create(null), missing = Object.create(null);
+    v.errors.forEach(function (e) { bad[e.field] = true; });
+    v.missing.forEach(function (m) { missing[m.field] = true; });
+    return { bad: bad, missing: missing };
+  }
+
+  /** Config safe for templates: invalid or missing values become visible placeholders. */
+  function templateConfig(d) {
+    var b = badFields(d);
+    var cfg = {};
+    Object.keys(d.config).forEach(function (k) {
+      cfg[k] = (b.bad[k] || b.missing[k] || d.config[k] === '') ? '' : d.config[k];
+    });
+    return { id: d.id, type: d.type, label: d.label, basePath: b.bad.basePath ? '/' : d.basePath, config: cfg };
   }
 
   // ---------------------------------------------------------------- plan
 
   function headersFor(d, settings, destinations) {
-    var out = settings.headers.map(function (h) { return { name: h.name, value: h.value, source: 'plan' }; });
+    var out = sanitizeSettings(settings).validHeaders.map(function (h) { return { name: h.name, value: h.value, source: 'plan' }; });
     var url = dest.effectiveBaseUrl(d);
     if (url && /^https:/.test(url)) out.push({ name: 'Strict-Transport-Security', value: 'max-age=31536000', source: 'https-destination' });
     if (settings.advertiseOnionLocation && url && /^https:/.test(url)) {
@@ -88,21 +132,36 @@
   }
 
   function redact(text) {
+    text = String(text === undefined || text === null ? '' : text);
     if (core.scanFieldForSecrets(text).length) return '[redacted by planner: possible credential]';
     return text;
   }
 
+  // Values that failed validation are omitted (they may hold injected text or
+  // credentials, e.g. https://user:pass@host); credential-looking text is redacted.
   function destinationForExport(d) {
-    var cfg = {};
+    var b = badFields(d);
+    var cfg = {}, omitted = [];
     Object.keys(d.config).forEach(function (k) {
       var v = d.config[k];
       if (k === 'address' && (d.type === 'tor-onion' || d.type === 'i2p') && d.config.addressMode !== 'entered') v = '';
+      if (b.bad[k] && v !== '') { v = ''; omitted.push(k); }
       cfg[k] = typeof v === 'string' ? redact(v) : v;
     });
-    return {
-      id: d.id, type: d.type, label: redact(d.label), basePath: d.basePath,
-      notes: redact(d.notes || ''), config: cfg, capabilities: JSON.parse(JSON.stringify(d.capabilities))
+    var rec = {
+      id: d.id, type: d.type,
+      label: b.bad.label ? 'Destination ' + d.id : redact(d.label),
+      basePath: b.bad.basePath ? '' : d.basePath,
+      notes: b.bad.notes ? '[omitted by planner: notes failed validation]' : redact(d.notes || ''),
+      config: cfg, capabilities: JSON.parse(JSON.stringify(d.capabilities))
     };
+    if (b.bad.basePath) omitted.push('basePath');
+    if (omitted.length) rec.omittedInvalidFields = omitted;
+    return rec;
+  }
+
+  function cleanMessages(list) {
+    return list.map(function (m) { var o = {}; Object.keys(m).forEach(function (k) { o[k] = typeof m[k] === 'string' ? redact(core.safeDisplay(m[k])) : m[k]; }); return o; });
   }
 
   /**
@@ -115,8 +174,8 @@
     var inv = input.inventory || null;
     var ss = sanitizeSettings(input.settings);
     var settings = ss.settings;
-    var dests = (input.destinations || []).slice(0, core.LIMITS.maxDestinations).map(dest.sanitizeDestination).filter(Boolean);
-    var ctx = { inventory: inv, headers: settings.headers };
+    var dests = prepareDestinations(input.destinations);
+    var ctx = { inventory: inv, headers: ss.validHeaders };
 
     var reasons = [];
     if (!inv) reasons.push('No site has been inventoried.');
@@ -127,31 +186,49 @@
     }
     if (ss.errors.length) reasons.push(ss.errors.length + ' plan setting error(s).');
     if (!dests.length) reasons.push('No destinations have been added.');
-    if ((input.destinations || []).length > core.LIMITS.maxDestinations) reasons.push('Only the first ' + core.LIMITS.maxDestinations + ' destinations are included.');
+    if (Array.isArray(input.destinations) && input.destinations.length > core.LIMITS.maxDestinations) reasons.push('Only the first ' + core.LIMITS.maxDestinations + ' destinations are included.');
 
     var crossWarnings = [];
     if (inv && inv.externalReferenceFiles && inv.externalReferenceFiles.length) {
-      var csp = settings.headers.filter(function (h) { return h.name.toLowerCase() === 'content-security-policy'; })[0];
+      var csp = ss.validHeaders.filter(function (h) { return h.name.toLowerCase() === 'content-security-policy'; })[0];
       if (csp && /default-src\s+'self'/.test(csp.value)) crossWarnings.push(inv.externalReferenceFiles.length + ' file(s) reference external hosts, which the planned Content-Security-Policy (default-src \'self\') will block.');
     }
-    var localListeners = dests.filter(function (d) { return d.type === 'local-server'; }).map(function (d) { return d.config.listenAddress; });
+    var localServers = dests.filter(function (d) { return d.type === 'local-server'; });
+    var localListeners = localServers.map(function (d) { return d.config.listenAddress; });
+    var localRoots = localServers.map(function (d) { return (d.config.documentRoot || '').replace(/\\/g, '/').replace(/\/+$/, ''); }).filter(Boolean);
 
     var outDests = dests.map(function (d) {
       var a = dest.assessDestination(d, ctx);
       var bp = core.normaliseBasePath(d.basePath);
       var extraWarnings = [];
+      if (d.type === 'tor-onion' && d.config.hiddenServiceDir) {
+        var hs = d.config.hiddenServiceDir.replace(/\\/g, '/').replace(/\/+$/, '');
+        if (localRoots.some(function (r) { return hs === r || hs.indexOf(r + '/') === 0 || r.indexOf(hs + '/') === 0; })) {
+          a.errors.push({ field: 'hiddenServiceDir', message: 'HiddenServiceDir overlaps the document root of a local web server in this plan; onion keys would be web-served.' });
+          a.state = dest.STATES.NEEDS_CONFIGURATION;
+          a.stateLabel = dest.STATE_LABELS[a.state];
+        }
+      }
       if ((d.type === 'tor-onion' || d.type === 'i2p') && d.config.localTarget && !/^unix:/.test(d.config.localTarget) && localListeners.indexOf(d.config.localTarget) === -1) {
         extraWarnings.push({ field: 'localTarget', message: 'No "local web server" destination in this plan listens on ' + d.config.localTarget + '. Add one, or make sure the operator\'s server is configured there.' });
       }
-      if (a.state !== dest.STATES.READY) reasons.push('Destination "' + redact(d.label) + '" is ' + a.state + '.');
+      var rec = destinationForExport(d);
+      if (a.state !== dest.STATES.READY) reasons.push('Destination "' + rec.label + '" is ' + a.state + '.');
+      var addrBad = a.errors.some(function (e) { return e.field === 'address' || e.field === 'publicUrl' || e.field === 'listenAddress'; });
       var addrStatus;
-      if (d.type === 'tor-onion' || d.type === 'i2p') addrStatus = d.config.addressMode === 'entered' && d.config.address ? 'user-entered-format-checked-unverified' : 'pending-operator-generation';
-      else addrStatus = (d.type === 'generic-static' ? d.config.address : (d.config.publicUrl || d.config.listenAddress)) ? 'user-entered-unverified' : 'not-provided';
+      if (d.type === 'tor-onion' || d.type === 'i2p') {
+        if (d.config.addressMode !== 'entered') addrStatus = 'pending-operator-generation';
+        else if (!d.config.address) addrStatus = 'not-provided';
+        else addrStatus = addrBad ? 'user-entered-invalid' : 'user-entered-format-checked-unverified';
+      } else {
+        var addr = d.type === 'generic-static' ? d.config.address : (d.config.publicUrl || d.config.listenAddress);
+        addrStatus = !addr ? 'not-provided' : addrBad ? 'user-entered-invalid' : 'user-entered-unverified';
+      }
       return {
         id: d.id,
         type: d.type,
         typeLabel: dest.TYPES[d.type].label,
-        label: redact(d.label),
+        label: rec.label,
         state: a.state,
         stateLabel: a.stateLabel,
         verified: false,
@@ -162,11 +239,11 @@
         templates: templateFiles(d, settings, dests, inv).map(function (t) { return 'destinations/' + fileSlug(d) + '/' + t.name; }),
         requiredHeaders: headersFor(d, settings, dests),
         capabilities: a.capabilities,
-        missingConfiguration: a.missing,
-        pendingOperatorActions: a.pending,
-        errors: a.errors,
-        warnings: a.warnings.concat(extraWarnings),
-        record: destinationForExport(d)
+        missingConfiguration: cleanMessages(a.missing),
+        pendingOperatorActions: cleanMessages(a.pending),
+        errors: cleanMessages(a.errors),
+        warnings: cleanMessages(a.warnings.concat(extraWarnings)),
+        record: rec
       };
     });
 
@@ -180,7 +257,7 @@
       planState: ready ? 'ready-for-manual-review' : 'draft',
       planStateReasons: ready ? ['Every required item is user-declared. A person must still review and verify everything manually before any deployment.'] : reasons,
       verification: { performed: false, networkRequests: 0, statement: 'No address, provider or capability was checked. All values are user-declared.' },
-      settings: { siteLabel: redact(settings.siteLabel), advertiseOnionLocation: settings.advertiseOnionLocation, headers: settings.headers, errors: ss.errors },
+      settings: { siteLabel: redact(ss.exportLabel), advertiseOnionLocation: settings.advertiseOnionLocation, headers: ss.validHeaders, errors: cleanMessages(ss.errors), headersOmittedAsInvalid: settings.headers.length - ss.validHeaders.length },
       site: inv ? {
         rootFolder: inv.rootFolder,
         totals: inv.totals,
@@ -215,7 +292,10 @@
     return out;
   }
 
-  function fileSlug(d) { return dest.slugify(d.label) + '-' + d.id; }
+  function fileSlug(d) {
+    var label = core.hasControlChars(d.label) || core.scanFieldForSecrets(d.label).length ? 'destination' : d.label;
+    return dest.slugify(label) + '-' + d.id;
+  }
 
   // ------------------------------------------------------------ templates
 
@@ -261,7 +341,8 @@
     var bp = basePathOf(d);
     var root = d.config.documentRoot || '/path/to/document-root';
     var has404 = inv && inv.files.some(function (f) { return f.path === '404.html'; });
-    var site = d.config.publicUrl ? new URL(d.config.publicUrl).origin : 'http://' + (d.config.listenAddress || '127.0.0.1:8080');
+    var site = 'http://' + (d.config.listenAddress || '127.0.0.1:8080');
+    if (d.config.publicUrl) { try { site = new URL(d.config.publicUrl).origin; } catch (e) { /* keep local address */ } }
     var lines = [hashBanner(['Copy the site files into ' + root + bp.replace(/\/$/, '') + '/ (document root + base path).'])];
     lines.push(site + ' {');
     lines.push('\troot * ' + root);
@@ -362,9 +443,15 @@
       'Auto start:         decide after manual review\n';
   }
 
+  // Belt and braces: every non-empty line of a Tor/I2P template is a comment.
+  function inert(text) {
+    return text.split('\n').map(function (l) { return l === '' || l.charAt(0) === '#' ? l : '# ' + l; }).join('\n');
+  }
+
   /** List of { name, content } template files for a destination. */
-  function templateFiles(d, settings, allDests, inv) {
-    var headers = headersFor(d, settings, allDests || [d]);
+  function templateFiles(rawDest, settings, allDests, inv) {
+    var headers = headersFor(rawDest, settings, allDests || [rawDest]);
+    var d = templateConfig(rawDest);
     var out = [{ name: 'headers.txt', content: hashBanner(['Response headers this destination must send for every site file.']) + '\n' + headerList(headers) }];
     if (d.type === 'local-server') {
       var sw = d.config.serverSoftware;
@@ -372,17 +459,19 @@
       else if (sw === 'caddy') out.push({ name: 'Caddyfile.template', content: caddyTemplate(d, headers, inv) });
       else if (sw === 'apache') out.push({ name: 'apache-vhost.conf.template', content: apacheTemplate(d, headers, inv) });
     } else if (d.type === 'tor-onion') {
-      out.push({ name: 'torrc.snippet.template', content: torrcTemplate(d) });
+      out.push({ name: 'torrc.snippet.template', content: inert(torrcTemplate(d)) });
     } else if (d.type === 'i2p') {
       if (d.config.router === 'java-i2p') out.push({ name: 'java-i2p-tunnel-values.txt', content: javaI2pValues(d) });
-      else out.push({ name: 'i2pd-tunnels.conf.template', content: i2pdTemplate(d) });
+      else out.push({ name: 'i2pd-tunnels.conf.template', content: inert(i2pdTemplate(d)) });
     }
     return out;
   }
 
   // --------------------------------------------------------- instructions
 
-  function mdEscape(s) { return String(s).replace(/([\\`*_{}\[\]<>|#])/g, '\\$1'); }
+  function mdEscape(s) { return oneLine(s).replace(/([\\`*_{}\[\]<>|#])/g, '\\$1'); }
+  function oneLine(s) { return String(s === undefined || s === null ? '' : s).replace(/[\r\n]+/g, ' ').replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/g, ' '); }
+  function code(s) { return '`' + oneLine(s).replace(/`/g, "'") + '`'; }
 
   function capTable(rows) {
     var lines = ['| Capability | Requirement | Declared by user | Status |', '|---|---|---|---|'];
@@ -532,7 +621,7 @@
     files.push({ path: base + 'plan.json', content: JSON.stringify(plan, null, 2) + '\n' });
     if (input.inventory) files.push({ path: base + 'SHA256SUMS', content: core.buildSha256Sums(input.inventory.files) });
     var ss = sanitizeSettings(input.settings).settings;
-    var dests = (input.destinations || []).slice(0, core.LIMITS.maxDestinations).map(dest.sanitizeDestination).filter(Boolean);
+    var dests = prepareDestinations(input.destinations);
     files.push({ path: base + 'destinations.json', content: JSON.stringify(destinationsExport(dests, ss, plan.generatedAt), null, 2) + '\n' });
     dests.forEach(function (d) {
       var dir = base + 'destinations/' + fileSlug(d) + '/';
@@ -547,7 +636,7 @@
       NOTICE,
       '',
       'Plan state: ' + plan.planState,
-      'Site: ' + plan.settings.siteLabel,
+      'Site: ' + oneLine(plan.settings.siteLabel),
       'Generated: ' + plan.generatedAt,
       '',
       'Contents:',
@@ -567,7 +656,7 @@
       schemaVersion: 1,
       generatedAt: generatedAt,
       notice: 'User-entered destination records. Addresses and capabilities are unverified. Contains no credentials.',
-      settings: { siteLabel: redact(settings.siteLabel), headers: settings.headers, advertiseOnionLocation: settings.advertiseOnionLocation },
+      settings: { siteLabel: redact(sanitizeSettings(settings).exportLabel), headers: sanitizeSettings(settings).validHeaders, advertiseOnionLocation: settings.advertiseOnionLocation },
       destinations: dests.map(destinationForExport)
     };
   }
@@ -579,9 +668,10 @@
    */
   function importDestinations(text) {
     if (typeof text !== 'string') throw core.PlannerError('BAD_IMPORT', 'Import must be text.');
-    if (text.length > core.LIMITS.maxImportBytes) throw core.PlannerError('IMPORT_TOO_LARGE', 'Import file is larger than ' + core.formatBytes(core.LIMITS.maxImportBytes) + '.');
+    if (text.length > core.LIMITS.maxImportBytes || (text.length * 3 > core.LIMITS.maxImportBytes && core.utf8Encode(text).length > core.LIMITS.maxImportBytes)) throw core.PlannerError('IMPORT_TOO_LARGE', 'Import file is larger than ' + core.formatBytes(core.LIMITS.maxImportBytes) + '.');
     var data;
-    try { data = JSON.parse(text); } catch (e) { throw core.PlannerError('BAD_JSON', 'Import file is not valid JSON: ' + e.message); }
+    // The parser's own message can quote file content (e.g. a mistakenly chosen .env), so it is not shown.
+    try { data = JSON.parse(text); } catch (e) { throw core.PlannerError('BAD_JSON', 'Import file is not valid JSON. Choose a destinations.json or plan.json exported by this planner.'); }
     var list, settings = null;
     if (Array.isArray(data)) list = data;
     else if (data && data.schema === DEST_SCHEMA) { list = data.destinations; settings = data.settings || null; }
@@ -623,6 +713,7 @@
     templateFiles: templateFiles,
     exportArtifacts: exportArtifacts,
     importDestinations: importDestinations,
-    fileSlug: fileSlug
+    fileSlug: fileSlug,
+    prepareDestinations: prepareDestinations
   };
 });

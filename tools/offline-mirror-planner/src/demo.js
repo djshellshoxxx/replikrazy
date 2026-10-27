@@ -45,7 +45,8 @@
       { path: 'docs/visiting.txt', bytes: enc('Visiting guide (fictional)\r\nWindows line endings are kept exactly as they are.\r\n') },
       { path: 'site.webmanifest', bytes: enc('{"name":"Lantern Community Library (demo)","start_url":"./","display":"browser"}\n') },
       { path: 'downloads/reading-list-2026.csv', bytes: enc('title,shelf\nField Guide to Night Moths,B2\n') },
-      { path: 'fonts/Ünïcode-név.txt', bytes: enc('Non-ASCII file name, NFC-normalised.\n') }
+      { path: 'fonts/Ünïcode-név.txt', bytes: enc('Non-ASCII file name, NFC-normalised.\n') },
+      { path: '.well-known/security.txt', bytes: enc('Contact: mailto:security@example.org\nExpires: 2027-10-27T00:00:00.000Z\n# Fictional demo; .well-known/ is the one hidden folder that is published.\n') }
     ];
   }
 
@@ -61,7 +62,9 @@
       { path: 'index.html.bak', bytes: enc('<!-- old copy -->\n') },
       { path: 'keys/hidden_service/hs_ed25519_secret_key', bytes: enc('demo placeholder, not key material\n') },
       { path: 'notes/ops-handoff.txt', bytes: enc('Ops notes (demo).\n' + FAKE_KEY_BLOCK) },
-      { path: 'wallet.dat', bytes: enc('demo placeholder\n') }
+      { path: 'wallet.dat', bytes: enc('demo placeholder\n') },
+      { path: 'cgi/contact.php', bytes: enc('<?php /* demo placeholder: server-side code is never part of a static mirror */ ?>\n') },
+      { path: '.htaccess', bytes: enc('# demo placeholder: server configuration is not published\n') }
     ];
   }
 
