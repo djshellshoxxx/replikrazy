@@ -1,3 +1,7 @@
+## 2026-10-27 local continuation
+
+Resume `chatgpt/intake-read-bounds-20261027`; preserve the published checkpoint and Claude branch. See [read-boundary results](../reviews/2026-10-27-read-boundary.md). Latest validation: 186 tests, typecheck within build, production build passed. Broker scan review packet is prepared privately outside git and awaits relay; missing T-ART-08 source remains unavailable. No push/merge/deployment in this slice.
+
 # Replikrazy — restart handoff
 
 > Current owner-requested GitHub checkpoint: `checkpoint/chatgpt-lean-handoff-20261025`.

@@ -32,15 +32,19 @@ export async function runAnalysis(input: AnalysisInput, opts: AnalysisOptions, o
   let intake: IntakeResult;
   if (input.kind === "zip") {
     // Size checked from metadata before the archive is read into memory.
-    if (input.file.size > DEFAULT_ZIP_LIMITS.maxArchiveBytes) {
+    const size = input.file.size;
+    if (!Number.isSafeInteger(size) || size < 0 || size > DEFAULT_ZIP_LIMITS.maxArchiveBytes) {
       intake = { source: "zip", candidateRoot: null, strippedRoot: null, files: [], issues: [{ severity: "error", code: "MK_LIMIT_EXCEEDED", message: "archive exceeds size limit" }] };
     } else {
       onProgress("reading", 0, 1);
-      intake = intakeZip(new Uint8Array(await input.file.arrayBuffer()), opts);
+      const bytes = new Uint8Array(await input.file.arrayBuffer());
+      intake = bytes.length !== size || input.file.size !== size
+        ? { source: "zip", candidateRoot: null, strippedRoot: null, files: [], issues: [{ severity: "error", code: "MK_INPUT_CHANGED", message: "archive changed while it was being read; select it again" }] }
+        : intakeZip(bytes, opts);
       onProgress("reading", 1, 1);
     }
   } else {
-    const picked: PickedFile[] = input.entries.map((e) => ({ webkitRelativePath: e.path, size: e.blob.size, arrayBuffer: () => e.blob.arrayBuffer() }));
+    const picked: PickedFile[] = input.entries.map((e) => ({ webkitRelativePath: e.path, get size() { return e.blob.size; }, arrayBuffer: () => e.blob.arrayBuffer() }));
     intake = await intakeFolder(picked, opts, DEFAULT_ZIP_LIMITS, (done, total) => onProgress("reading", done, total));
   }
   const inv = await buildInventory(intake.files, (done, total) => onProgress("hashing", done, total));

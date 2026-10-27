@@ -108,19 +108,26 @@ export async function intakeFolder(
   if (picked.length > limits.maxEntries) return failed("folder", "too many files", "MK_LIMIT_EXCEEDED");
   const raw: { name: string; bytes: Uint8Array }[] = [];
   let total = 0;
-  // Sizes are checked from metadata before reading, so an oversized pick is
-  // refused without loading it into memory.
+  // Capture and validate the entire size budget before reading any bytes.
+  // Keep the snapshot separate from possibly changing source metadata.
+  const accepted: { file: PickedFile; size: number; path: string }[] = [];
   for (const f of picked) {
-    if (f.size > limits.maxFileBytes) {
+    const size = f.size;
+    if (!Number.isSafeInteger(size) || size < 0) return failed("folder", "invalid file size", "MK_LIMIT_EXCEEDED");
+    if (size > limits.maxFileBytes) {
       issues.push({ severity: "error", code: "MK_LIMIT_EXCEEDED", path: f.webkitRelativePath, message: "file exceeds size limit" });
       continue;
     }
-    total += f.size;
-    if (total > limits.maxTotalBytes) return failed("folder", "total size exceeds limit", "MK_LIMIT_EXCEEDED");
+    total += size;
+    if (!Number.isSafeInteger(total) || total > limits.maxTotalBytes) return failed("folder", "total size exceeds limit", "MK_LIMIT_EXCEEDED");
+    accepted.push({ file: f, size, path: f.webkitRelativePath });
+  }
+  for (const { file: f, size, path } of accepted) {
+    if (f.size !== size || f.webkitRelativePath !== path) return failed("folder", "a file changed before it was read; select the folder again", "MK_INPUT_CHANGED");
     const bytes = new Uint8Array(await f.arrayBuffer());
     // The file changed between listing and reading (MK_INPUT_CHANGED).
-    if (bytes.length !== f.size) return failed("folder", "a file changed while it was being read; select the folder again", "MK_INPUT_CHANGED");
-    raw.push({ name: f.webkitRelativePath, bytes });
+    if (bytes.length !== size || f.size !== size || f.webkitRelativePath !== path) return failed("folder", "a file changed while it was being read; select the folder again", "MK_INPUT_CHANGED");
+    raw.push({ name: path, bytes });
     onProgress(raw.length, picked.length);
   }
   return finish("folder", raw, issues, opts);
