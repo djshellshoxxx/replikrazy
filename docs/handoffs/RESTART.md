@@ -1,3 +1,7 @@
+## 2026-10-27 opt-in local validation profile
+
+Defined `replikrazy-local-verify/1` after reconciling preserved contracts/producers; exact JCS/SHA-256 keys and conservative snapshot/pair validation, no legacy rewrite. [Contract](../contracts/LOCAL_VERIFY_PROFILE_1.md), [evidence](../reviews/2026-10-27-local-verify-profile.md). Latest: 333 tests / 25 files, typecheck/build and 39 Chromium checks passed. Mechanical local-profile definitions are resolved; hydration/provider execution remain separately gated.
+
 ## 2026-10-27 read-only plan/operation boundary
 
 Manual-plan and non-mutating operation structural validation, references and credential-field exclusions added; source retained and disposition remains read-only-unvalidated. [Evidence and exact missing lifecycle definitions](../reviews/2026-10-27-recovery-plan-operation.md). Latest: 316 tests / 24 files, typecheck/build and 39 Chromium checks passed. No recovery hydration/import UI or remote authority.

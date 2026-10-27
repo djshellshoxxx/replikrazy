@@ -1,4 +1,5 @@
 // MK-CTR-001/007/008: read-only envelope inspection, never record hydration.
+import { checkLocalVerifyProfile, LOCAL_VERIFY_PROFILE } from "./local-verify-profile";
 import { hasExcludedRecordMaterial } from "./record-secrets";
 import { validateRecoveryOperation } from "./recovery-operation";
 import { validateRecoveryPlan } from "./recovery-plan";
@@ -9,12 +10,13 @@ import { boundedText, exactKeys, isRecord, type Result } from "./diagnostic";
 import { parseRecordJson, RecordJsonError } from "./record-json";
 export interface RecoverySourceInspection {
   source: string; // Exact input, including unsupported versions; not an error detail.
-  result: Result<{ disposition: "read-only-unvalidated"; envelope: Record<string, unknown> }>;
+  result: Result<{ disposition: "read-only-unvalidated"; envelope: Record<string, unknown>; validationProfile?: string }>;
 }
-export async function inspectRecoverySource(source: string): Promise<RecoverySourceInspection> {
+export async function inspectRecoverySource(source: string, options: { validationProfile?: string } = {}): Promise<RecoverySourceInspection> {
   const reject = (code: "MK_RECORD_CORRUPT" | "MK_LIMIT_EXCEEDED" | "MK_SCHEMA_UNSUPPORTED" | "MK_PRIVATE_DATA"): RecoverySourceInspection => ({
     source, result: { ok: false, error: { code, messageKey: "record.unapplied", params: {}, retry: "after-user-action" } },
   });
+  if (options.validationProfile !== undefined && options.validationProfile !== LOCAL_VERIFY_PROFILE) return reject("MK_SCHEMA_UNSUPPORTED");
   let x: unknown;
   try { x = parseRecordJson(source); } catch (e) { return reject(e instanceof RecordJsonError ? e.code : "MK_RECORD_CORRUPT"); }
   if (hasExcludedRecordMaterial(x)) return reject("MK_PRIVATE_DATA");
@@ -49,6 +51,10 @@ export async function inspectRecoverySource(source: string): Promise<RecoverySou
     const id = checked.value.operationId as string;
     if (operationIds.has(id)) return reject("MK_RECORD_CORRUPT");
     operationIds.add(id);
+    if (options.validationProfile === LOCAL_VERIFY_PROFILE) {
+      const code = await checkLocalVerifyProfile(checked.value, plans.get(checked.value.planId as string)!);
+      if (code) return { source, result: { ok: false, error: { code, messageKey: "record.profile-unapplied", params: {}, retry: "after-user-action" } } };
+    }
   }
   for (const provenance of x.provenance as unknown[]) {
     const checked = validateProvenance(provenance, artifactIds);
@@ -58,5 +64,5 @@ export async function inspectRecoverySource(source: string): Promise<RecoverySou
   // Manual-plan/non-mutating operation structure is checked. Signatures,
   // complete secret absence, lifecycle and execution authority remain unvalidated.
   // Never apply this value.
-  return { source, result: { ok: true, value: { disposition: "read-only-unvalidated", envelope: x } } };
+  return { source, result: { ok: true, value: { disposition: "read-only-unvalidated", envelope: x, ...(options.validationProfile ? { validationProfile: options.validationProfile } : {}) } } };
 }
