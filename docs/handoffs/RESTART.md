@@ -1,3 +1,7 @@
+## 2026-10-27 read-only plan/operation boundary
+
+Manual-plan and non-mutating operation structural validation, references and credential-field exclusions added; source retained and disposition remains read-only-unvalidated. [Evidence and exact missing lifecycle definitions](../reviews/2026-10-27-recovery-plan-operation.md). Latest: 316 tests / 24 files, typecheck/build and 39 Chromium checks passed. No recovery hydration/import UI or remote authority.
+
 ## 2026-10-27 provenance metadata checkpoint
 
 Continued from ArtifactHandle checkpoint 0baa4498f89db1f1e2b321d14ad7f39575ded506: validate owner-claim fields and included-artifact references; signatures stay opaque/untrusted. [Evidence and remaining import gates](../reviews/2026-10-27-artifact-binding.md). Latest: 276 tests / 21 files, typecheck/build and 39 Chromium checks passed. Inspection remains read-only-unvalidated; no hydration authority.
