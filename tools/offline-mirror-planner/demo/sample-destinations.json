@@ -1,0 +1,117 @@
+[
+  {
+    "id": "static-host-a",
+    "name": "Example static host A",
+    "type": "static-host",
+    "basePath": "/",
+    "address": "https://mirror-a.example.org/",
+    "providerLabel": "Generic static host (user-declared)",
+    "serverSoftware": "",
+    "listen": "",
+    "documentRoot": "",
+    "router": "",
+    "maxFileMB": 25,
+    "capabilities": {
+      "directoryIndex": "yes",
+      "customHeaders": "unknown",
+      "customErrorPages": "yes",
+      "subpathHosting": "yes",
+      "https": "yes",
+      "correctMimeTypes": "yes",
+      "minimalLogging": "unknown"
+    },
+    "notes": "Demo record. All values are user-declared examples; nothing here was checked by the tool. Header support has not been confirmed yet."
+  },
+  {
+    "id": "static-host-b",
+    "name": "Example static host B",
+    "type": "static-host",
+    "basePath": "/",
+    "address": "https://mirror-b.example.net/",
+    "providerLabel": "Generic static host (user-declared)",
+    "serverSoftware": "",
+    "listen": "",
+    "documentRoot": "",
+    "router": "",
+    "maxFileMB": 25,
+    "capabilities": {
+      "directoryIndex": "yes",
+      "customHeaders": "no",
+      "customErrorPages": "no",
+      "subpathHosting": "no",
+      "https": "yes",
+      "correctMimeTypes": "yes",
+      "minimalLogging": "unknown"
+    },
+    "notes": "Demo record. All values are user-declared examples. This host was declared unable to set response headers."
+  },
+  {
+    "id": "lan-server",
+    "name": "Operator LAN server",
+    "type": "local-server",
+    "basePath": "/field-notes/",
+    "address": "",
+    "providerLabel": "",
+    "serverSoftware": "nginx",
+    "listen": "127.0.0.1:8080",
+    "documentRoot": "/srv/mirror/site",
+    "router": "",
+    "maxFileMB": 100,
+    "capabilities": {
+      "directoryIndex": "yes",
+      "customHeaders": "yes",
+      "customErrorPages": "yes",
+      "subpathHosting": "yes",
+      "https": "yes",
+      "correctMimeTypes": "yes",
+      "minimalLogging": "yes"
+    },
+    "notes": "Demo record. All values are user-declared examples. Served under a sub-path, so root-relative links in the site need review."
+  },
+  {
+    "id": "onion-mirror",
+    "name": "Onion mirror (address pending)",
+    "type": "tor-onion",
+    "basePath": "/",
+    "address": "",
+    "providerLabel": "",
+    "serverSoftware": "nginx",
+    "listen": "127.0.0.1:8081",
+    "documentRoot": "/srv/onion-mirror/site",
+    "router": "",
+    "maxFileMB": 100,
+    "capabilities": {
+      "directoryIndex": "yes",
+      "customHeaders": "yes",
+      "customErrorPages": "yes",
+      "subpathHosting": "yes",
+      "https": "unknown",
+      "correctMimeTypes": "yes",
+      "minimalLogging": "yes"
+    },
+    "notes": "Demo record. All values are user-declared examples. The onion address is left empty: it is pending until the operator's own Tor setup creates it."
+  },
+  {
+    "id": "i2p-eepsite-draft",
+    "name": "I2P eepsite draft",
+    "type": "i2p",
+    "basePath": "/",
+    "address": "",
+    "providerLabel": "",
+    "serverSoftware": "caddy",
+    "listen": "",
+    "documentRoot": "/srv/i2p-mirror/site",
+    "router": "i2pd",
+    "maxFileMB": null,
+    "capabilities": {
+      "directoryIndex": "yes",
+      "customHeaders": "unknown",
+      "customErrorPages": "unknown",
+      "subpathHosting": "unknown",
+      "https": "unknown",
+      "correctMimeTypes": "yes",
+      "minimalLogging": "yes"
+    },
+    "notes": "Demo record. All values are user-declared examples. The listen address is missing on purpose, so this draft stays incomplete."
+  }
+]

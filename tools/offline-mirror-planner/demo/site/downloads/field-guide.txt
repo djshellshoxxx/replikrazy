@@ -1,0 +1,58 @@
+LANTERN FIELD NOTES - POCKET FIELD GUIDE
+========================================
+
+Synthetic demo download. Everything below is invented for a software demo.
+
+1. BEFORE YOU GO
+----------------
+- Pick a route you have walked in daylight at least twice.
+- Charge or fill the lantern. A dim lantern is better than a dead one.
+- Tell someone at home which route you chose and when you expect to be back.
+- Bring a pencil. Pens skip when the paper is damp.
+
+2. WHAT TO CARRY
+----------------
+- One small lantern, shaded on the side that faces your eyes.
+- A notebook that fits in a coat pocket.
+- A spare layer. Evenings by the river are colder than they look.
+- Nothing you would mind getting muddy.
+
+3. HOW TO WRITE AN ENTRY
+------------------------
+Every entry has three lines and no more:
+
+  SAW:     one thing the lantern showed you.
+  HEARD:   one sound you could not see the source of.
+  GUESSED: one small story that might explain either.
+
+Sign the entry with the colour of your lantern, not your name.
+Describe places loosely: "past the second stile" rather than a map
+reference. The notebook is about noticing, not about tracking.
+
+4. LANTERN COLOURS USED IN THE NOTEBOOK
+---------------------------------------
+  amber  - the default; warm and easy on night vision
+  green  - for walkers who mostly follow water
+  blue   - for walkers who mostly look up
+  white  - for first walks; swap it for a colour later
+
+5. LEAVING NO TRACE
+-------------------
+- Stay on paths. Meadows recover slowly from shortcuts.
+- Do not tie ribbons or markers. If you find one, note it and leave it.
+- Keep the lantern low near nesting areas and water.
+- Take home everything you brought, including spent candles.
+
+6. SHARING ENTRIES
+------------------
+Copy your three lines onto a card and drop it in the notebook box, or
+send them to notes@example.org (a placeholder address for this demo).
+Entries are added to the site in batches, never with names attached.
+
+7. QUIET HOURS
+--------------
+The notebook asks walkers to finish by an hour after full dark. The point
+is to see the edge of the evening, not to be out in the middle of the
+night.
+
+-- end of field guide --

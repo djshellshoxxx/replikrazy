@@ -1,0 +1,5 @@
+# Synthetic demo file for the Offline Mirror Planner.
+Contact: mailto:security@example.org
+Expires: 2027-06-30T23:59:59Z
+Preferred-Languages: en
+Canonical: https://notes.example.org/.well-known/security.txt

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Lantern">
+  <title>Lantern</title>
+  <path d="M12 4h8M16 4v3" fill="none" stroke="#6b4a1f" stroke-width="2" stroke-linecap="round"/>
+  <rect x="9" y="7" width="14" height="4" rx="1" fill="#6b4a1f"/>
+  <rect x="10" y="11" width="12" height="14" rx="2" fill="#f6c76b" stroke="#6b4a1f" stroke-width="2"/>
+  <path d="M16 15c-2 2.5-2 5 0 6.5c2-1.5 2-4 0-6.5z" fill="#e0782a"/>
+  <rect x="9" y="25" width="14" height="3" rx="1" fill="#6b4a1f"/>
+</svg>
