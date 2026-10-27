@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offline Mirror Planner — Replikrazy (planner only; nothing is published)</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="topbar">
+  <p class="topbar-notice"><strong>Planner only.</strong> Nothing is uploaded, published or verified. No network requests. State is kept in this tab's memory only.</p>
+  <nav aria-label="Sections">
+    <ul class="nav-list">
+      <li><a href="#site">1. Site</a></li>
+      <li><a href="#destinations">2. Destinations</a></li>
+      <li><a href="#compare">3. Compare</a></li>
+      <li><a href="#settings">4. Headers &amp; settings</a></li>
+      <li><a href="#export">5. Export &amp; import</a></li>
+    </ul>
+  </nav>
+</div>
+
+<header class="page-header">
+  <h1>Offline Mirror Planner</h1>
+  <p class="lede">Inventory a static-site folder on this computer, describe the mirror destinations you intend to set up yourself, compare what you have declared, and export a deployment plan with operator instructions and inert configuration templates.</p>
+</header>
+
+<p id="boot-error" class="boot-error" role="alert">The planner scripts did not load. Keep all files of the tool together (index.html next to the <code>src</code> folder) and open index.html in a current browser with JavaScript enabled.</p>
+
+<main id="main" tabindex="-1">
+
+<section id="notice" class="notice" aria-labelledby="notice-title">
+  <h2 id="notice-title">This is a planner and offline exporter — never a publisher</h2>
+  <ul class="notice-list">
+    <li><strong>Nothing is uploaded, published, deployed, registered or verified.</strong> This page has no way to contact any host, provider, Tor or I2P network.</li>
+    <li><strong>No network requests.</strong> The page's Content-Security-Policy forbids them; all work happens inside this browser tab.</li>
+    <li><strong>Every address and capability is declared by you</strong> and stays unverified. The best possible state is "ready for manual review", never "verified" or "live".</li>
+    <li>It never signs up anywhere, never creates Tor or I2P keys, identities or addresses, and never starts or configures any service. Templates it exports are inert text for a person to review.</li>
+    <li><strong>State is kept in memory only</strong> — no localStorage, IndexedDB, cookies or other browser storage. Reloading or closing this tab discards everything; export what you want to keep.</li>
+  </ul>
+  <details class="limitations" open>
+    <summary>Limitations you should know about</summary>
+    <ul id="limitations-list"></ul>
+  </details>
+</section>
+
+<section id="site" class="panel" aria-labelledby="site-title">
+  <h2 id="site-title">1. Site folder</h2>
+  <p>Select the folder that contains the built static site (the folder with <code>index.html</code>). Files are read and hashed (SHA-256) inside this tab. Sensitive files — credentials, private keys, onion/I2P key material, wallets, databases, backups, version-control and OS metadata — are excluded without being read.</p>
+  <details class="limits">
+    <summary>Limits</summary>
+    <ul id="limits-list"></ul>
+  </details>
+
+  <div class="site-inputs">
+    <div class="field">
+      <label for="folder-input">Choose a site folder</label>
+      <input type="file" id="folder-input" webkitdirectory multiple aria-describedby="folder-hint">
+      <p class="hint" id="folder-hint">Your browser may ask you to confirm. Selecting a folder only lets this page read it; nothing leaves this computer.</p>
+    </div>
+    <div id="drop-zone" class="drop-zone">
+      <p>…or drag a folder from your file manager and drop it here.</p>
+    </div>
+    <div class="button-row">
+      <button type="button" id="demo-site">Load built-in demo</button>
+      <button type="button" id="demo-site-clean">Load clean demo (no bait or unsafe files)</button>
+      <button type="button" id="clear-site" class="secondary">Clear site</button>
+    </div>
+    <p class="hint">The demo is a small fictional site generated in memory. The full demo also contains harmless "bait" files that are excluded and two unsafe entries that are rejected.</p>
+  </div>
+
+  <div id="inv-progress" class="progress" hidden>
+    <label for="inv-progress-bar" id="inv-progress-label">Reading and hashing files…</label>
+    <progress id="inv-progress-bar" max="1" value="0"></progress>
+    <p id="inv-progress-text" class="progress-text"></p>
+  </div>
+  <div id="site-error" class="message error" role="alert" hidden></div>
+  <div id="inventory" class="inventory"></div>
+</section>
+
+<section id="destinations" class="panel" aria-labelledby="dest-title">
+  <h2 id="dest-title">2. Destinations</h2>
+  <p>Describe each place you intend to mirror the site. Everything you enter is a declaration for planning; nothing is looked up or contacted. Capabilities default to "unknown" — confirm each one from the destination's own documentation or configuration before declaring it.</p>
+  <div class="dest-add">
+    <div class="field">
+      <label for="dest-type">Destination type</label>
+      <select id="dest-type" aria-describedby="dest-type-summary"></select>
+    </div>
+    <button type="button" id="dest-add">Add destination</button>
+    <button type="button" id="dest-demo" class="secondary">Load demo destinations</button>
+  </div>
+  <p id="dest-type-summary" class="hint"></p>
+  <p id="dest-count" class="hint"></p>
+  <div id="dest-message" class="message" role="status" hidden></div>
+  <div id="dest-list" class="dest-list"></div>
+</section>
+
+<section id="compare" class="panel" aria-labelledby="compare-title">
+  <h2 id="compare-title">3. Compare destinations</h2>
+  <p>How each destination's <em>declared</em> capabilities meet what this site and plan require. Nothing here is verified.</p>
+  <div id="compare-body"></div>
+</section>
+
+<section id="settings" class="panel" aria-labelledby="settings-title">
+  <h2 id="settings-title">4. Headers &amp; settings</h2>
+  <div class="field">
+    <label for="site-label">Site label</label>
+    <input type="text" id="site-label" aria-describedby="site-label-msg">
+    <p class="field-msg" id="site-label-msg"></p>
+  </div>
+  <h3>Response headers every destination should send</h3>
+  <p class="hint">Strict-Transport-Security and Onion-Location are added per destination automatically and must not be listed here. Credential-bearing and connection-level headers are refused.</p>
+  <div id="header-list"></div>
+  <div class="button-row">
+    <button type="button" id="header-add">Add header</button>
+    <button type="button" id="header-defaults" class="secondary">Restore default headers</button>
+  </div>
+  <div id="settings-errors" class="message error" hidden></div>
+
+  <h3>Onion-Location</h3>
+  <div class="field checkbox-field">
+    <input type="checkbox" id="onion-location" aria-describedby="onion-location-warning onion-location-status">
+    <label for="onion-location">Advertise the onion mirror with an <code>Onion-Location</code> header on HTTPS destinations</label>
+  </div>
+  <p class="message warning" id="onion-location-warning"><strong>Warning:</strong> an Onion-Location header publicly and permanently links your clearnet mirror(s) to the onion address. Anyone can see that both are run by the same operator. Only enable this deliberately.</p>
+  <p class="hint" id="onion-location-status"></p>
+</section>
+
+<section id="export" class="panel" aria-labelledby="export-title">
+  <h2 id="export-title">5. Export &amp; import</h2>
+  <p>Exports are files saved by your browser. They are planning artifacts only; nothing is sent anywhere.</p>
+  <div id="plan-state"></div>
+
+  <h3>Plan files</h3>
+  <div class="button-row" id="export-plan-buttons">
+    <button type="button" id="dl-plan">Download plan.json</button>
+    <button type="button" id="dl-sums">Download SHA256SUMS</button>
+    <button type="button" id="dl-dests">Download destinations.json</button>
+    <button type="button" id="dl-readme">Download README-FIRST.txt</button>
+  </div>
+
+  <h3>Per-destination instructions and templates</h3>
+  <div id="export-dest-files"></div>
+
+  <h3>Archives</h3>
+  <div class="button-row">
+    <button type="button" id="dl-zip">Download ZIP of all plan files</button>
+    <button type="button" id="dl-bundle">Download ZIP bundle including site files</button>
+  </div>
+  <p class="hint">The bundle adds every included site file under <code>offline-mirror-plan/site/</code>. Each file is re-read and re-hashed first; if any file no longer matches its inventoried SHA-256, the bundle is refused. Excluded and rejected files are never added.</p>
+  <div id="export-progress" class="progress-text" role="status"></div>
+  <div id="export-error" class="message error" role="alert" hidden></div>
+
+  <h3>Preview</h3>
+  <div class="field">
+    <label for="preview-select">File to preview</label>
+    <select id="preview-select"></select>
+  </div>
+  <pre id="preview" class="preview" tabindex="0" aria-label="File preview"></pre>
+
+  <h3>Import destinations</h3>
+  <div class="field">
+    <label for="import-input">Import a destinations.json or plan.json exported by this planner</label>
+    <input type="file" id="import-input" accept=".json,application/json" aria-describedby="import-hint">
+    <p class="hint" id="import-hint"></p>
+  </div>
+  <div id="import-message" class="message" role="status" hidden></div>
+</section>
+
+</main>
+
+<footer class="page-footer">
+  <p>Replikrazy Offline Mirror Planner. Runs entirely from local files; no build step and no third-party code.</p>
+</footer>
+
+<div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+<script src="src/core.js"></script>
+<script src="src/destinations.js"></script>
+<script src="src/plan.js"></script>
+<script src="src/zip.js"></script>
+<script src="src/demo.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>
