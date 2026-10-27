@@ -27,6 +27,19 @@ async function selectNetlify() {
 }
 try {
   await page.goto(origin);
+  // A safe explicit wrapper can bring payload paths within the path cap.
+  // The chooser must remain reachable even when no unrooted file was valid.
+  const wrapper = 'w'.repeat(100);
+  const payloadPath = `${'a'.repeat(100)}/${'b'.repeat(100)}/index.html`;
+  await page.locator('#zip-input').setInputFiles(zip({ [`${wrapper}/${payloadPath}`]: 'public' }));
+  await page.waitForFunction(() => document.querySelector('#root-choice input'));
+  check(await page.locator('#payload-btn').isEnabled(), false);
+  await page.locator('#root-choice input').check();
+  await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('site root'));
+  await page.locator('#entrypoint').selectOption(payloadPath);
+  await page.waitForFunction(() => document.querySelector('#artifact-id').textContent.includes('sha256:'));
+  check(await page.locator('#inv-rows tr td').first().textContent(), payloadPath);
+  check(await page.locator('#root-choice input').isChecked(), true);
   await load();
   // Exercise the real folder picker, explicit root choice, and ZIP identity parity.
   const zipArtifact = await page.locator('#artifact-id').textContent();

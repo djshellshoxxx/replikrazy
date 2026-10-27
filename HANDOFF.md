@@ -10,8 +10,8 @@ read-only recovery inspection with cancellation, explicit profile selection and
 byte-exact original downloads. Recognized metadata never restores consent or
 triggers execution. Actual site bytes still come from ZIP/folder intake.
 
-Latest validation: 343 unit tests, typecheck/build, 42 main Chromium checks
-and 25 recovery checks; zero browser errors/external requests. Focused reviews
+Latest validation: 359 unit tests, typecheck/build, 45 main Chromium checks.
+Earlier unchanged recovery evidence: 25 recovery checks; zero browser errors/external requests. Focused reviews
 and retained failures are in docs/reviews. Recovery keyboard matrix reaches 52 controls with 16 reflow and four cancel-focus checks. No full-audit, new axe/manual screen
 reader or cross-browser claim. Browser download denials remain binding.
 
@@ -23,3 +23,5 @@ The private archive was never recovered here; supplied contracts and broker
 review provenance are recorded without publishing full private source text.
 
 [Exact finish checklist](docs/reviews/2026-10-27-finish-acceptance.md) separates completed work, open technical tasks, missing acceptance inputs and execution/publication exclusions.
+
+[Root preflight checkpoint and next steps](docs/reviews/2026-10-27-root-preflight.md): explicit root-relative path validation is complete; entrypoint-before-hashing and payload-backed recovery remain technical implementation work.

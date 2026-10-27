@@ -11,7 +11,7 @@ self.onmessage = async (ev: MessageEvent<{ input: AnalysisInput; opts: AnalysisO
     const result = await runAnalysis(ev.data.input, ev.data.opts, (stage, done, total) => {
       self.postMessage({ type: "progress", stage, done, total });
     });
-    const fatal = result.intake.issues.find((i) => i.severity === "error" && (result.intake.files.length === 0 || i.code === "MK_INPUT_CHANGED"));
+    const fatal = result.intake.issues.find((i) => i.severity === "error" && ((result.intake.files.length === 0 && result.intake.candidateRoot === null) || i.code === "MK_INPUT_CHANGED"));
     if (fatal) {
       self.postMessage({ type: "error", error: inputError(fatal.code) });
       return;

@@ -42,8 +42,9 @@ manual-only provider labels, rights/public-data/use gates, manual exports,
 offline comparison, source-preserving read-only recovery inspection and explicit
 local profile, recovery keyboard focus/reflow. Existing catalogue reused.
 
-Open implementation: root/entrypoint preflight ordering still follows the earlier
-stricter validation/hash-first flow; it is not claimed fully conformant to the
+Update: explicit root-relative path validation is complete in the
+[root preflight checkpoint](2026-10-27-root-preflight.md).
+Open implementation: entrypoint preflight still follows the earlier hash-first flow; it is not claimed fully conformant to the
 proposed ordering. Full recovery payload matching/restoration is not implemented;
 metadata cannot manufacture absent bytes. These are technical work, not fresh
 owner-approval requirements. No need to invent optional features to hide them.

@@ -1,3 +1,7 @@
+## 2026-10-27 explicit root path preflight
+
+Root selection now precedes payload path validation for files and ZIP directories; invalid siblings cannot fabricate a common root. Empty initial inventory retains the root chooser. [Evidence and exact next boundary](../reviews/2026-10-27-root-preflight.md). 359 unit tests / 27 files, typecheck/build, 45 main Chromium checks pass. Entrypoint-before-hashing and payload-backed recovery remain ready technical work; recovery restoration is not claimed. Preserve original failure logs and existing denials.
+
 ## 2026-10-27 essential finish acceptance
 
 Fixed recovery Cancel focus loss; added dedicated keyboard/reflow matrix. Replaced missing full Unicode fold coverage with pinned Unicode 15.0.0 data, retaining previous conservative collisions. [Exact completed/open checklist](../reviews/2026-10-27-finish-acceptance.md). Latest: 343 unit tests, typecheck/build, 42 main + 25 recovery Chromium checks, 52 recovery controls reached, 16 reflow and four cancellation-focus checks. Preview remains local-only.

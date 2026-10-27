@@ -51,18 +51,30 @@ function finish(
   raw: { name: string; bytes: Uint8Array }[],
   issues: IntakeIssue[],
   opts: IntakeOptions,
+  directories: string[] = [],
 ): IntakeResult {
-  const valid: BundleFile[] = [];
+  // Determine the wrapper before rejecting any names. Otherwise a rejected
+  // sibling can make an originally mixed input appear to have a common root.
+  // A wrapper must itself be safe; stripping never launders traversal/control
+  // characters. Payload length/depth limits apply after the explicit choice.
+  const names = [...raw.map((r) => r.name), ...directories.map((p) => `${p}/`), ...issues.flatMap((i) => i.path === undefined ? [] : [i.path])];
+  const candidate = commonRoot(names);
+  const root = candidate && validatePath(candidate).ok ? candidate : null;
+  const strip = opts.stripRoot && root ? root : null;
+  const files: BundleFile[] = [];
   for (const r of raw) {
-    const v = validatePath(r.name);
-    if (v.ok) valid.push({ path: v.path, bytes: r.bytes });
+    const path = strip ? r.name.slice(strip.length + 1) : r.name;
+    const v = validatePath(path);
+    if (v.ok) files.push({ path: v.path, bytes: r.bytes });
     else issues.push({ severity: "error", code: "MK_PATH_INVALID", path: r.name, message: `rejected path: ${v.reason}` });
   }
-  const root = commonRoot(valid.map((f) => f.path));
-  const strip = opts.stripRoot && root ? root : null;
-  const files = strip
-    ? valid.map((f) => ({ path: f.path.slice(strip.length + 1), bytes: f.bytes }))
-    : valid;
+  for (const name of directories) {
+    // An explicit wrapper's own directory record becomes the selected root.
+    if (strip && name === strip) continue;
+    const path = strip ? name.slice(strip.length + 1) : name;
+    const v = validatePath(path);
+    if (!v.ok) issues.push({ severity: "error", code: "MK_PATH_INVALID", path: name, message: `rejected directory path: ${v.reason}` });
+  }
   files.sort((a, b) => compareUtf8(a.path, b.path));
 
   for (const group of findCaseCollisions(files.map((f) => f.path))) {
@@ -77,14 +89,14 @@ function finish(
 
 export function intakeZip(buf: Uint8Array, opts: IntakeOptions = {}, limits: ZipLimits = DEFAULT_ZIP_LIMITS): IntakeResult {
   try {
-    const { entries, rejected } = readZip(buf, limits);
+    const { entries, directories, rejected } = readZip(buf, limits, true);
     const issues: IntakeIssue[] = rejected.map((r) => ({
       severity: "error",
       code: r.code,
       path: r.name,
       message: `rejected entry: ${r.reason}`,
     }));
-    return finish("zip", entries, issues, opts);
+    return finish("zip", entries, issues, opts, directories);
   } catch (e) {
     return e instanceof ZipError ? failed("zip", e.message, e.code) : failed("zip", "unreadable archive", "MK_ZIP_CORRUPT");
   }

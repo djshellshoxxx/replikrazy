@@ -43,6 +43,8 @@ export interface RawEntry {
 
 export interface ZipReadResult {
   entries: RawEntry[];
+  // Present only for intake root preflight; caller must validate these paths.
+  directories?: string[];
   // Entries refused individually (symlink, encrypted, bad CRC, ...). The
   // archive as a whole is still readable, but callers must surface these.
   rejected: { name: string; reason: string; code: ZipCode }[];
@@ -74,7 +76,7 @@ const SIG_CEN = 0x02014b50;
 const SIG_LOC = 0x04034b50;
 const SIG_ZIP64_LOCATOR = 0x07064b50;
 
-export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS): ZipReadResult {
+export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS, deferDirectoryPaths = false): ZipReadResult {
   if (buf.length > limits.maxArchiveBytes) throw new ZipError("archive exceeds size limit", "MK_LIMIT_EXCEEDED");
   const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
   const u16 = (o: number) => dv.getUint16(o, true);
@@ -104,6 +106,7 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS)
 
   const utf8 = new TextDecoder("utf-8", { fatal: true });
   const entries: RawEntry[] = [];
+  const directories: string[] = [];
   const rejected: ZipReadResult["rejected"] = [];
   const reject = (name: string, reason: string, code: ZipCode) => rejected.push({ name, reason, code });
   let files = 0;
@@ -159,7 +162,7 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS)
       if (usize !== 0) throw new ZipError("directory entry with data");
       if (++dirs > limits.maxDirEntries) throw new ZipError("too many directory entries", "MK_LIMIT_EXCEEDED");
       const path = name.endsWith("/") ? name.slice(0, -1) : name;
-      if (!validatePath(path).ok) { reject(name, "invalid directory path", "MK_PATH_INVALID"); continue; }
+      if (!deferDirectoryPaths && !validatePath(path).ok) { reject(name, "invalid directory path", "MK_PATH_INVALID"); continue; }
     }
     if (!isDir && ++files > limits.maxEntries) throw new ZipError("too many entries", "MK_LIMIT_EXCEEDED");
     if (unixMode === 0xa000) { reject(name, "symbolic link", "MK_ENTRY_UNSUPPORTED"); continue; }
@@ -219,7 +222,12 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS)
     }
     // CRC32 detects corruption only; it is not an authenticity check.
     if (bytes.length !== usize || crc32(bytes) !== crc) throw new ZipError(`size or CRC mismatch: ${name}`);
-    if (isDir) continue; // validated empty directories are not payload files
+    if (isDir) {
+      // Intake can defer portability validation until the explicit root choice.
+      // Header/type/size/CRC checks still precede this metadata-only result.
+      if (deferDirectoryPaths) directories.push(name.endsWith("/") ? name.slice(0, -1) : name);
+      continue;
+    }
     total += usize;
     entries.push({ name, bytes });
   }
@@ -232,5 +240,5 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS)
   for (let i = 1; i < ranges.length; i++) {
     if (ranges[i]!.start < ranges[i - 1]!.end) throw new ZipError("overlapping entries", "MK_ZIP_BOMB");
   }
-  return { entries, rejected };
+  return deferDirectoryPaths ? { entries, directories, rejected } : { entries, rejected };
 }
