@@ -1,3 +1,7 @@
+## 2026-10-27 analysis lifecycle checkpoint
+
+Same local continuation branch. Added monotonic deadline alongside wall-clock limit and safe worker envelope/progress handling. [Evidence and limitations](../reviews/2026-10-27-analysis-envelope.md). Latest: 208 tests / 15 files, typecheck/build and 35 Chromium checks passed. Scanner untouched and broker-owned.
+
 ## 2026-10-27 manifest boundary checkpoint
 
 Same local branch `chatgpt/intake-read-bounds-20261027`: exact manifest records, existing intake count/collision checks, validation before digest. [Evidence and limits](../reviews/2026-10-27-manifest-boundary.md). Latest: 199 tests / 15 files, typecheck/build, 35 Chromium checks passed. Scanner review remains broker-owned; no remote writes.

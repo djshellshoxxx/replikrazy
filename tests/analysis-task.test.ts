@@ -95,3 +95,40 @@ it("maps unrecognized worker error codes to a fixed internal error", async () =>
   await expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_INTERNAL", messageKey: "analysis.failed" } });
   expect(JSON.stringify(await result)).not.toContain("private-value");
 });
+
+it("keeps a monotonic deadline when the wall clock moves backwards", async () => {
+  let wall = 100_000, elapsed = 0;
+  const worker = new FakeWorker();
+  const task = new AnalysisTask(() => worker as unknown as Worker, 60_000, () => wall, () => elapsed);
+  const result = task.run(input, {}, vi.fn());
+  wall = 1; elapsed = 60_000;
+  worker.send({ type: "done", result: {} });
+  await expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_LIMIT_EXCEEDED" } });
+  expect(worker.terminate).toHaveBeenCalledTimes(1);
+});
+
+it.each([null, [], { type: "done" }, { type: "progress", stage: "secret", done: 0, total: 1 },
+  { type: "progress", stage: "reading", done: -1, total: 1 },
+  { type: "progress", stage: "reading", done: 2, total: 1 },
+  { type: "progress", stage: "reading", done: 0, total: NaN },
+])("settles malformed worker messages safely: %j", async (message) => {
+  const { task, workers } = setup();
+  const progress = vi.fn();
+  const result = task.run(input, {}, progress);
+  expect(() => workers[0]!.send(message)).not.toThrow();
+  // A queued valid completion cannot turn a malformed message into success.
+  workers[0]!.send({ type: "done", result: {} });
+  await expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_INTERNAL" } });
+  expect(progress).not.toHaveBeenCalled();
+  expect(workers[0]!.terminate).toHaveBeenCalledTimes(1);
+});
+
+it("settles and terminates when the progress consumer throws", async () => {
+  const { task, workers } = setup();
+  const result = task.run(input, {}, () => { throw new Error("private callback detail"); });
+  expect(() => workers[0]!.send({ type: "progress", stage: "reading", done: 0, total: 1 })).not.toThrow();
+  workers[0]!.send({ type: "done", result: {} });
+  await expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_INTERNAL" } });
+  expect(JSON.stringify(await result)).not.toContain("private callback detail");
+  expect(workers[0]!.terminate).toHaveBeenCalledTimes(1);
+});
