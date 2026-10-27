@@ -4,7 +4,7 @@ import { exactKeys, isRecord, isUInt } from "../contracts/diagnostic";
 import { compareUtf8, validatePath } from "../core/paths";
 import { DEFAULT_ZIP_LIMITS as limits } from "../core/zip";
 import { SCAN_LIMITS } from "../core/scan";
-import type { AnalysisResult } from "../core/pipeline";
+import type { AnalysisResult, AnalysisPreflight } from "../core/pipeline";
 
 const hash = (x: unknown): x is string => typeof x === "string" && /^[0-9a-f]{64}$/.test(x);
 const text = (x: unknown): x is string => typeof x === "string" && x.length <= limits.maxMetadataBytes;
@@ -69,4 +69,20 @@ export function isAnalysisResult(x: unknown): x is AnalysisResult {
     if (associations > 2 * SCAN_LIMITS.maxDependencyReferences) return false;
   }
   return true;
+}
+
+export function isAnalysisPreflight(x: unknown): x is AnalysisPreflight {
+  if (!isRecord(x) || !exactKeys(x, ["kind", "source", "candidateRoot", "strippedRoot", "entries", "issues"])
+    || x.kind !== "preflight" || !oneOf(x.source, ["folder", "zip"])
+    || ![x.candidateRoot, x.strippedRoot].every(r => r === null || (path(r) && !r.includes("/")))
+    || (x.strippedRoot !== null && x.strippedRoot !== x.candidateRoot)
+    || !list(x.entries, limits.maxEntries) || !list(x.issues, limits.maxDirEntries + 4 * limits.maxEntries + 1)) return false;
+  let total = 0;
+  for (const e of x.entries) {
+    if (!isRecord(e) || !exactKeys(e, ["path", "size"]) || !path(e.path) || !isUInt(e.size) || e.size > limits.maxFileBytes) return false;
+    total += e.size;
+  }
+  return total <= limits.maxTotalBytes && x.issues.every(i => isRecord(i) && exactKeys(i, ["severity", "message"], ["path", "code"])
+    && oneOf(i.severity, ["error", "warning"]) && text(i.message)
+    && (!Object.hasOwn(i, "path") || text(i.path)) && (!Object.hasOwn(i, "code") || text(i.code)));
 }

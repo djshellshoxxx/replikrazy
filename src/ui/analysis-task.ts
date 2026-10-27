@@ -1,5 +1,5 @@
-import { isAnalysisResult } from "./analysis-result";
-import type { AnalysisInput, AnalysisOptions, AnalysisResult, Progress } from "../core/pipeline";
+import { isAnalysisResult, isAnalysisPreflight } from "./analysis-result";
+import type { AnalysisInput, AnalysisOptions, AnalysisResult, AnalysisOutcome, Progress } from "../core/pipeline";
 
 import { analysisError, inputError, isRecord, isUInt, type MKError, type Result } from "../contracts/diagnostic";
 
@@ -16,7 +16,10 @@ export class AnalysisTask {
 
   cancel() { this.stop?.(); }
 
-  run(input: AnalysisInput, opts: AnalysisOptions, progress: Progress): Promise<Result<AnalysisResult>> {
+  run(input: AnalysisInput, opts: AnalysisOptions & { requireEntrypoint: true }, progress: Progress): Promise<Result<AnalysisOutcome>>;
+  run(input: AnalysisInput, opts: AnalysisOptions & { requireEntrypoint?: false }, progress: Progress): Promise<Result<AnalysisResult>>;
+  run(input: AnalysisInput, opts: AnalysisOptions, progress: Progress): Promise<Result<AnalysisOutcome>>;
+  run(input: AnalysisInput, opts: AnalysisOptions, progress: Progress): Promise<Result<AnalysisOutcome>> {
     this.cancel();
     return new Promise((resolve) => {
       let worker: Worker;
@@ -25,7 +28,7 @@ export class AnalysisTask {
       const deadline = this.now() + this.budgetMs;
       const monotonicDeadline = this.monotonicNow() + this.budgetMs;
       let settled = false;
-      const finish = (error?: MKError, result?: AnalysisResult) => {
+      const finish = (error?: MKError, result?: AnalysisOutcome) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
@@ -49,6 +52,8 @@ export class AnalysisTask {
           }
           try { progress(m.stage as Parameters<Progress>[0], m.done, m.total); }
           catch { finish(analysisError("failed")); }
+        } else if (m.type === "preflight" && opts.requireEntrypoint && isAnalysisPreflight(m.result)) {
+          finish(undefined, m.result);
         } else if (m.type === "done" && isAnalysisResult(m.result)) {
           if (opts.expectedSourceDigest !== undefined && m.result.sourceDigest !== opts.expectedSourceDigest) finish(analysisError("changed"));
           else finish(undefined, m.result);

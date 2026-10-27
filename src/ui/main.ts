@@ -119,6 +119,7 @@ function clearArtifact() {
   ++compareGeneration;
   compareTask.cancel();
   state.files = [];
+  state.intakeIssues = [];
   state.sourceDigest = null;
   state.inv = null;
   state.scan = null;
@@ -138,7 +139,7 @@ function clearArtifact() {
   ($("payload-btn") as HTMLButtonElement).disabled = true;
 }
 
-async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourceDigest?: string) {
+async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourceDigest?: string, entrypoint?: string | null) {
   const status = $("intake-status");
   const cancelBtn = $("cancel-btn") as HTMLButtonElement;
   intakeTask.cancel();
@@ -149,18 +150,32 @@ async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourc
   state.input = input;
   state.stripRoot = stripRoot;
   try {
-    const analysis = await intakeTask.run(input, { stripRoot, expectedSourceDigest }, (stage, done, total) => {
+    const analysis = await intakeTask.run(input, { stripRoot, expectedSourceDigest, requireEntrypoint: true, entrypoint }, (stage, done, total) => {
       if (gen === generation) status.textContent = `${stage[0]!.toUpperCase()}${stage.slice(1)}… ${done} / ${total}`;
     });
     if (gen !== generation) return; // a newer selection replaced this one
     if (!analysis.ok) throw analysis.error;
+    if ("kind" in analysis.value) {
+      const p = analysis.value;
+      state.intakeIssues = p.issues;
+      state.sourceDigest = expectedSourceDigest ?? null;
+      state.entrypoint = entrypoint ?? defaultEntrypoint(p.entries.map(e => e.path));
+      status.textContent = (p.issues.some(i => i.severity === "error") ? "Input has errors. " : "") + "Input preflight: review errors, choose a root or entry HTML page. No files have been hashed or scanned.";
+      renderRootChoice({ ...p, files: [] });
+      renderEntryChoices(p.entries.map(e => e.path));
+      $("inventory").hidden = false;
+      $("inv-summary").textContent = `${p.entries.length} files listed; not hashed.`;
+      $("inv-rows").replaceChildren(...p.entries.map(e => { const tr = el("tr"); tr.append(el("td", e.path), el("td", String(e.size)), el("td", "Not hashed")); return tr; }));
+      $("issues").replaceChildren(...p.issues.map(i => el("li", `${i.severity.toUpperCase()}: ${i.message}${i.path ? ` (${i.path})` : ""}`, i.severity)));
+      return;
+    }
     const { intake: r, inv, scan, sourceDigest } = analysis.value;
     state.files = r.files;
     state.sourceDigest = r.issues.some((i) => i.severity === "error") ? null : sourceDigest;
     state.inv = inv;
     state.scan = scan;
     state.intakeIssues = r.issues;
-    state.entrypoint = defaultEntrypoint(inv.entries.map((e) => e.path));
+    state.entrypoint = entrypoint ?? defaultEntrypoint(inv.entries.map((e) => e.path));
     state.selected.clear();
     state.plan = null;
     status.textContent = r.issues.some((i) => i.severity === "error") ? "Input has errors. Export is blocked; review them below." : r.strippedRoot ? `Loaded with "${r.strippedRoot}/" as the site root.` : "Loaded.";
@@ -208,13 +223,17 @@ async function refreshIdentity() {
 function renderIdentity(inv: Inventory) {
   const appIdInput = $("app-id") as HTMLInputElement;
   appIdInput.value = state.appId;
+  renderEntryChoices(inv.entries.map(e => e.path));
+  $("artifact-id").textContent = state.artifactId ? `Artifact id: ${state.artifactId}` : "Artifact id: not available until the identity is valid.";
+}
+
+function renderEntryChoices(paths: string[]) {
   const sel = $("entrypoint") as HTMLSelectElement;
-  const candidates = htmlCandidates(inv.entries.map((e) => e.path));
+  const candidates = htmlCandidates(paths);
   sel.replaceChildren(el("option", "— choose the entry page —"), ...candidates.map((p) => el("option", p)));
   (sel.options[0] as HTMLOptionElement).value = "";
   for (let i = 1; i < sel.options.length; i++) (sel.options[i] as HTMLOptionElement).value = candidates[i - 1]!;
   sel.value = state.entrypoint ?? "";
-  $("artifact-id").textContent = state.artifactId ? `Artifact id: ${state.artifactId}` : "Artifact id: not available until the identity is valid.";
 }
 
 // Root selection is an explicit, visible choice (research T-ART-02).
@@ -435,8 +454,8 @@ $("research").addEventListener("toggle", async (ev) => {
 // artifact. Offline: the user supplies the files; nothing is fetched.
 async function compareCopy(input: AnalysisInput) {
   const out = $("compare-result");
-  if (!state.inv) { out.textContent = "Load the original site first."; return; }
   if (state.intakeIssues.some((i) => i.severity === "error")) { out.textContent = "The original input has errors. Load a valid original before comparing a copy."; return; }
+  if (!state.inv) { out.textContent = "Load the original site first."; return; }
   const reference = state.inv;
   const gen = ++compareGeneration;
   compareTask.cancel();
@@ -519,8 +538,33 @@ $("app-id").addEventListener("change", (ev) => {
 });
 $("entrypoint").addEventListener("change", (ev) => {
   state.entrypoint = (ev.target as HTMLSelectElement).value || null;
-  void refreshIdentity();
+  if (!state.inv && state.input) void loadBundle(state.input, state.stripRoot, state.sourceDigest ?? undefined, state.entrypoint);
+  else void refreshIdentity();
 });
 $("payload-btn").addEventListener("click", downloadPayload);
 
-mountRecovery();
+mountRecovery(() => {
+  if (!state.inv || !state.scan || state.hasErrors || !state.artifactId) return null;
+  const snapshot = { files: state.files, inv: state.inv, scan: state.scan, input: state.input,
+    sourceDigest: state.sourceDigest, stripRoot: state.stripRoot };
+  const selectedGeneration = generation, selectedIdentity = identityGeneration;
+  return {
+    input: { kind: "folder", entries: snapshot.files.map(f => ({ path: f.path, blob: new Blob([f.bytes.slice()]) })) },
+    async apply(manifest, current) {
+      // Rebind the worker's response to this exact active inventory, then check
+      // both UI generations immediately before the sole state mutation.
+      const m = buildManifest(manifest.appId, snapshot.inv.entries, manifest.entrypoint);
+      if (!m.ok || await artifactId(m.manifest) !== await artifactId(manifest)) return false;
+      if (!current() || generation !== selectedGeneration || identityGeneration !== selectedIdentity) return false;
+      intakeTask.cancel(); ++generation; clearArtifact();
+      Object.assign(state, snapshot, { appId: manifest.appId, entrypoint: manifest.entrypoint });
+      $("intake-status").textContent = "Restored identity from matching local bytes. Review public data before export.";
+      renderCompat(snapshot.scan); renderProviders();
+      const committedGeneration = generation;
+      const refreshed = refreshIdentity();
+      const committedIdentity = identityGeneration;
+      await refreshed;
+      return current() && generation === committedGeneration && identityGeneration === committedIdentity;
+    },
+  };
+});

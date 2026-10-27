@@ -62,3 +62,5 @@ Final relevant checks: 343 unit tests / 26 files, typecheck/build and diff check
 pass; Chromium 42 existing+Unicode checks, 25 recovery checks, keyboard matrix
 above; zero page errors/external requests. Local preview remains at
 127.0.0.1:4173, no public exposure. Original thresholds/fixtures retained.
+
+Update: the [local recovery workflow checkpoint](2026-10-27-local-recovery-workflow.md) completes the entrypoint preflight and actual-payload artifact identity restoration items above. Acceptance/input and execution exclusions remain unchanged.

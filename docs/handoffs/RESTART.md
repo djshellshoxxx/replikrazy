@@ -1,3 +1,7 @@
+## 2026-10-27 working local preflight and recovery
+
+Step 1 now presents root/entrypoint preflight metadata before hashing unresolved or rejected artifact input. Step 7 explicitly restores artifact identity only after matching actual locally selected payload bytes to a validated recovery manifest. Mismatches and stale results do not apply; public review resets; imported consent/plans/provider state stay unapplied. [Workflow, exact scope and evidence](../reviews/2026-10-27-local-recovery-workflow.md). 368 unit tests / 29 files, typecheck/build, 46 main + 13 payload recovery + 25 inspection Chromium checks, 68 keyboard controls/16 reflow/four cancel-focus checks. No network/provider/publication activity. Existing acceptance/download limits unchanged.
+
 ## 2026-10-27 explicit root path preflight
 
 Root selection now precedes payload path validation for files and ZIP directories; invalid siblings cannot fabricate a common root. Empty initial inventory retains the root chooser. [Evidence and exact next boundary](../reviews/2026-10-27-root-preflight.md). 359 unit tests / 27 files, typecheck/build, 45 main Chromium checks pass. Entrypoint-before-hashing and payload-backed recovery remain ready technical work; recovery restoration is not claimed. Preserve original failure logs and existing denials.

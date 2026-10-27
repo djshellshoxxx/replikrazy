@@ -3,6 +3,7 @@
 // worker). The UI requires workers for cancellation. Pure apart from reading
 // the given Blobs.
 
+import { defaultEntrypoint, htmlCandidates } from "../contracts/manifest";
 import { intakeFolder, intakeZip, type IntakeOptions, type IntakeResult, type PickedFile } from "./intake";
 import { buildInventory, canonicalManifest, sha256Hex, type Inventory } from "./inventory";
 import { scanBundle, type CompatibilityScan } from "./scan";
@@ -17,6 +18,8 @@ export type AnalysisInput =
 export interface AnalysisOptions extends IntakeOptions {
   // Re-reading one selection must preserve the original-path content snapshot.
   expectedSourceDigest?: string;
+  requireEntrypoint?: boolean;
+  entrypoint?: string | null;
 }
 
 export interface AnalysisResult {
@@ -26,9 +29,22 @@ export interface AnalysisResult {
   scan: CompatibilityScan;
 }
 
+export interface AnalysisPreflight {
+  kind: "preflight";
+  source: "zip" | "folder";
+  candidateRoot: string | null;
+  strippedRoot: string | null;
+  entries: { path: string; size: number }[];
+  issues: IntakeResult["issues"];
+}
+export type AnalysisOutcome = AnalysisResult | AnalysisPreflight;
+
 export type Progress = (stage: "reading" | "hashing" | "scanning", done: number, total: number) => void;
 
-export async function runAnalysis(input: AnalysisInput, opts: AnalysisOptions, onProgress: Progress = () => {}): Promise<AnalysisResult> {
+export function runAnalysis(input: AnalysisInput, opts: AnalysisOptions & { requireEntrypoint: true }, onProgress?: Progress): Promise<AnalysisOutcome>;
+export function runAnalysis(input: AnalysisInput, opts: AnalysisOptions & { requireEntrypoint?: false }, onProgress?: Progress): Promise<AnalysisResult>;
+export function runAnalysis(input: AnalysisInput, opts: AnalysisOptions, onProgress?: Progress): Promise<AnalysisOutcome>;
+export async function runAnalysis(input: AnalysisInput, opts: AnalysisOptions, onProgress: Progress = () => {}): Promise<AnalysisOutcome> {
   let intake: IntakeResult;
   if (input.kind === "zip") {
     // Size checked from metadata before the archive is read into memory.
@@ -46,6 +62,14 @@ export async function runAnalysis(input: AnalysisInput, opts: AnalysisOptions, o
   } else {
     const picked: PickedFile[] = input.entries.map((e) => ({ webkitRelativePath: e.path, get size() { return e.blob.size; }, arrayBuffer: () => e.blob.arrayBuffer() }));
     intake = await intakeFolder(picked, opts, DEFAULT_ZIP_LIMITS, (done, total) => onProgress("reading", done, total));
+  }
+  if (opts.requireEntrypoint) {
+    const paths = intake.files.map(f => f.path);
+    const entry = opts.entrypoint === undefined ? defaultEntrypoint(paths) : opts.entrypoint;
+    if (intake.issues.some(i => i.severity === "error") || !entry || !htmlCandidates(paths).includes(entry)) {
+      return { kind: "preflight", source: intake.source, candidateRoot: intake.candidateRoot, strippedRoot: intake.strippedRoot,
+        entries: intake.files.map(f => ({ path: f.path, size: f.bytes.length })), issues: intake.issues };
+    }
   }
   const inv = await buildInventory(intake.files, (done, total) => onProgress("hashing", done, total));
   // Root selection changes manifest paths, not the selected source bytes.

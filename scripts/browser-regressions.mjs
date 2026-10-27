@@ -35,7 +35,7 @@ try {
   await page.waitForFunction(() => document.querySelector('#root-choice input'));
   check(await page.locator('#payload-btn').isEnabled(), false);
   await page.locator('#root-choice input').check();
-  await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('site root'));
+  await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('preflight') && document.querySelector('#root-choice input').checked);
   await page.locator('#entrypoint').selectOption(payloadPath);
   await page.waitForFunction(() => document.querySelector('#artifact-id').textContent.includes('sha256:'));
   check(await page.locator('#inv-rows tr td').first().textContent(), payloadPath);
@@ -124,14 +124,17 @@ try {
   await page.locator('#cmp-zip').setInputFiles(zip({ 'index.html': '<script>globalThis.pwned=true</script><h1>Hello</h1>', '../bad.txt': 'bad' }));
   await page.waitForFunction(() => document.querySelector('#compare-result').textContent.includes('Could not read'));
   checks++;
-  await load(zip({ 'index.html': 'hello', '../bad.txt': 'bad' }));
+  await page.locator('#zip-input').setInputFiles(zip({ 'index.html': 'hello', '../bad.txt': 'bad' }));
+  await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('Input has errors'));
+  check((await page.locator('#artifact-id').textContent()).includes('sha256:'), false);
   await page.locator('#cmp-zip').setInputFiles(zip({ 'index.html': 'hello' }));
   await page.waitForFunction(() => document.querySelector('#compare-result').textContent.includes('original input has errors'));
   checks++;
   check(await page.locator('#export-btn').isEnabled(), false);
   check(await page.locator('#use-public').isChecked(), false);
   check(await page.evaluate(() => globalThis.pwned), undefined);
-  await load(zip({ 'index.html': 'hello', '../bad/': '' }));
+  await page.locator('#zip-input').setInputFiles(zip({ 'index.html': 'hello', '../bad/': '' }));
+  await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('Input has errors'));
   await page.locator('#cmp-zip').setInputFiles(zip({ 'index.html': 'hello' }));
   await page.waitForFunction(() => document.querySelector('#compare-result').textContent.includes('original input has errors'));
   checks++;

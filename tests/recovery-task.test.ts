@@ -43,3 +43,9 @@ it("does not forward error details", async () => {
   expect(result).toMatchObject({ ok: false, error: { code: "MK_PRIVATE_DATA", params: {} } });
   expect(JSON.stringify(result)).not.toContain("synthetic-private");
 });
+it("requires a matched manifest only for explicit payload matching", async () => {
+  const { task, workers } = setup();
+  const pending = task.run(new Blob(), false, { artifactIndex: 0, input: { kind: "folder", entries: [] } });
+  workers[0]!.send({ ok: true, value });
+  expect(await pending).toMatchObject({ ok: false, error: { code: "MK_INTERNAL" } });
+});

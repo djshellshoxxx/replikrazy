@@ -6,14 +6,15 @@ separate branch/PR #1; this continuation has not been pushed or merged.
 
 The lean browser-only application supports bounded intake, manifests, heuristic
 scans, manual export and offline comparison. Optional step 7 now provides safe
-read-only recovery inspection with cancellation, explicit profile selection and
-byte-exact original downloads. Recognized metadata never restores consent or
-triggers execution. Actual site bytes still come from ZIP/folder intake.
+recovery inspection with cancellation, explicit profile selection and byte-exact
+original downloads. Explicit identity restoration requires exact matching of actual
+local site bytes. Recognized metadata never restores consent or triggers execution.
 
-Latest validation: 359 unit tests, typecheck/build, 45 main Chromium checks.
-Earlier unchanged recovery evidence: 25 recovery checks; zero browser errors/external requests. Focused reviews
-and retained failures are in docs/reviews. Recovery keyboard matrix reaches 52 controls with 16 reflow and four cancel-focus checks. No full-audit, new axe/manual screen
-reader or cross-browser claim. Browser download denials remain binding.
+Latest validation: 368 unit tests / 29 files, typecheck/build, 46 main Chromium
+checks, 13 payload recovery checks and 25 recovery inspection checks; zero page
+errors/external requests. Keyboard matrix: 68 controls, 16 reflow checks and four
+cancel-focus checks. No full-audit, new axe/manual screen reader or cross-browser
+claim. Browser download denials remain binding.
 
 See [current restart notes](docs/handoffs/RESTART.md) and
 [recovery preview evidence](docs/reviews/2026-10-27-recovery-preview.md).
@@ -25,3 +26,5 @@ review provenance are recorded without publishing full private source text.
 [Exact finish checklist](docs/reviews/2026-10-27-finish-acceptance.md) separates completed work, open technical tasks, missing acceptance inputs and execution/publication exclusions.
 
 [Root preflight checkpoint and next steps](docs/reviews/2026-10-27-root-preflight.md): explicit root-relative path validation is complete; entrypoint-before-hashing and payload-backed recovery remain technical implementation work.
+
+[Completed local workflow](docs/reviews/2026-10-27-local-recovery-workflow.md) supersedes the prior root checkpoint’s open entrypoint and payload-binding implementation items.
