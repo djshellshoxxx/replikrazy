@@ -125,7 +125,7 @@
   function isValidId(id) { return typeof id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(id); }
 
   function slugify(s) {
-    var out = String(s || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    var out = String(s || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').slice(0, 40).replace(/^-+|-+$/g, '');
     return out || 'destination';
   }
 

@@ -1,0 +1,927 @@
+{
+  "schema": "replikrazy.offline-mirror-plan",
+  "schemaVersion": 1,
+  "tool": {
+    "name": "replikrazy-offline-mirror-planner",
+    "version": "0.1.0"
+  },
+  "generatedAt": "2026-10-27T00:00:00.000Z",
+  "notice": "PLANNING ARTIFACT ONLY. Generated offline by the Replikrazy Offline Mirror Planner. Nothing was uploaded, published, registered, deployed or verified. No network request was made. Every address and capability in this plan was entered by a person and is unverified.",
+  "planState": "draft",
+  "planStateReasons": [
+    "2 file(s) were rejected (unsafe path, size limit or read error). Fix or remove them in the source folder and re-inventory.",
+    "Destination \"Example static host (fictional)\" is unverified.",
+    "Destination \"I2P mirror (needs tunnel name)\" is needs-configuration."
+  ],
+  "verification": {
+    "performed": false,
+    "networkRequests": 0,
+    "statement": "No address, provider or capability was checked. All values are user-declared."
+  },
+  "settings": {
+    "siteLabel": "Lantern Community Library (fictional demo)",
+    "advertiseOnionLocation": false,
+    "headers": [
+      {
+        "name": "X-Content-Type-Options",
+        "value": "nosniff"
+      },
+      {
+        "name": "Referrer-Policy",
+        "value": "no-referrer"
+      },
+      {
+        "name": "Content-Security-Policy",
+        "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'"
+      },
+      {
+        "name": "Permissions-Policy",
+        "value": "camera=(), microphone=(), geolocation=()"
+      },
+      {
+        "name": "Cross-Origin-Opener-Policy",
+        "value": "same-origin"
+      }
+    ],
+    "errors": []
+  },
+  "site": {
+    "rootFolder": "lantern-community-library",
+    "totals": {
+      "fileCount": 13,
+      "totalBytes": 3862,
+      "largestFileBytes": 771,
+      "excludedCount": 9,
+      "rejectedCount": 2,
+      "inputCount": 24
+    },
+    "manifestSha256": "b6c4f31f603febc26dffa90a87acfd1e2fde63d312251f365aa3be33807bfb91",
+    "manifestFormat": "sha256sum -c compatible, file \"SHA256SUMS\"; manifestSha256 is the SHA-256 of that file",
+    "bytePreservation": "Files are listed and bundled verbatim. The planner never rewrites, minifies or re-encodes site bytes.",
+    "files": [
+      {
+        "path": "404.html",
+        "size": 508,
+        "sha256": "81b606ae5e75f15db17e13e9c8ace335c7626ce30317b5f79ce21e80633a72a3",
+        "mediaType": "text/html; charset=utf-8",
+        "flags": []
+      },
+      {
+        "path": "about/index.html",
+        "size": 631,
+        "sha256": "71369cf656c19b4a2e865a570719fe5434bedd626b8a1b1576073e0a8cd1176e",
+        "mediaType": "text/html; charset=utf-8",
+        "flags": [
+          "root-absolute-links"
+        ]
+      },
+      {
+        "path": "catalog/index.html",
+        "size": 674,
+        "sha256": "391b9f2deba81bd6e3079d5a10937ed17432595a02bd03ab1416987d4025ce76",
+        "mediaType": "text/html; charset=utf-8",
+        "flags": [
+          "external-references"
+        ],
+        "notes": [
+          "References external hosts: tiles.example.net"
+        ]
+      },
+      {
+        "path": "css/site.css",
+        "size": 189,
+        "sha256": "56bf044e096b028e2dd0313e6dbd7f03c555ec4d3fbfbe26c75a63c5dbc72470",
+        "mediaType": "text/css; charset=utf-8",
+        "flags": []
+      },
+      {
+        "path": "data/catalog.json",
+        "size": 248,
+        "sha256": "d1a4b94761abfd969f2abe137886af5ae81c6b868246b2942949893da8a1dc78",
+        "mediaType": "application/json",
+        "flags": []
+      },
+      {
+        "path": "docs/visiting.txt",
+        "size": 80,
+        "sha256": "08effa3c137f81596fe1f94ffea24c36998bbd1647a3e2d7d2a4ff9cdbe7831e",
+        "mediaType": "text/plain; charset=utf-8",
+        "flags": []
+      },
+      {
+        "path": "downloads/reading-list-2026.csv",
+        "size": 42,
+        "sha256": "f9ef6415066bf4a2b85614e9987b39495f7de82b961d8389e3684cb6216e40dd",
+        "mediaType": "text/csv; charset=utf-8",
+        "flags": []
+      },
+      {
+        "path": "fonts/Ünïcode-név.txt",
+        "size": 37,
+        "sha256": "ad947283e690e26393f628ec8de1d6d233c1de5503df7e6c90404053853ea024",
+        "mediaType": "text/plain; charset=utf-8",
+        "flags": [],
+        "notes": [
+          "Path contains non-ASCII characters; confirm every destination serves UTF-8 paths."
+        ]
+      },
+      {
+        "path": "img/logo.svg",
+        "size": 179,
+        "sha256": "8b550a4be6e9f09c132722f38e3b528ff886f7dd72517277071dcb27d7ba7bb8",
+        "mediaType": "image/svg+xml",
+        "flags": []
+      },
+      {
+        "path": "img/pixel.png",
+        "size": 67,
+        "sha256": "2b1da20a14b97d8f01f0a809d9f7d53eeefc59df6312eaa5a0c8b5c1228d1d7f",
+        "mediaType": "image/png",
+        "flags": []
+      },
+      {
+        "path": "index.html",
+        "size": 771,
+        "sha256": "6d65ada9360afd7dbb6cae6392d472bd86e26a243cecb6425613200c6d7c72ed",
+        "mediaType": "text/html; charset=utf-8",
+        "flags": []
+      },
+      {
+        "path": "js/app.js",
+        "size": 355,
+        "sha256": "02917d9f31896d71db7a521720ee6726b8fa0186756a95fd96a08396d35ede14",
+        "mediaType": "text/javascript; charset=utf-8",
+        "flags": []
+      },
+      {
+        "path": "site.webmanifest",
+        "size": 81,
+        "sha256": "ae03ac5958b9c1d57f77abc53178206bbebc24a23973818d380fefd19ffa1bfd",
+        "mediaType": "application/manifest+json",
+        "flags": []
+      }
+    ],
+    "excluded": [
+      {
+        "path": ".DS_Store",
+        "size": 8,
+        "category": "os-metadata",
+        "reason": "Operating-system metadata — excluded; bytes were not read."
+      },
+      {
+        "path": ".env",
+        "size": 36,
+        "category": "credentials",
+        "reason": "Environment / credential file — excluded; bytes were not read."
+      },
+      {
+        "path": ".git/config",
+        "size": 21,
+        "category": "version-control",
+        "reason": "Version-control metadata directory — excluded; bytes were not read."
+      },
+      {
+        "path": "backup/site-2026-01.zip",
+        "size": 19,
+        "category": "backup",
+        "reason": "Backup directory — excluded; bytes were not read."
+      },
+      {
+        "path": "db/members.sqlite",
+        "size": 51,
+        "category": "database",
+        "reason": "Database file or dump — excluded; bytes were not read."
+      },
+      {
+        "path": "index.html.bak",
+        "size": 18,
+        "category": "backup",
+        "reason": "Backup, editor swap or temporary file — excluded; bytes were not read."
+      },
+      {
+        "path": "keys/hidden_service/hs_ed25519_secret_key",
+        "size": 35,
+        "category": "onion-or-i2p-key",
+        "reason": "Tor onion-service or I2P key material — excluded; bytes were not read."
+      },
+      {
+        "path": "notes/ops-handoff.txt",
+        "size": 113,
+        "category": "secret-content",
+        "reason": "Contains a PEM/OpenSSH private-key block — excluded from plan and bundle."
+      },
+      {
+        "path": "wallet.dat",
+        "size": 17,
+        "category": "wallet",
+        "reason": "Cryptocurrency wallet / seed material — excluded; bytes were not read."
+      }
+    ],
+    "rejected": [
+      {
+        "path": "../outside-the-site.txt",
+        "reason": "Path contains a \"..\" traversal segment.",
+        "category": "unsafe-path"
+      },
+      {
+        "path": "images/CON.txt",
+        "reason": "Path segment \"CON.txt\" is a reserved device name on Windows.",
+        "category": "unsafe-path"
+      }
+    ],
+    "warnings": [],
+    "rootAbsoluteLinkFiles": [
+      "about/index.html"
+    ],
+    "externalReferenceFiles": [
+      "catalog/index.html"
+    ]
+  },
+  "contentTypes": {
+    "css": "text/css; charset=utf-8",
+    "csv": "text/csv; charset=utf-8",
+    "html": "text/html; charset=utf-8",
+    "js": "text/javascript; charset=utf-8",
+    "json": "application/json",
+    "png": "image/png",
+    "svg": "image/svg+xml",
+    "txt": "text/plain; charset=utf-8",
+    "webmanifest": "application/manifest+json"
+  },
+  "cacheRecommendations": [
+    {
+      "match": "*.html",
+      "header": "Cache-Control",
+      "value": "no-cache",
+      "level": "recommended"
+    },
+    {
+      "match": "all other files",
+      "header": "Cache-Control",
+      "value": "public, max-age=3600",
+      "level": "recommended"
+    }
+  ],
+  "crossChecks": [
+    "1 file(s) reference external hosts, which the planned Content-Security-Policy (default-src 'self') will block."
+  ],
+  "destinations": [
+    {
+      "id": "demo-local",
+      "type": "local-server",
+      "typeLabel": "Operator-managed local web server",
+      "label": "Operator laptop nginx (demo)",
+      "state": "ready-for-manual-review",
+      "stateLabel": "Ready for manual review (user-declared, not verified)",
+      "verified": false,
+      "addressStatus": "user-entered-unverified",
+      "basePath": "/",
+      "effectiveBaseUrl": "http://127.0.0.1:8080/",
+      "instructionsFile": "destinations/operator-laptop-nginx-demo-demo-local/INSTRUCTIONS.md",
+      "templates": [
+        "destinations/operator-laptop-nginx-demo-demo-local/headers.txt",
+        "destinations/operator-laptop-nginx-demo-demo-local/nginx-server.conf.template"
+      ],
+      "requiredHeaders": [
+        {
+          "name": "X-Content-Type-Options",
+          "value": "nosniff",
+          "source": "plan"
+        },
+        {
+          "name": "Referrer-Policy",
+          "value": "no-referrer",
+          "source": "plan"
+        },
+        {
+          "name": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+          "source": "plan"
+        },
+        {
+          "name": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()",
+          "source": "plan"
+        },
+        {
+          "name": "Cross-Origin-Opener-Policy",
+          "value": "same-origin",
+          "source": "plan"
+        }
+      ],
+      "capabilities": [
+        {
+          "key": "byte-exact-delivery",
+          "label": "Serves files byte-for-byte (no minify, injection or rewriting)",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "custom-headers",
+          "label": "Can send the plan's custom response headers",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "content-type-control",
+          "label": "Sends correct Content-Type for every file extension in the site",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "directory-index",
+          "label": "Serves index.html for directory URLs",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "subdirectory-base-path",
+          "label": "Can serve the site under the chosen base path",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "custom-404",
+          "label": "Can use the site's own 404.html",
+          "level": "recommended",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "tls-https",
+          "label": "Serves over HTTPS with a valid certificate",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "log-retention-control",
+          "label": "Operator controls access-log retention",
+          "level": "recommended",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "file-size-limit",
+          "label": "Per-file size limit accommodates the largest site file",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "file-count-limit",
+          "label": "File-count limit accommodates the site",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        }
+      ],
+      "missingConfiguration": [],
+      "pendingOperatorActions": [],
+      "errors": [],
+      "warnings": [],
+      "record": {
+        "id": "demo-local",
+        "type": "local-server",
+        "label": "Operator laptop nginx (demo)",
+        "basePath": "/",
+        "notes": "Fictional sample record. Serves the files locally and is the target for the onion and I2P tunnels.",
+        "config": {
+          "serverSoftware": "nginx",
+          "listenAddress": "127.0.0.1:8080",
+          "documentRoot": "/srv/replikrazy-mirror",
+          "publicUrl": ""
+        },
+        "capabilities": {
+          "byte-exact-delivery": "yes",
+          "custom-headers": "yes",
+          "content-type-control": "yes",
+          "directory-index": "yes",
+          "subdirectory-base-path": "unknown",
+          "custom-404": "yes",
+          "tls-https": "unknown",
+          "log-retention-control": "yes"
+        }
+      }
+    },
+    {
+      "id": "demo-static",
+      "type": "generic-static",
+      "typeLabel": "Generic static hosting",
+      "label": "Example static host (fictional)",
+      "state": "unverified",
+      "stateLabel": "Unverified (required capabilities still unknown)",
+      "verified": false,
+      "addressStatus": "user-entered-unverified",
+      "basePath": "/library/",
+      "effectiveBaseUrl": "https://mirror.example.com/library/",
+      "instructionsFile": "destinations/example-static-host-fictional-demo-static/INSTRUCTIONS.md",
+      "templates": [
+        "destinations/example-static-host-fictional-demo-static/headers.txt"
+      ],
+      "requiredHeaders": [
+        {
+          "name": "X-Content-Type-Options",
+          "value": "nosniff",
+          "source": "plan"
+        },
+        {
+          "name": "Referrer-Policy",
+          "value": "no-referrer",
+          "source": "plan"
+        },
+        {
+          "name": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+          "source": "plan"
+        },
+        {
+          "name": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()",
+          "source": "plan"
+        },
+        {
+          "name": "Cross-Origin-Opener-Policy",
+          "value": "same-origin",
+          "source": "plan"
+        },
+        {
+          "name": "Strict-Transport-Security",
+          "value": "max-age=31536000",
+          "source": "https-destination"
+        }
+      ],
+      "capabilities": [
+        {
+          "key": "byte-exact-delivery",
+          "label": "Serves files byte-for-byte (no minify, injection or rewriting)",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "custom-headers",
+          "label": "Can send the plan's custom response headers",
+          "level": "required",
+          "declared": "unknown",
+          "status": "unknown-blocking",
+          "detail": ""
+        },
+        {
+          "key": "content-type-control",
+          "label": "Sends correct Content-Type for every file extension in the site",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "directory-index",
+          "label": "Serves index.html for directory URLs",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "subdirectory-base-path",
+          "label": "Can serve the site under the chosen base path",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "custom-404",
+          "label": "Can use the site's own 404.html",
+          "level": "recommended",
+          "declared": "no",
+          "status": "declared-unsupported",
+          "detail": ""
+        },
+        {
+          "key": "tls-https",
+          "label": "Serves over HTTPS with a valid certificate",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "log-retention-control",
+          "label": "Operator controls access-log retention",
+          "level": "recommended",
+          "declared": "unknown",
+          "status": "unknown",
+          "detail": ""
+        },
+        {
+          "key": "file-size-limit",
+          "label": "Per-file size limit accommodates the largest site file",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": "Declared 25.0 MiB per file; largest site file is 771 B."
+        },
+        {
+          "key": "file-count-limit",
+          "label": "File-count limit accommodates the site",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": "Declared 20000 files; site has 13."
+        }
+      ],
+      "missingConfiguration": [],
+      "pendingOperatorActions": [],
+      "errors": [],
+      "warnings": [
+        {
+          "field": "basePath",
+          "message": "1 file(s) use root-absolute links (\"/…\") that will break under base path \"/library/\". The planner does not rewrite site bytes; fix links in the source site or use base path \"/\"."
+        }
+      ],
+      "record": {
+        "id": "demo-static",
+        "type": "generic-static",
+        "label": "Example static host (fictional)",
+        "basePath": "/library/",
+        "notes": "Fictional provider. Capabilities left unknown until checked against the provider's own documentation.",
+        "config": {
+          "providerName": "Example Static Host (fictional)",
+          "address": "https://mirror.example.com/library/",
+          "deployMethod": "Manual upload through the provider dashboard (operator only)",
+          "declaredMaxFileBytes": "26214400",
+          "declaredMaxFiles": "20000"
+        },
+        "capabilities": {
+          "byte-exact-delivery": "yes",
+          "custom-headers": "unknown",
+          "content-type-control": "yes",
+          "directory-index": "yes",
+          "subdirectory-base-path": "yes",
+          "custom-404": "no",
+          "tls-https": "yes",
+          "log-retention-control": "unknown"
+        }
+      }
+    },
+    {
+      "id": "demo-onion",
+      "type": "tor-onion",
+      "typeLabel": "Tor onion service",
+      "label": "Onion mirror (address pending)",
+      "state": "ready-for-manual-review",
+      "stateLabel": "Ready for manual review (user-declared, not verified)",
+      "verified": false,
+      "addressStatus": "pending-operator-generation",
+      "basePath": "/",
+      "effectiveBaseUrl": null,
+      "instructionsFile": "destinations/onion-mirror-address-pending-demo-onion/INSTRUCTIONS.md",
+      "templates": [
+        "destinations/onion-mirror-address-pending-demo-onion/headers.txt",
+        "destinations/onion-mirror-address-pending-demo-onion/torrc.snippet.template"
+      ],
+      "requiredHeaders": [
+        {
+          "name": "X-Content-Type-Options",
+          "value": "nosniff",
+          "source": "plan"
+        },
+        {
+          "name": "Referrer-Policy",
+          "value": "no-referrer",
+          "source": "plan"
+        },
+        {
+          "name": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+          "source": "plan"
+        },
+        {
+          "name": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()",
+          "source": "plan"
+        },
+        {
+          "name": "Cross-Origin-Opener-Policy",
+          "value": "same-origin",
+          "source": "plan"
+        }
+      ],
+      "capabilities": [
+        {
+          "key": "byte-exact-delivery",
+          "label": "Serves files byte-for-byte (no minify, injection or rewriting)",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "custom-headers",
+          "label": "Can send the plan's custom response headers",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "content-type-control",
+          "label": "Sends correct Content-Type for every file extension in the site",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "directory-index",
+          "label": "Serves index.html for directory URLs",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "subdirectory-base-path",
+          "label": "Can serve the site under the chosen base path",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "custom-404",
+          "label": "Can use the site's own 404.html",
+          "level": "recommended",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "tls-https",
+          "label": "Serves over HTTPS with a valid certificate",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "log-retention-control",
+          "label": "Operator controls access-log retention",
+          "level": "recommended",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "file-size-limit",
+          "label": "Per-file size limit accommodates the largest site file",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "file-count-limit",
+          "label": "File-count limit accommodates the site",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        }
+      ],
+      "missingConfiguration": [],
+      "pendingOperatorActions": [
+        {
+          "field": "address",
+          "message": "Address will be created by the operator's own Tor and entered later. The planner never creates it."
+        }
+      ],
+      "errors": [],
+      "warnings": [
+        {
+          "field": "",
+          "message": "1 file(s) reference external hosts. On Tor onion service those requests would leave the overlay network or fail. Prefer self-contained pages."
+        }
+      ],
+      "record": {
+        "id": "demo-onion",
+        "type": "tor-onion",
+        "label": "Onion mirror (address pending)",
+        "basePath": "/",
+        "notes": "The onion address does not exist yet; the operator's own Tor will create it.",
+        "config": {
+          "addressMode": "pending-operator",
+          "address": "",
+          "localTarget": "127.0.0.1:8080",
+          "virtualPort": "80",
+          "hiddenServiceDir": "/var/lib/tor/replikrazy-mirror/"
+        },
+        "capabilities": {
+          "byte-exact-delivery": "yes",
+          "custom-headers": "yes",
+          "content-type-control": "yes",
+          "directory-index": "yes",
+          "subdirectory-base-path": "unknown",
+          "custom-404": "yes",
+          "log-retention-control": "yes"
+        }
+      }
+    },
+    {
+      "id": "demo-i2p",
+      "type": "i2p",
+      "typeLabel": "I2P site (server tunnel)",
+      "label": "I2P mirror (needs tunnel name)",
+      "state": "needs-configuration",
+      "stateLabel": "Needs configuration",
+      "verified": false,
+      "addressStatus": "pending-operator-generation",
+      "basePath": "/",
+      "effectiveBaseUrl": null,
+      "instructionsFile": "destinations/i2p-mirror-needs-tunnel-name-demo-i2p/INSTRUCTIONS.md",
+      "templates": [
+        "destinations/i2p-mirror-needs-tunnel-name-demo-i2p/headers.txt",
+        "destinations/i2p-mirror-needs-tunnel-name-demo-i2p/i2pd-tunnels.conf.template"
+      ],
+      "requiredHeaders": [
+        {
+          "name": "X-Content-Type-Options",
+          "value": "nosniff",
+          "source": "plan"
+        },
+        {
+          "name": "Referrer-Policy",
+          "value": "no-referrer",
+          "source": "plan"
+        },
+        {
+          "name": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+          "source": "plan"
+        },
+        {
+          "name": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()",
+          "source": "plan"
+        },
+        {
+          "name": "Cross-Origin-Opener-Policy",
+          "value": "same-origin",
+          "source": "plan"
+        }
+      ],
+      "capabilities": [
+        {
+          "key": "byte-exact-delivery",
+          "label": "Serves files byte-for-byte (no minify, injection or rewriting)",
+          "level": "required",
+          "declared": "yes",
+          "status": "declared-supported",
+          "detail": ""
+        },
+        {
+          "key": "custom-headers",
+          "label": "Can send the plan's custom response headers",
+          "level": "required",
+          "declared": "unknown",
+          "status": "unknown-blocking",
+          "detail": ""
+        },
+        {
+          "key": "content-type-control",
+          "label": "Sends correct Content-Type for every file extension in the site",
+          "level": "required",
+          "declared": "unknown",
+          "status": "unknown-blocking",
+          "detail": ""
+        },
+        {
+          "key": "directory-index",
+          "label": "Serves index.html for directory URLs",
+          "level": "required",
+          "declared": "unknown",
+          "status": "unknown-blocking",
+          "detail": ""
+        },
+        {
+          "key": "subdirectory-base-path",
+          "label": "Can serve the site under the chosen base path",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "custom-404",
+          "label": "Can use the site's own 404.html",
+          "level": "recommended",
+          "declared": "unknown",
+          "status": "unknown",
+          "detail": ""
+        },
+        {
+          "key": "tls-https",
+          "label": "Serves over HTTPS with a valid certificate",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "log-retention-control",
+          "label": "Operator controls access-log retention",
+          "level": "recommended",
+          "declared": "unknown",
+          "status": "unknown",
+          "detail": ""
+        },
+        {
+          "key": "file-size-limit",
+          "label": "Per-file size limit accommodates the largest site file",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        },
+        {
+          "key": "file-count-limit",
+          "label": "File-count limit accommodates the site",
+          "level": "not-applicable",
+          "declared": "n/a",
+          "status": "n/a",
+          "detail": ""
+        }
+      ],
+      "missingConfiguration": [
+        {
+          "field": "tunnelName",
+          "label": "Tunnel name (letters, digits, . _ -)"
+        }
+      ],
+      "pendingOperatorActions": [
+        {
+          "field": "address",
+          "message": "Address will be created by the operator's own I2P router and entered later. The planner never creates it."
+        }
+      ],
+      "errors": [],
+      "warnings": [
+        {
+          "field": "",
+          "message": "1 file(s) reference external hosts. On I2P site (server tunnel) those requests would leave the overlay network or fail. Prefer self-contained pages."
+        }
+      ],
+      "record": {
+        "id": "demo-i2p",
+        "type": "i2p",
+        "label": "I2P mirror (needs tunnel name)",
+        "basePath": "/",
+        "notes": "Deliberately incomplete to show missing configuration.",
+        "config": {
+          "router": "i2pd",
+          "addressMode": "pending-operator",
+          "address": "",
+          "localTarget": "127.0.0.1:8080",
+          "tunnelName": "",
+          "keysFile": "replikrazy-mirror.dat"
+        },
+        "capabilities": {
+          "byte-exact-delivery": "yes",
+          "custom-headers": "unknown",
+          "content-type-control": "unknown",
+          "directory-index": "unknown",
+          "subdirectory-base-path": "unknown",
+          "custom-404": "unknown",
+          "log-retention-control": "unknown"
+        }
+      }
+    }
+  ],
+  "excludedFromPlan": "Credentials, private keys, onion/I2P key material, wallets, databases, backups, VCS metadata and OS metadata are never included. Destination records hold no credential fields; free-text fields that look like credentials are redacted.",
+  "limitations": [
+    "The planner performs no network requests and verifies nothing. Every address and capability is as entered by a person; \"ready-for-manual-review\" means every required item was declared, not that it was checked.",
+    "Mirrors are separate web origins. Browser storage (cookies, localStorage, sessionStorage, IndexedDB, Cache Storage, service workers) is NOT shared between mirrors; data saved on one mirror is invisible on another.",
+    "Serving a site over Tor or I2P protects the connection between visitor and mirror only. It does not make blockchain or cryptocurrency transactions anonymous: on-chain data remains public and linkable.",
+    "Onion and I2P addresses can only be created by the operator's own Tor or I2P software. The planner never generates keys, identities or addresses, and never starts or configures any service.",
+    "Exported plans exclude credentials, private keys, databases and backups. Excluded files are listed by path and reason only; their bytes are never read into the plan or bundle.",
+    "Site bytes are never modified. Base paths are a server setting; links inside the site are not rewritten."
+  ]
+}

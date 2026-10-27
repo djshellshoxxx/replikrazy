@@ -1,0 +1,128 @@
+{
+  "schema": "replikrazy.offline-mirror-destinations",
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-27T00:00:00.000Z",
+  "notice": "User-entered destination records. Addresses and capabilities are unverified. Contains no credentials.",
+  "settings": {
+    "siteLabel": "Lantern Community Library (fictional demo)",
+    "headers": [
+      {
+        "name": "X-Content-Type-Options",
+        "value": "nosniff"
+      },
+      {
+        "name": "Referrer-Policy",
+        "value": "no-referrer"
+      },
+      {
+        "name": "Content-Security-Policy",
+        "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'"
+      },
+      {
+        "name": "Permissions-Policy",
+        "value": "camera=(), microphone=(), geolocation=()"
+      },
+      {
+        "name": "Cross-Origin-Opener-Policy",
+        "value": "same-origin"
+      }
+    ],
+    "advertiseOnionLocation": false
+  },
+  "destinations": [
+    {
+      "id": "demo-local",
+      "type": "local-server",
+      "label": "Operator laptop nginx (demo)",
+      "basePath": "/",
+      "notes": "Fictional sample record. Serves the files locally and is the target for the onion and I2P tunnels.",
+      "config": {
+        "serverSoftware": "nginx",
+        "listenAddress": "127.0.0.1:8080",
+        "documentRoot": "/srv/replikrazy-mirror",
+        "publicUrl": ""
+      },
+      "capabilities": {
+        "byte-exact-delivery": "yes",
+        "custom-headers": "yes",
+        "content-type-control": "yes",
+        "directory-index": "yes",
+        "subdirectory-base-path": "unknown",
+        "custom-404": "yes",
+        "tls-https": "unknown",
+        "log-retention-control": "yes"
+      }
+    },
+    {
+      "id": "demo-static",
+      "type": "generic-static",
+      "label": "Example static host (fictional)",
+      "basePath": "/library/",
+      "notes": "Fictional provider. Capabilities left unknown until checked against the provider's own documentation.",
+      "config": {
+        "providerName": "Example Static Host (fictional)",
+        "address": "https://mirror.example.com/library/",
+        "deployMethod": "Manual upload through the provider dashboard (operator only)",
+        "declaredMaxFileBytes": "26214400",
+        "declaredMaxFiles": "20000"
+      },
+      "capabilities": {
+        "byte-exact-delivery": "yes",
+        "custom-headers": "unknown",
+        "content-type-control": "yes",
+        "directory-index": "yes",
+        "subdirectory-base-path": "yes",
+        "custom-404": "no",
+        "tls-https": "yes",
+        "log-retention-control": "unknown"
+      }
+    },
+    {
+      "id": "demo-onion",
+      "type": "tor-onion",
+      "label": "Onion mirror (address pending)",
+      "basePath": "/",
+      "notes": "The onion address does not exist yet; the operator's own Tor will create it.",
+      "config": {
+        "addressMode": "pending-operator",
+        "address": "",
+        "localTarget": "127.0.0.1:8080",
+        "virtualPort": "80",
+        "hiddenServiceDir": "/var/lib/tor/replikrazy-mirror/"
+      },
+      "capabilities": {
+        "byte-exact-delivery": "yes",
+        "custom-headers": "yes",
+        "content-type-control": "yes",
+        "directory-index": "yes",
+        "subdirectory-base-path": "unknown",
+        "custom-404": "yes",
+        "log-retention-control": "yes"
+      }
+    },
+    {
+      "id": "demo-i2p",
+      "type": "i2p",
+      "label": "I2P mirror (needs tunnel name)",
+      "basePath": "/",
+      "notes": "Deliberately incomplete to show missing configuration.",
+      "config": {
+        "router": "i2pd",
+        "addressMode": "pending-operator",
+        "address": "",
+        "localTarget": "127.0.0.1:8080",
+        "tunnelName": "",
+        "keysFile": "replikrazy-mirror.dat"
+      },
+      "capabilities": {
+        "byte-exact-delivery": "yes",
+        "custom-headers": "unknown",
+        "content-type-control": "unknown",
+        "directory-index": "unknown",
+        "subdirectory-base-path": "unknown",
+        "custom-404": "unknown",
+        "log-retention-control": "unknown"
+      }
+    }
+  ]
+}
