@@ -1,3 +1,7 @@
+## 2026-10-27 internal-result and retention checkpoint
+
+Same local continuation branch. Internal worker result structure is validated; existing manual-status persistence has a version/identity boundary, preserves legacy and rejected source, and offers read-only source backup. [Scope and evidence](../reviews/2026-10-27-result-retention.md). Latest: 230 tests / 17 files, typecheck/build and 39 Chromium checks passed. Full RecoveryRecord import remains unimplemented; scanner stays broker-owned.
+
 ## 2026-10-27 analysis lifecycle checkpoint
 
 Same local continuation branch. Added monotonic deadline alongside wall-clock limit and safe worker envelope/progress handling. [Evidence and limitations](../reviews/2026-10-27-analysis-envelope.md). Latest: 208 tests / 15 files, typecheck/build and 35 Chromium checks passed. Scanner untouched and broker-owned.

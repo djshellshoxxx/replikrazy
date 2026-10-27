@@ -13,6 +13,7 @@ import type { Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, restorePlanStatuses, transition, type DryRunPlan } from "../core/plan";
 import type { CompatibilityScan } from "../core/scan";
 import { isMKError } from "../contracts/diagnostic";
+import { legacyStatusKey, readStatusRecord, statusKey, writeStatusRecord } from "../core/status-record";
 import { AnalysisTask } from "./analysis-task";
 import { filterCatalogue, getProvider } from "../providers/catalogue";
 import type { MethodId, ProviderAdapter } from "../providers/types";
@@ -56,18 +57,38 @@ const state: State = {
   publicDataReviewed: false,
 };
 
-// Per-viewer convenience only: remembers statuses for a given artifactId.
-const storeKey = (digest: string) => `replikrazy.plan.${digest}`;
+// Per-viewer convenience only; legacy bytes stay in their original key.
 function savePlan() {
   if (!state.plan) return;
   try {
-    const s = Object.fromEntries(state.plan.destinations.map((d) => [d.providerId, d.status]));
-    localStorage.setItem(storeKey(state.plan.artifactId), JSON.stringify(s));
-  } catch { /* storage unavailable: statuses simply aren't remembered */ }
+    const statuses = Object.fromEntries(state.plan.destinations.map((d) => [d.providerId, d.status]));
+    writeStatusRecord(localStorage, state.plan.artifactId, statuses);
+  } catch { /* optional storage unavailable */ }
+  renderStoredStatus();
 }
 function restoreStatuses(plan: DryRunPlan): DryRunPlan {
-  try { return restorePlanStatuses(plan, JSON.parse(localStorage.getItem(storeKey(plan.artifactId)) ?? "{}")); }
-  catch { return plan; }
+  try {
+    const current = localStorage.getItem(statusKey(plan.artifactId));
+    const record = current !== null ? readStatusRecord(current, plan.artifactId)
+      : readStatusRecord(localStorage.getItem(legacyStatusKey(plan.artifactId)), plan.artifactId, true);
+    return record.statuses ? restorePlanStatuses(plan, record.statuses) : plan;
+  } catch { return plan; }
+}
+function retainedStatus(): { key: string; raw: string } | null {
+  if (!state.plan) return null;
+  const id = state.plan.artifactId;
+  try {
+    for (const [key, legacy] of [[statusKey(id), false], [legacyStatusKey(id), true]] as const) {
+      const raw = localStorage.getItem(key);
+      if (raw !== null && readStatusRecord(raw, id, legacy).kind === "retained") return { key, raw };
+    }
+  } catch { /* optional storage unavailable */ }
+  return null;
+}
+function renderStoredStatus() {
+  const retained = retainedStatus();
+  $("stored-status-notice").textContent = retained ? "Saved status data could not be applied. It remains unchanged in this browser; you can save a local copy." : "";
+  $("stored-status-export").hidden = !retained;
 }
 
 const fmtBytes = (n: number) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KiB` : `${(n / 1048576).toFixed(1)} MiB`);
@@ -300,6 +321,7 @@ function renderPlan() {
   sec.hidden = !state.plan;
   if (!state.plan) return;
   const plan = state.plan;
+  renderStoredStatus();
   $("plan-list").replaceChildren(
     ...plan.destinations.map((d) => {
       const p = getProvider(d.providerId)!;
@@ -371,6 +393,16 @@ function saveZip(zip: Uint8Array, name: string) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
+
+$("stored-status-export").addEventListener("click", () => {
+  const retained = retainedStatus();
+  if (!retained) return;
+  // JSON escaping preserves even malformed UTF-16 source strings losslessly.
+  // This is a read-only source backup, not an importable/verified record.
+  const url = URL.createObjectURL(new Blob([JSON.stringify({ kind: "replikrazy-saved-source", storageKey: retained.key, source: retained.raw })], { type: "application/json" }));
+  const a = el("a"); a.href = url; a.download = "replikrazy-saved-status-source.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+});
 
 $("zip-input").addEventListener("change", (ev) => {
   const f = (ev.target as HTMLInputElement).files?.[0];

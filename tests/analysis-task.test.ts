@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { runAnalysis, type AnalysisResult } from "../src/core/pipeline";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { AnalysisTask } from "../src/ui/analysis-task";
 
 class FakeWorker {
@@ -9,6 +10,8 @@ class FakeWorker {
   postMessage = vi.fn();
   send(data: unknown) { this.onmessage?.({ data } as MessageEvent); }
 }
+let valid: AnalysisResult;
+beforeAll(async () => { valid = await runAnalysis({ kind: "folder", entries: [{ path: "index.html", blob: new Blob(["hello"]) }] }, {}); });
 const input = { kind: "zip" as const, file: new Blob() };
 const setup = (now?: () => number) => {
   const workers: FakeWorker[] = [];
@@ -27,7 +30,7 @@ describe("analysis worker lifecycle", () => {
     const rejected = expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_CANCELLED", messageKey: "analysis.cancelled" } });
     task.cancel();
     workers[0]!.send({ type: "progress", stage: "reading", done: 1, total: 1 });
-    workers[0]!.send({ type: "done", result: {} });
+    workers[0]!.send({ type: "done", result: valid });
     await rejected;
     expect(progress).not.toHaveBeenCalled();
     expect(workers[0]!.terminate).toHaveBeenCalledTimes(1);
@@ -37,9 +40,9 @@ describe("analysis worker lifecycle", () => {
     const first = expect(task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_CANCELLED", messageKey: "analysis.cancelled" } });
     const second = task.run(input, {}, vi.fn());
     workers[0]!.send({ type: "done", result: { stale: true } });
-    workers[1]!.send({ type: "done", result: { current: true } });
+    workers[1]!.send({ type: "done", result: valid });
     await first;
-    await expect(second).resolves.toEqual({ ok: true, value: { current: true } });
+    await expect(second).resolves.toEqual({ ok: true, value: valid });
   });
   it("stops a worker that never responds at the unchanged 60 second limit", async () => {
     vi.useFakeTimers();
@@ -54,7 +57,7 @@ describe("analysis worker lifecycle", () => {
     const { task, workers } = setup(() => time);
     const result = expect(task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_LIMIT_EXCEEDED", messageKey: "analysis.time-limit" } });
     time = 60_001;
-    workers[0]!.send({ type: "done", result: {} });
+    workers[0]!.send({ type: "done", result: valid });
     await result;
   });
   it("keeps cancellation local to its owner", async () => {
@@ -62,9 +65,9 @@ describe("analysis worker lifecycle", () => {
     const stopped = expect(a.task.run(input, {}, vi.fn())).resolves.toMatchObject({ ok: false, error: { code: "MK_CANCELLED", messageKey: "analysis.cancelled" } });
     const live = b.task.run(input, {}, vi.fn());
     a.task.cancel();
-    b.workers[0]!.send({ type: "done", result: {} });
+    b.workers[0]!.send({ type: "done", result: valid });
     await stopped;
-    await expect(live).resolves.toEqual({ ok: true, value: {} });
+    await expect(live).resolves.toEqual({ ok: true, value: valid });
   });
   it("fails closed if workers are unavailable", async () => {
     const task = new AnalysisTask(() => { throw new Error("worker denied"); });
@@ -102,7 +105,7 @@ it("keeps a monotonic deadline when the wall clock moves backwards", async () =>
   const task = new AnalysisTask(() => worker as unknown as Worker, 60_000, () => wall, () => elapsed);
   const result = task.run(input, {}, vi.fn());
   wall = 1; elapsed = 60_000;
-  worker.send({ type: "done", result: {} });
+  worker.send({ type: "done", result: valid });
   await expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_LIMIT_EXCEEDED" } });
   expect(worker.terminate).toHaveBeenCalledTimes(1);
 });
@@ -117,7 +120,7 @@ it.each([null, [], { type: "done" }, { type: "progress", stage: "secret", done: 
   const result = task.run(input, {}, progress);
   expect(() => workers[0]!.send(message)).not.toThrow();
   // A queued valid completion cannot turn a malformed message into success.
-  workers[0]!.send({ type: "done", result: {} });
+  workers[0]!.send({ type: "done", result: valid });
   await expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_INTERNAL" } });
   expect(progress).not.toHaveBeenCalled();
   expect(workers[0]!.terminate).toHaveBeenCalledTimes(1);
@@ -127,7 +130,7 @@ it("settles and terminates when the progress consumer throws", async () => {
   const { task, workers } = setup();
   const result = task.run(input, {}, () => { throw new Error("private callback detail"); });
   expect(() => workers[0]!.send({ type: "progress", stage: "reading", done: 0, total: 1 })).not.toThrow();
-  workers[0]!.send({ type: "done", result: {} });
+  workers[0]!.send({ type: "done", result: valid });
   await expect(result).resolves.toMatchObject({ ok: false, error: { code: "MK_INTERNAL" } });
   expect(JSON.stringify(await result)).not.toContain("private callback detail");
   expect(workers[0]!.terminate).toHaveBeenCalledTimes(1);

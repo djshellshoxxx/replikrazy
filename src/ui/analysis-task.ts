@@ -1,3 +1,4 @@
+import { isAnalysisResult } from "./analysis-result";
 import type { AnalysisInput, AnalysisOptions, AnalysisResult, Progress } from "../core/pipeline";
 
 import { analysisError, inputError, isRecord, isUInt, type MKError, type Result } from "../contracts/diagnostic";
@@ -48,10 +49,9 @@ export class AnalysisTask {
           }
           try { progress(m.stage as Parameters<Progress>[0], m.done, m.total); }
           catch { finish(analysisError("failed")); }
-        } else if (m.type === "done" && isRecord(m.result)) {
-          // Internal result shape is owned by the pipeline; this checks the
-          // message envelope, not a general-purpose artifact import schema.
-          finish(undefined, m.result as unknown as AnalysisResult);
+        } else if (m.type === "done" && isAnalysisResult(m.result)) {
+          if (opts.expectedSourceDigest !== undefined && m.result.sourceDigest !== opts.expectedSourceDigest) finish(analysisError("changed"));
+          else finish(undefined, m.result);
         } else if (m.type === "error" && isRecord(m.error)) {
           finish(m.error.messageKey === "analysis.input-changed" ? analysisError("changed") : inputError(m.error.code));
         } else finish(analysisError("failed"));

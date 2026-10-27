@@ -88,6 +88,23 @@ try {
   check(await page.locator('#payload-btn').isEnabled(), false);
   check(await page.locator('#export-btn').isEnabled(), false);
   await page.locator('#use-rights').check();
+  const retainedSource = '{"schemaVersion":"2.0","future":"retain exactly"}';
+  const retainedKey = await page.evaluate(raw => {
+    const id = document.querySelector('#artifact-id').textContent.replace('Artifact id: ', '');
+    const key = `replikrazy.status.v1.${id}`;
+    localStorage.setItem(key, raw);
+    return key;
+  }, retainedSource);
+  await page.locator('#use-rights').uncheck();
+  await page.locator('#use-rights').check();
+  check(await page.locator('#stored-status-export').isVisible(), true);
+  check((await page.locator('#stored-status-notice').textContent()).includes('remains unchanged'), true);
+  const [retainedDownload] = await Promise.all([page.waitForEvent('download'), page.locator('#stored-status-export').click()]);
+  const retainedPath = join(fixtureDir, 'retained-status.json');
+  await retainedDownload.saveAs(retainedPath);
+  const sourceCopy = JSON.parse(await readFile(retainedPath, 'utf8'));
+  check(sourceCopy.source, retainedSource);
+  check(await page.evaluate(key => localStorage.getItem(key), retainedKey), retainedSource);
   await page.locator('#cmp-zip').setInputFiles(site);
   await page.waitForFunction(() => document.querySelector('#compare-result').textContent.includes('Every file matches'));
   checks++;
