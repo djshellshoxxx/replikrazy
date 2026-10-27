@@ -313,37 +313,30 @@
 
     function progress(path) { if (typeof options.onProgress === 'function') { try { options.onProgress({ done: idx, total: total, path: path }); } catch (e) { /* ignore UI errors */ } } }
 
-    function next() {
-      if (idx >= total) return Promise.resolve(finish());
-      var entry = entries[idx];
-      var path = stripped.paths[idx];
-      var displayPath = typeof path === 'string' && path ? path : '(unnamed entry #' + (idx + 1) + ')';
-      idx++;
-      progress(displayPath);
-
+    // Returns null after recording a rejection/exclusion, or a Promise for a file being read and hashed.
+    function processOne(entry, path, displayPath) {
       var v = validateRelativePath(path);
-      if (!v.ok) { rejected.push({ path: safeDisplay(displayPath), reason: v.reason, category: 'unsafe-path' }); return next(); }
-      if (seen[path]) { rejected.push({ path: path, reason: 'Duplicate path in selection.', category: 'duplicate' }); return next(); }
+      if (!v.ok) { rejected.push({ path: safeDisplay(displayPath), reason: v.reason, category: 'unsafe-path' }); return null; }
+      if (seen[path]) { rejected.push({ path: path, reason: 'Duplicate path in selection.', category: 'duplicate' }); return null; }
       seen[path] = true;
 
-      var size = entry.size;
+      var size = entry && typeof entry === 'object' ? entry.size : undefined;
       if (typeof size !== 'number' || !isFinite(size) || size < 0 || Math.floor(size) !== size) {
-        rejected.push({ path: path, reason: 'File size is unknown or invalid.', category: 'invalid-size' }); return next();
+        rejected.push({ path: path, reason: 'File size is unknown or invalid.', category: 'invalid-size' }); return null;
       }
 
       var sens = classifySensitivePath(path);
-      if (sens) { excluded.push({ path: path, size: size, category: sens.category, reason: sens.reason + ' — excluded; bytes were not read.' }); return next(); }
+      if (sens) { excluded.push({ path: path, size: size, category: sens.category, reason: sens.reason + ' — excluded; bytes were not read.' }); return null; }
 
       if (size > lim.maxFileBytes) {
-        rejected.push({ path: path, reason: 'File is ' + formatBytes(size) + '; the per-file limit is ' + formatBytes(lim.maxFileBytes) + '.', category: 'too-large' }); return next();
+        rejected.push({ path: path, reason: 'File is ' + formatBytes(size) + '; the per-file limit is ' + formatBytes(lim.maxFileBytes) + '.', category: 'too-large' }); return null;
       }
       if (totalBytes + size > lim.maxTotalBytes) {
-        rejected.push({ path: path, reason: 'Adding this file would exceed the total size limit of ' + formatBytes(lim.maxTotalBytes) + '.', category: 'total-limit' }); return next();
+        rejected.push({ path: path, reason: 'Adding this file would exceed the total size limit of ' + formatBytes(lim.maxTotalBytes) + '.', category: 'total-limit' }); return null;
       }
-
-      var lower = path.toLowerCase();
-      if (seenLower[lower]) warnings.push({ path: path, message: 'Differs only by letter case from "' + seenLower[lower] + '"; it will collide on case-insensitive file systems.' });
-      else seenLower[lower] = path;
+      if (typeof entry.read !== 'function') {
+        rejected.push({ path: path, reason: 'File cannot be read.', category: 'read-error' }); return null;
+      }
 
       return Promise.resolve()
         .then(function () { return entry.read(); })
@@ -351,7 +344,7 @@
           var bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
           if (bytes.byteLength !== size) {
             rejected.push({ path: path, reason: 'Read ' + bytes.byteLength + ' bytes but the file reported ' + size + '; it may have changed while reading.', category: 'read-mismatch' });
-            return next();
+            return;
           }
           var ext = extensionOf(path);
           var analysis = { flags: [], notes: [] };
@@ -361,23 +354,38 @@
             var secretHits = scanTextForSecrets(text);
             if (secretHits.length) {
               excluded.push({ path: path, size: size, category: 'secret-content', reason: secretHits.join('; ') + ' — excluded from plan and bundle.' });
-              return next();
+              return;
             }
             if (TEXT_EXTENSIONS[ext]) analysis = analyseText(path, text);
             if (bytes.byteLength > lim.maxTextScanBytes) analysis.notes.push('Only the first ' + formatBytes(lim.maxTextScanBytes) + ' were scanned for secrets and links.');
           }
           return sha256Hex(bytes).then(function (hash) {
             totalBytes += size;
+            var lower = path.toLowerCase();
+            if (seenLower[lower]) warnings.push({ path: path, message: 'Differs only by letter case from "' + seenLower[lower] + '"; it will collide on case-insensitive file systems.' });
+            else seenLower[lower] = path;
             var rec = { path: path, size: size, sha256: hash, mediaType: mediaTypeFor(path), flags: analysis.flags };
             var adv = pathAdvisories(path).concat(analysis.notes);
             if (adv.length) rec.notes = adv;
             files.push(rec);
-            return next();
           });
         }, function (err) {
-          rejected.push({ path: path, reason: 'Could not read file: ' + (err && err.message ? err.message : String(err)), category: 'read-error' });
-          return next();
+          rejected.push({ path: path, reason: 'Could not read file: ' + safeDisplay(err && err.message ? err.message : String(err)), category: 'read-error' });
         });
+    }
+
+    // Iterative loop (no recursion): files are read one at a time to bound memory.
+    async function run() {
+      for (idx = 0; idx < total; ) {
+        var entry = entries[idx];
+        var path = stripped.paths[idx];
+        var displayPath = typeof path === 'string' && path ? path : '(unnamed entry #' + (idx + 1) + ')';
+        idx++;
+        progress(displayPath);
+        var pending = processOne(entry, path, displayPath);
+        if (pending) await pending;
+      }
+      return finish();
     }
 
     function finish() {
@@ -412,7 +420,7 @@
       });
     }
 
-    return next();
+    return run();
   }
 
   /** `sha256sum -c` compatible manifest, sorted by path, LF line endings. */
