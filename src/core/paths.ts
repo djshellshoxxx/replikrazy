@@ -1,3 +1,6 @@
+import { CASE_FOLD } from "./casefold-data";
+export { CASE_FOLD_UNICODE_VERSION } from "./casefold-data";
+
 // Path validation for files taken from an imported bundle (ZIP entry names or
 // folder-picker relative paths). Every path that reaches the inventory must
 // pass validatePath(); anything else is rejected with a reason, never "fixed"
@@ -57,37 +60,50 @@ export function validatePath(raw: string): PathResult {
   return { ok: true, path: raw };
 }
 
-// Collision key: NFC + case fold. JS has no full Unicode case-fold API, so we
-// approximate it with upper-then-lower casing, which folds the common
-// multi-character cases (ß→ss, ſ→s, ﬁ→fi) that toLowerCase alone misses. The
-// Unicode data version is whatever the running JS engine ships.
+// Pin full default folding independently of the browser's casing tables.
+// Accepted paths are already NFC; names themselves are never rewritten.
 export function foldKey(p: string): string {
+  return Array.from(p.normalize("NFC"), (char) => CASE_FOLD[String(char.codePointAt(0)!)] ?? char).join("");
+}
+
+// Preserve the prior stricter portability rejections as an additional guard.
+// This approximation is never used instead of full Unicode folding.
+function legacyFoldKey(p: string): string {
   return p.normalize("NFC").toUpperCase().toLowerCase().normalize("NFC");
 }
 
 // Two distinct paths with the same fold key would overwrite each other on
 // case-insensitive filesystems/hosts; report them rather than pick one.
 export function findCaseCollisions(paths: readonly string[]): string[][] {
-  const groups = new Map<string, string[]>();
-  for (const p of paths) {
-    const key = foldKey(p);
-    const g = groups.get(key);
-    if (g) g.push(p);
-    else groups.set(key, [p]);
+  const collisions: string[][] = [];
+  const seen = new Set<string>();
+  for (const fold of [foldKey, legacyFoldKey]) {
+    const groups = new Map<string, string[]>();
+    for (const p of paths) {
+      const key = fold(p);
+      const group = groups.get(key);
+      if (group) group.push(p); else groups.set(key, [p]);
+    }
+    for (const group of groups.values()) if (group.length > 1) {
+      const key = JSON.stringify([...group].sort(compareUtf8));
+      if (!seen.has(key)) { seen.add(key); collisions.push(group); }
+    }
   }
-  return [...groups.values()].filter((g) => g.length > 1);
+  return collisions;
 }
 
 // A path that is both a file and a directory prefix ("a" and "a/b") cannot be
 // written to any filesystem. Compared on fold keys so "A" vs "a/b" is caught.
 export function findFileDirConflicts(paths: readonly string[]): string[] {
-  const files = new Map(paths.map((p) => [foldKey(p), p]));
   const out = new Set<string>();
-  for (const p of paths) {
-    const segs = foldKey(p).split("/");
-    for (let i = 1; i < segs.length; i++) {
-      const hit = files.get(segs.slice(0, i).join("/"));
-      if (hit) out.add(hit);
+  for (const fold of [foldKey, legacyFoldKey]) {
+    const files = new Map(paths.map((p) => [fold(p), p]));
+    for (const p of paths) {
+      const segs = fold(p).split("/");
+      for (let i = 1; i < segs.length; i++) {
+        const hit = files.get(segs.slice(0, i).join("/"));
+        if (hit) out.add(hit);
+      }
     }
   }
   return [...out];

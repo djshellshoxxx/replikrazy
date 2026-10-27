@@ -1,3 +1,7 @@
+## 2026-10-27 essential finish acceptance
+
+Fixed recovery Cancel focus loss; added dedicated keyboard/reflow matrix. Replaced missing full Unicode fold coverage with pinned Unicode 15.0.0 data, retaining previous conservative collisions. [Exact completed/open checklist](../reviews/2026-10-27-finish-acceptance.md). Latest: 343 unit tests, typecheck/build, 42 main + 25 recovery Chromium checks, 52 recovery controls reached, 16 reflow and four cancellation-focus checks. Preview remains local-only.
+
 ## 2026-10-27 user-facing recovery preview
 
 Optional step 7 now inspects recovery JSON in a dedicated bounded/cancellable worker, presents safe counts/messages and preserves exact original downloads. Explicit profile opt-in; no active-state writes. [Evidence and workflow](../reviews/2026-10-27-recovery-preview.md). Latest: 341 unit tests / 26 files, typecheck/build, 39 existing and 25 recovery Chromium checks passed. Local production preview at 127.0.0.1:4173, not externally published.

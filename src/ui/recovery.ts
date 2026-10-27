@@ -24,10 +24,12 @@ export function mountRecovery() {
     output.textContent = "Inspecting locally…"; cancel.hidden = false; backup.disabled = false;
     const result = await task.run(current, profile.checked);
     if (revision !== generation) return;
+    const returnFocus = document.activeElement === cancel;
     cancel.hidden = true;
     output.textContent = result.ok
       ? `Recognized metadata: ${result.value.artifacts} artifacts, ${result.value.plans} plans, ${result.value.operations} operations, ${result.value.provenance} owner claims. ${result.value.profileChecked ? "Local profile checks passed. " : "No local profile was selected. "}Nothing was restored. Payload bytes, signatures and publisher trust are not verified.`
       : error(result.error.code);
+    if (returnFocus) input.focus();
   };
   const clear = () => {
     generation++; task.cancel(); current = null; input.value = ""; profile.checked = false;

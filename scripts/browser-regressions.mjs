@@ -128,6 +128,13 @@ try {
   await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('Could not read this ZIP'));
   check(await page.locator('#inventory').isVisible(), false);
 
+  // Full pinned Unicode folding must catch capital sharp-S against ss.
+  await page.locator('#zip-input').setInputFiles(zip({ 'index.html': 'ok', 'ẞ.txt': 'a', 'ss.txt': 'b' }));
+  await page.waitForFunction(() => document.querySelector('#intake-status').textContent.includes('Input has errors'));
+  check((await page.locator('#issues').textContent()).includes('case folding'), true);
+  check(await page.locator('#export-btn').isEnabled(), false);
+  check(await page.locator('#payload-btn').isEnabled(), false);
+
   // Storage denial is nonfatal and cannot override fresh policy checks.
   await page.evaluate(() => { Storage.prototype.getItem = () => { throw Error('denied'); }; Storage.prototype.setItem = () => { throw Error('denied'); }; });
   await load();

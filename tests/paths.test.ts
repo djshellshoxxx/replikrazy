@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareUtf8, findCaseCollisions, findFileDirConflicts, validatePath } from "../src/core/paths";
+import { CASE_FOLD_UNICODE_VERSION, foldKey, compareUtf8, findCaseCollisions, findFileDirConflicts, validatePath } from "../src/core/paths";
 
 describe("validatePath", () => {
   it.each(["index.html", "css/site.css", "a/b/c/d.png", "ünïcode.html", "\u{1F600}.html", "_redirects", ".well-known/security.txt"])(
@@ -33,4 +33,17 @@ describe("collisions", () => {
     expect([astral, bmpHigh].sort()).toEqual([astral, bmpHigh]);
     expect([astral, bmpHigh].sort(compareUtf8)).toEqual([bmpHigh, astral]);
   });
+});
+
+it("rejects capital sharp-S collisions missed by upper-then-lower folding", () => {
+  expect(findCaseCollisions(["ẞ.html", "ss.html"])).toEqual([["ẞ.html", "ss.html"]]);
+  expect(findFileDirConflicts(["ẞ", "ss/index.html"])).toEqual(["ẞ"]);
+});
+
+it("pins full default folding and preserves older conservative rejections", () => {
+  expect(CASE_FOLD_UNICODE_VERSION).toBe("15.0.0");
+  expect(foldKey("ẞΣςſﬃİ" )).toBe("ssσσsffii\u0307");
+  expect(foldKey("\uAB70")).toBe("\u13A0"); // Cherokee full folding uses uppercase.
+  expect(foldKey("ı")).not.toBe(foldKey("I"));
+  expect(findCaseCollisions(["ı", "I"])).toEqual([["ı", "I"]]); // Existing portability rule retained.
 });
