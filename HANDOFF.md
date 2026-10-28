@@ -10,9 +10,9 @@ recovery inspection with cancellation, explicit profile selection and byte-exact
 original downloads. Explicit identity restoration requires exact matching of actual
 local site bytes. Recognized metadata never restores consent or triggers execution.
 
-Latest validation: 384 unit tests / 30 files, typecheck/build, 46 main Chromium
-checks, 13 payload recovery checks and 12 selection-clear checks; zero page
-errors/external requests. Keyboard matrix: 68 controls, 16 reflow checks and four
+Latest validation: 385 unit tests / 31 files, typecheck/build, 46 main Chromium
+checks, 18 payload recovery/export checks; prior review milestone also passed 12 selection-clear checks; zero page
+errors/external requests. Keyboard matrix: 76 controls, 16 reflow checks and four
 cancel-focus checks. No full-audit, new axe/manual screen reader or cross-browser
 claim. Browser download denials remain binding.
 
@@ -30,3 +30,5 @@ review provenance are recorded without publishing full private source text.
 [Completed local workflow](docs/reviews/2026-10-27-local-recovery-workflow.md) supersedes the prior root checkpoint’s open entrypoint and payload-binding implementation items.
 
 [Current AI review and live branch ownership map](docs/reviews/2026-10-28-ai-review.md). External standalone planner branches remain preserved and unmerged; no PR approvals.
+
+[Artifact-only recovery metadata export and real round-trip evidence](docs/reviews/2026-10-28-recovery-export.md). The local workflow is complete; missing acceptance inputs and external branch integration remain explicitly separate.

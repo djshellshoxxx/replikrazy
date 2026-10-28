@@ -1,3 +1,7 @@
+## 2026-10-28 artifact-only recovery record producer
+
+Step 7 now saves metadata for the loaded valid artifact; real browser download/import/match restores its identity using original local bytes. No payload bytes, consent or provider state are embedded. [Evidence and remaining acceptance limits](../reviews/2026-10-28-recovery-export.md). 385 tests / 31 files, typecheck/build, 46 main + 18 recovery round-trip Chromium checks; keyboard 76 controls/16 reflow/four cancel-focus checks. Prior pushed source a7c3aa9 has CI 40711686208 success. Preserve external Claude planner branches and existing missing-input/download gates.
+
 ## 2026-10-28 owner-authorized source milestones and AI review
 
 Canonical app branch pushed at 8f8f9de; remote SHA verified, CI 40709662773 success. New external Claude planner branches reconciled and preserved, not merged or duplicated. [Review scope, six fixes, original failures and exact remote refs](../reviews/2026-10-28-ai-review.md). Latest local validation 384 tests / 30 files, typecheck/build, 46 main + 13 payload recovery + 12 selection-clear Chromium checks. Review is AI evidence, not independent acceptance. Next ready local workflow slice: artifact-only recovery metadata export for an end-to-end owner-byte round trip; no imported execution authority.

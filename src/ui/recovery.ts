@@ -3,7 +3,7 @@ import type { ArtifactManifest } from "../contracts/manifest";
 import { RecoveryTask } from "./recovery-task";
 import type { ErrorCode } from "../contracts/diagnostic";
 export interface RecoverySelection { input: AnalysisInput; apply(manifest: ArtifactManifest, current: () => boolean): Promise<boolean> }
-export function mountRecovery(selection: () => RecoverySelection | null) {
+export function mountRecovery(selection: () => RecoverySelection | null, saveMetadata: (current: () => boolean) => Promise<boolean>) {
   const input = document.querySelector<HTMLInputElement>("#recovery-file")!;
   const profile = document.querySelector<HTMLInputElement>("#recovery-profile")!;
   const output = document.querySelector<HTMLElement>("#recovery-result")!;
@@ -51,6 +51,12 @@ export function mountRecovery(selection: () => RecoverySelection | null) {
   };
   input.addEventListener("change", () => { current = input.files?.[0] ?? null; if (current) { restore.disabled = false; void inspect(); } else clear(); });
   profile.addEventListener("change", () => { if (current) void inspect(); });
+  document.querySelector("#recovery-save")!.addEventListener("click", async () => {
+    const revision = ++generation; task.cancel(); cancel.hidden = true;
+    const saved = await saveMetadata(() => revision === generation);
+    if (revision !== generation) return;
+    output.textContent = saved ? "Recovery metadata saved. Keep the actual site files too; no plans, consent or provider state were exported." : "Load a valid local site first. If the selection changed, try saving its metadata again.";
+  });
   restore.addEventListener("click", () => void inspect(true));
   artifact.addEventListener("change", () => { generation++; task.cancel(); cancel.hidden = true; output.textContent = "Artifact selection changed. Match again to restore its identity."; });
   cancel.addEventListener("click", () => task.cancel());

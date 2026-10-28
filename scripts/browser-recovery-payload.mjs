@@ -1,9 +1,13 @@
+import {mkdtemp, readFile, rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 // Installed local browser only: exact byte binding, mismatch and stale completion.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { zipSync } from 'fflate';
 import { launchBrowser } from './browser-tools.mjs';
 const browser = await launchBrowser(), page = await browser.newPage();
+const temp = await mkdtemp(join(tmpdir(), 'replikrazy-record-'));
 const origin = 'http://127.0.0.1:4173', errors = [], external = [];
 let checks = 0;
 const check = (a,b) => { assert.deepEqual(a,b); checks++; };
@@ -23,7 +27,35 @@ const upload = async data => {
   await page.waitForFunction(()=>document.querySelector('#recovery-result').textContent !== 'Inspecting locally…');
 };
 try {
-  await page.goto(origin); await load('public'); await upload(record);
+  await page.goto(origin); await load('public');
+  const originalId = await page.locator('#artifact-id').textContent();
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#recovery-save').click()]);
+  const savedPath = join(temp, 'recovery.json'); await download.saveAs(savedPath);
+  const saved = JSON.parse(await readFile(savedPath, 'utf8'));
+  check(saved.artifacts[0].artifactId, originalId.replace('Artifact id: ',''));
+  check([saved.plans,saved.operations,saved.provenance], [[],[],[]]);
+  check(Object.keys(saved.artifacts[0].manifest.files[0]).sort(), ['path','sha256','size']);
+  let staleDownloads = 0;
+  const countStale = () => staleDownloads++;
+  page.on('download', countStale);
+  await page.evaluate(() => {
+    window.originalDigest = crypto.subtle.digest.bind(crypto.subtle);
+    crypto.subtle.digest = (...args) => new Promise(resolve => { window.releaseSavedDigest = () => window.originalDigest(...args).then(resolve); });
+  });
+  await page.locator('#recovery-save').click();
+  await page.waitForFunction(() => typeof window.releaseSavedDigest === 'function');
+  await page.locator('#zip-input').setInputFiles([]);
+  await page.evaluate(() => { window.releaseSavedDigest(); crypto.subtle.digest = window.originalDigest; });
+  await page.waitForFunction(() => document.querySelector('#recovery-result').textContent.includes('Load a valid local site'));
+  check(staleDownloads, 0);
+  page.off('download', countStale);
+  await load('public');
+  await page.locator('#app-id').fill('temporary'); await page.locator('#app-id').dispatchEvent('change');
+  await page.waitForFunction(id => document.querySelector('#artifact-id').textContent.includes('sha256:') && document.querySelector('#artifact-id').textContent !== id, originalId);
+  await upload(saved); await page.locator('#recovery-restore').click();
+  await page.waitForFunction(()=>document.querySelector('#recovery-result').textContent.includes('Exact local payload match'));
+  check(await page.locator('#artifact-id').textContent(), originalId);
+  await page.reload(); await load('public'); await upload(record);
   await page.locator('#provider-list .card').filter({ has: page.getByRole('heading', { name: /Netlify/ }) }).locator('input').check();
   await page.locator('#use-public').check();
   await page.locator('#recovery-restore').click();
@@ -83,4 +115,4 @@ try {
   check(await page.locator('#artifact-id').textContent(), newest);
   check(errors,[]); check(external,[]);
   console.log(JSON.stringify({checks,pageErrors:errors.length,externalRequests:external.length}));
-} finally { await browser.close(); }
+} finally { await browser.close(); await rm(temp, {recursive:true,force:true}); }

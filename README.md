@@ -40,6 +40,8 @@ deployment or production readiness is claimed.
 | Intended-use declaration + policy gates (rights, public-data review, payment/token blocked everywhere, GitHub Pages commercial exclusion with cited source); contract `PublishPlan` with `planId`, 24 h expiry, manual-only non-mutating operations | implemented, unit-tested, browser smoke-tested |
 | Handoff ZIP (`app/` + `mirrorkit-control/` incl. `artifact-manifest.json`) and app-only payload ZIP | implemented, unit-tested, browser smoke-tested |
 | Offline "compare a copy" with exact changed-file hashes and cancellation: owner-supplied mirror files vs the artifact (matching / changed / missing / extra) | implemented, unit-tested, browser smoke-tested; a byte match is not proof the mirror works |
+| Root/entrypoint preflight before hashing unresolved artifact input | implemented, bounded worker metadata; exports remain blocked until valid |
+| Artifact-only recovery JSON export, source-preserving inspection and explicit local identity restoration | implemented, unit/browser-tested; requires exact matching locally selected bytes; never restores consent, provider state or missing files |
 | Any live deployment / provider API | **not implemented, by design** |
 
 ### Evidence levels

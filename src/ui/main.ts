@@ -1,3 +1,4 @@
+import { exportArtifactRecovery } from "../contracts/recovery-export";
 import { mountRecovery } from "./recovery";
 // UI wiring. Invariant: imported file names/contents only ever reach the DOM
 // through textContent (never innerHTML), and file contents are never rendered.
@@ -39,6 +40,7 @@ interface State {
   // without the user picking files again.
   input: AnalysisInput | null;
   sourceDigest: string | null;
+  capturedAt: string | null;
   stripRoot: boolean;
   intakeIssues: IntakeIssue[];
   // Owner-declared identity inputs (research MK-CTR-003); changing either
@@ -52,7 +54,7 @@ interface State {
   publicDataReviewed: boolean;
 }
 const state: State = {
-  files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, input: null, sourceDigest: null, stripRoot: false,
+  files: [], inv: null, hasErrors: false, selected: new Set(), plan: null, scan: null, input: null, sourceDigest: null, capturedAt: null, stripRoot: false,
   intakeIssues: [], appId: "site", entrypoint: null, manifest: null, artifactId: null,
   use: { category: "public-demo", containsPrivateData: false, ownerHasRights: false, description: "" },
   publicDataReviewed: false,
@@ -121,6 +123,7 @@ function clearArtifact() {
   state.files = [];
   state.intakeIssues = [];
   state.sourceDigest = null;
+  state.capturedAt = null;
   state.inv = null;
   state.scan = null;
   state.manifest = null;
@@ -171,6 +174,7 @@ async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourc
     }
     const { intake: r, inv, scan, sourceDigest } = analysis.value;
     state.files = r.files;
+    state.capturedAt = new Date().toISOString();
     state.sourceDigest = r.issues.some((i) => i.severity === "error") ? null : sourceDigest;
     state.inv = inv;
     state.scan = scan;
@@ -561,7 +565,7 @@ $("payload-btn").addEventListener("click", downloadPayload);
 mountRecovery(() => {
   if (!state.inv || !state.scan || state.hasErrors || !state.artifactId) return null;
   const snapshot = { files: state.files, inv: state.inv, scan: state.scan, input: state.input,
-    sourceDigest: state.sourceDigest, stripRoot: state.stripRoot };
+    sourceDigest: state.sourceDigest, stripRoot: state.stripRoot, capturedAt: state.capturedAt };
   const selectedGeneration = generation, selectedIdentity = identityGeneration;
   return {
     input: { kind: "folder", entries: snapshot.files.map(f => ({ path: f.path, blob: new Blob([f.bytes.slice()]) })) },
@@ -582,4 +586,14 @@ mountRecovery(() => {
       return current() && generation === committedGeneration && identityGeneration === committedIdentity;
     },
   };
+}, async (current) => {
+  if (!state.manifest || !state.artifactId || !state.inv || !state.input || !state.capturedAt || state.hasErrors) return false;
+  const revision = identityGeneration, selectionGeneration = generation;
+  const result = await exportArtifactRecovery({ artifactId: state.artifactId, manifest: state.manifest,
+    totalBytes: state.inv.totalBytes, fileCount: state.inv.entries.length, sourceKind: state.input.kind, capturedAt: state.capturedAt }, new Date().toISOString());
+  if (!result.ok || !current() || identityGeneration !== revision || generation !== selectionGeneration) return false;
+  const url = URL.createObjectURL(new Blob([result.value], { type: "application/json" }));
+  const a = el("a"); a.href = url; a.download = "replikrazy-artifact-recovery.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  return true;
 });
