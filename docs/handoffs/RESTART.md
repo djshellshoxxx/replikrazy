@@ -1,3 +1,5 @@
+> Current durable restart: [2026-10-28 handoff](CURRENT_20261028.md). It supersedes historical next-step/status claims below and records tested source separately from documentation heads.
+
 ## 2026-10-28 artifact-only recovery record producer
 
 Step 7 now saves metadata for the loaded valid artifact; real browser download/import/match restores its identity using original local bytes. No payload bytes, consent or provider state are embedded. [Evidence and remaining acceptance limits](../reviews/2026-10-28-recovery-export.md). 385 tests / 31 files, typecheck/build, 46 main + 18 recovery round-trip Chromium checks; keyboard 76 controls/16 reflow/four cancel-focus checks. Prior pushed source a7c3aa9 has CI 40711686208 success. Preserve external Claude planner branches and existing missing-input/download gates.

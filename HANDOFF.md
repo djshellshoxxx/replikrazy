@@ -1,3 +1,5 @@
+> Current durable restart: [2026-10-28 handoff](docs/handoffs/CURRENT_20261028.md). It supersedes historical next-step/status claims below and records tested source separately from documentation heads.
+
 # Replikrazy local continuation handoff
 
 Resume local branch `chatgpt/intake-read-bounds-20261027` after checking its tip
