@@ -1,3 +1,13 @@
+## 2026-10-28 isolated standalone planner integration
+
+Branch chatgpt/planner-integration-20261028 combines source abb7c31 with canonical
+a09d7b1, preserving both original lines and main. [Ownership, fixes, test split,
+synthetic fixture provenance and exact gates](../reviews/2026-10-28-planner-integration.md).
+392 canonical tests and 166 planner tests plus unchanged samples/typecheck/build
+pass. Planner file navigation is administratively blocked; no alternate route or
+download retried. Separate schemas/filtering are not unified. Do not merge main
+or submit PR approvals without the required evidence/confirmation.
+
 ## 2026-10-28 artifact-only recovery record producer
 
 Step 7 now saves metadata for the loaded valid artifact; real browser download/import/match restores its identity using original local bytes. No payload bytes, consent or provider state are embedded. [Evidence and remaining acceptance limits](../reviews/2026-10-28-recovery-export.md). 385 tests / 31 files, typecheck/build, 46 main + 18 recovery round-trip Chromium checks; keyboard 76 controls/16 reflow/four cancel-focus checks. Prior pushed source a7c3aa9 has CI 40711686208 success. Preserve external Claude planner branches and existing missing-input/download gates.

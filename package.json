@@ -9,7 +9,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:planner": "npm --prefix tools/offline-mirror-planner test",
+    "test:all": "npm test && npm run test:planner && node tools/offline-mirror-planner/scripts/export-samples.cjs --check"
   },
   "repository": {
     "type": "git",

@@ -119,3 +119,12 @@ remain TBD and require separate review.
 
 Current state, next steps and exact commands: [`docs/handoffs/RESTART.md`](docs/handoffs/RESTART.md)
 and [`NEXT_CHATGPT_PROMPT.md`](NEXT_CHATGPT_PROMPT.md).
+
+## Standalone planner in this integration checkout
+
+The separately owned [Offline Mirror Planner](tools/offline-mirror-planner/README.md)
+is preserved alongside the canonical app. Run `npm run test:all` for both suites.
+It has different schemas and file-filtering rules; its records are not canonical
+recovery records and never supply publishing authority. See the
+[integration evidence and browser gate](docs/reviews/2026-10-28-planner-integration.md).
+The main build does not bundle or deploy it.

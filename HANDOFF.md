@@ -1,3 +1,14 @@
+# Planner integration checkpoint
+
+This branch is `chatgpt/planner-integration-20261028`, an isolated integration of
+canonical app a09d7b1 with Claude planner CI abb7c31. Main and both source branches
+are preserved. [Exact evidence and gates](docs/reviews/2026-10-28-planner-integration.md).
+392 canonical tests + 166 planner tests, unchanged samples, typecheck/build pass.
+Planner browser navigation is denied by administrator policy and remains untested
+here; do not retry or bypass. Source integration does not unify schemas/policy.
+
+## Previous canonical-app handoff
+
 # Replikrazy local continuation handoff
 
 Resume local branch `chatgpt/intake-read-bounds-20261027` after checking its tip
