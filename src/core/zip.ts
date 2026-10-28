@@ -104,7 +104,7 @@ export function readZip(buf: Uint8Array, limits: ZipLimits = DEFAULT_ZIP_LIMITS,
   if (cenSize > limits.maxMetadataBytes) throw new ZipError("ZIP metadata exceeds limit", "MK_LIMIT_EXCEEDED");
   if (!inBounds(cenOff, cenSize) || cenOff + cenSize > eocd) throw new ZipError("central directory out of bounds");
 
-  const utf8 = new TextDecoder("utf-8", { fatal: true });
+  const utf8 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
   const entries: RawEntry[] = [];
   const directories: string[] = [];
   const rejected: ZipReadResult["rejected"] = [];

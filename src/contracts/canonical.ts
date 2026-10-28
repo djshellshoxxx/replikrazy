@@ -24,7 +24,10 @@ export function canonicalJson(v: unknown): string {
     return Object.is(v, -0) ? "0" : String(v);
   }
   if (typeof v === "string") return str(v);
-  if (Array.isArray(v)) return `[${v.map(canonicalJson).join(",")}]`;
+  if (Array.isArray(v)) {
+    for (let i = 0; i < v.length; i++) if (!Object.hasOwn(v, i)) throw new CanonicalError("sparse array");
+    return `[${v.map(canonicalJson).join(",")}]`;
+  }
   if (typeof v === "object" && (Object.getPrototypeOf(v) === Object.prototype || Object.getPrototypeOf(v) === null)) {
     const entries = Object.entries(v as Record<string, unknown>).filter(([, x]) => x !== undefined);
     // Default sort compares UTF-16 code units, which is what JCS requires.

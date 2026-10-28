@@ -4,6 +4,23 @@ export const RECORD_MAX_BYTES = 10 * 1024 * 1024;
 export class RecordJsonError extends Error {
   constructor(readonly code: "MK_RECORD_CORRUPT" | "MK_LIMIT_EXCEEDED") { super(code); }
 }
+// Compare decimal values without expanding an exponent or constructing a huge
+// integer. A rounded fractional/underflow token must not become a valid counter.
+function decimalKey(token: string): string | null {
+  const negative = token.startsWith("-");
+  const [mantissa, exponent = "0"] = (negative ? token.slice(1) : token).toLowerCase().split("e");
+  const dot = mantissa!.indexOf(".");
+  const fraction = dot < 0 ? 0 : mantissa!.length - dot - 1;
+  let digits = mantissa!.replace(".", "").replace(/^0+/, "");
+  if (!digits) return "0";
+  let end = digits.length;
+  while (end > 0 && digits[end - 1] === "0") end--;
+  const trimmed = digits.slice(0, end);
+  const power = Number(exponent) - fraction + digits.length - trimmed.length;
+  if (!Number.isSafeInteger(power)) return null;
+  digits = trimmed;
+  return `${negative ? "-" : ""}${digits}:${power}`;
+}
 export function parseRecordJson(source: string): unknown {
   const fail = (): never => { throw new RecordJsonError("MK_RECORD_CORRUPT"); };
   const limit = (): never => { throw new RecordJsonError("MK_LIMIT_EXCEEDED"); };
@@ -61,6 +78,7 @@ export function parseRecordJson(source: string): unknown {
     at = number.lastIndex;
     const result = Number(match[0]);
     if (!Number.isFinite(result)) fail();
+    if (Number.isInteger(result) && decimalKey(match[0]) !== decimalKey(String(result))) fail();
     return result;
   }
   const result = value(0); ws();

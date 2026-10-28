@@ -134,6 +134,14 @@ interface Ref {
 
 function htmlRefs(text: string): Ref[] {
   const out: Ref[] = [];
+  // Keep one overflow sentinel for the existing fail-closed truncation gate.
+  // Never spread dense inline arrays into function arguments (engine stack cap).
+  const append = (refs: Ref[]) => {
+    for (const ref of refs) {
+      if (out.length > SCAN_LIMITS.maxRefsPerFile) break;
+      out.push(ref);
+    }
+  };
   // Tag-aware enough to assign roles; still regex-only, no DOM.
   // "[^<>]" (not "[^>]") stops each attempt at the next tag, so many
   // unterminated "<a " opens cannot each scan to the end of the file. A
@@ -163,9 +171,9 @@ function htmlRefs(text: string): Ref[] {
       } else out.push({ url: value, role });
     }
   }
-  for (const body of blocks(text, "style")) out.push(...cssRefs(body.text));
-  for (const m of text.matchAll(/\bstyle\s*=\s*"([^"]{0,8192})"/gi)) out.push(...cssRefs(m[1]!));
-  for (const body of blocks(text, "script")) if (!/\bsrc\s*=/i.test(body.open)) out.push(...jsRefs(body.text));
+  for (const body of blocks(text, "style")) append(cssRefs(body.text));
+  for (const m of text.matchAll(/\bstyle\s*=\s*"([^"]{0,8192})"/gi)) append(cssRefs(m[1]!));
+  for (const body of blocks(text, "script")) if (!/\bsrc\s*=/i.test(body.open)) append(jsRefs(body.text));
   return out;
 }
 

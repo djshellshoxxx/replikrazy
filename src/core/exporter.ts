@@ -24,7 +24,8 @@ import type { DryRunPlan } from "./plan";
 import type { CompatibilityScan } from "./scan";
 
 // Fixed timestamp => identical inputs give an identical export ZIP.
-const FIXED_MTIME = new Date("1980-01-01T00:00:00Z");
+// ZIP stores local calendar fields; UTC midnight would become 1979 west of UTC.
+const FIXED_MTIME = new Date(1980, 0, 1, 0, 0, 0);
 const OPT = { level: 0 as const, mtime: FIXED_MTIME };
 export const APP_DIR = "app";
 export const CONTROL_DIR = "mirrorkit-control";

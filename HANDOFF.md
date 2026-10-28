@@ -2,7 +2,7 @@
 
 Resume local branch `chatgpt/intake-read-bounds-20261027` after checking its tip
 and current remote refs. Preserve the published e437a488 checkpoint and Claude's
-separate branch/PR #1; this continuation has not been pushed or merged.
+separate branch/PR #1; the canonical app milestone 8f8f9de was pushed on 2026-10-28 with CI 40709662773 passing. No merge or deployment.
 
 The lean browser-only application supports bounded intake, manifests, heuristic
 scans, manual export and offline comparison. Optional step 7 now provides safe
@@ -10,8 +10,8 @@ recovery inspection with cancellation, explicit profile selection and byte-exact
 original downloads. Explicit identity restoration requires exact matching of actual
 local site bytes. Recognized metadata never restores consent or triggers execution.
 
-Latest validation: 368 unit tests / 29 files, typecheck/build, 46 main Chromium
-checks, 13 payload recovery checks and 25 recovery inspection checks; zero page
+Latest validation: 384 unit tests / 30 files, typecheck/build, 46 main Chromium
+checks, 13 payload recovery checks and 12 selection-clear checks; zero page
 errors/external requests. Keyboard matrix: 68 controls, 16 reflow checks and four
 cancel-focus checks. No full-audit, new axe/manual screen reader or cross-browser
 claim. Browser download denials remain binding.
@@ -28,3 +28,5 @@ review provenance are recorded without publishing full private source text.
 [Root preflight checkpoint and next steps](docs/reviews/2026-10-27-root-preflight.md): explicit root-relative path validation is complete; entrypoint-before-hashing and payload-backed recovery remain technical implementation work.
 
 [Completed local workflow](docs/reviews/2026-10-27-local-recovery-workflow.md) supersedes the prior root checkpoint’s open entrypoint and payload-binding implementation items.
+
+[Current AI review and live branch ownership map](docs/reviews/2026-10-28-ai-review.md). External standalone planner branches remain preserved and unmerged; no PR approvals.

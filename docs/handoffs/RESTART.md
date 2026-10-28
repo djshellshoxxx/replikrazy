@@ -1,3 +1,7 @@
+## 2026-10-28 owner-authorized source milestones and AI review
+
+Canonical app branch pushed at 8f8f9de; remote SHA verified, CI 40709662773 success. New external Claude planner branches reconciled and preserved, not merged or duplicated. [Review scope, six fixes, original failures and exact remote refs](../reviews/2026-10-28-ai-review.md). Latest local validation 384 tests / 30 files, typecheck/build, 46 main + 13 payload recovery + 12 selection-clear Chromium checks. Review is AI evidence, not independent acceptance. Next ready local workflow slice: artifact-only recovery metadata export for an end-to-end owner-byte round trip; no imported execution authority.
+
 ## 2026-10-27 working local preflight and recovery
 
 Step 1 now presents root/entrypoint preflight metadata before hashing unresolved or rejected artifact input. Step 7 explicitly restores artifact identity only after matching actual locally selected payload bytes to a validated recovery manifest. Mismatches and stale results do not apply; public review resets; imported consent/plans/provider state stay unapplied. [Workflow, exact scope and evidence](../reviews/2026-10-27-local-recovery-workflow.md). 368 unit tests / 29 files, typecheck/build, 46 main + 13 payload recovery + 25 inspection Chromium checks, 68 keyboard controls/16 reflow/four cancel-focus checks. No network/provider/publication activity. Existing acceptance/download limits unchanged.

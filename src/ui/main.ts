@@ -424,14 +424,27 @@ $("stored-status-export").addEventListener("click", () => {
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 });
 
+function clearSelection() {
+  ++generation; intakeTask.cancel(); clearArtifact();
+  state.input = null; state.stripRoot = false; state.entrypoint = null;
+  renderEntryChoices([]);
+  $("cancel-btn").hidden = true;
+  $("intake-status").textContent = "No input selected. Previous files and plans were cleared.";
+}
+function clearComparison() {
+  ++compareGeneration; compareTask.cancel();
+  $("compare-cancel-btn").hidden = true;
+  $("compare-result").textContent = "No copy selected.";
+}
 $("zip-input").addEventListener("change", (ev) => {
   const f = (ev.target as HTMLInputElement).files?.[0];
-  if (!f) return;
+  if (!f) { clearSelection(); return; }
   void loadBundle({ kind: "zip", file: f });
 });
 $("dir-input").addEventListener("change", (ev) => {
   const list = (ev.target as HTMLInputElement).files;
   if (list?.length) void loadBundle({ kind: "folder", entries: [...list].map((f) => ({ path: f.webkitRelativePath, blob: f })) });
+  else clearSelection();
 });
 for (const id of ["f-text", "f-noacct", "f-domain", "f-method"]) $(id).addEventListener("input", renderProviders);
 $("export-btn").addEventListener("click", () => void download());
@@ -508,10 +521,12 @@ $("compare-cancel-btn").addEventListener("click", () => compareTask.cancel());
 $("cmp-zip").addEventListener("change", (ev) => {
   const f = (ev.target as HTMLInputElement).files?.[0];
   if (f) void compareCopy({ kind: "zip", file: f });
+  else clearComparison();
 });
 $("cmp-dir").addEventListener("change", (ev) => {
   const list = (ev.target as HTMLInputElement).files;
   if (list?.length) void compareCopy({ kind: "folder", entries: [...list].map((f) => ({ path: f.webkitRelativePath, blob: f })) });
+  else clearComparison();
 });
 function readUse() {
   const country = ($("use-country") as HTMLInputElement).value.trim().toUpperCase();
