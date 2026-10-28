@@ -1,0 +1,38 @@
+name: offline-mirror-planner
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['tools/offline-mirror-planner/**', '.github/workflows/offline-mirror-planner.yml']
+  pull_request:
+    paths: ['tools/offline-mirror-planner/**', '.github/workflows/offline-mirror-planner.yml']
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+defaults:
+  run:
+    working-directory: tools/offline-mirror-planner
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - run: node --version
+      - run: npm test
+      - run: node scripts/export-samples.cjs --check
+  e2e:
+    # Browser tests need a Chromium download; run on main and manual dispatch only.
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    needs: engine
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - run: npm install --no-save --no-package-lock playwright@1.49.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/e2e/run.cjs
