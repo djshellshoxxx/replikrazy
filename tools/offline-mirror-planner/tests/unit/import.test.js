@@ -118,3 +118,26 @@ test('importDestinations: capability values accepted in plan-export shape {decla
   assert.strictEqual(r.destinations[0].capabilities['byte-exact-delivery'], 'yes');
   assert.strictEqual(r.destinations[0].capabilities['custom-headers'], 'unknown');
 });
+
+test('importDestinations: rejects explicit unsupported versions without changing missing-version legacy', () => {
+  for (const schema of [plan.SCHEMA, plan.DEST_SCHEMA]) {
+    const d = raw('generic-static', { address: 'https://example.invalid/' });
+    const record = { schema, destinations: schema === plan.SCHEMA ? [{ record: d }] : [d] };
+    assert.strictEqual(imp(JSON.stringify(record)).destinations.length, 1);
+    assert.strictEqual(imp(JSON.stringify({ ...record, schemaVersion: 1 })).destinations.length, 1);
+    for (const schemaVersion of [0, 2, 999, '1', null]) {
+      assert.throws(() => imp(JSON.stringify({ ...record, schemaVersion })), e => e.name === 'PlannerError' && e.code === 'BAD_SCHEMA');
+    }
+  }
+});
+
+test('importDestinations: malformed plan destination containers produce only a fixed PlannerError', () => {
+  for (const destinations of [{ privateMarker: 'synthetic' }, 'synthetic', 17, false, null]) {
+    assert.throws(() => imp(JSON.stringify({ schema: plan.SCHEMA, schemaVersion: 1, destinations })), e => {
+      assert.strictEqual(e.name, 'PlannerError');
+      assert.strictEqual(e.code, 'BAD_SCHEMA');
+      assert.ok(!e.message.includes('synthetic'));
+      return true;
+    });
+  }
+});

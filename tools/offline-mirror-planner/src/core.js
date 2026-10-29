@@ -66,6 +66,7 @@
     var maxLen = LIMITS.maxPathLength + (opts && opts.extraLength || 0);
     var maxDepth = LIMITS.maxPathDepth + (opts && opts.extraDepth || 0);
     if (typeof p !== 'string') return { ok: false, reason: 'Path is not a string.' };
+    for (var ch of p) { var point = ch.codePointAt(0); if (point >= 0xd800 && point <= 0xdfff) return { ok: false, reason: 'Path contains an unpaired surrogate.' }; }
     if (p.length === 0) return { ok: false, reason: 'Path is empty.' };
     if (p.length > maxLen) return { ok: false, reason: 'Path is longer than ' + maxLen + ' characters.' };
     if (CONTROL_CHARS.test(p)) return { ok: false, reason: 'Path contains control, invisible or bidirectional-formatting characters.' };
@@ -318,7 +319,7 @@
     var stripped = options.stripRoot === false ? { root: '', paths: rawPaths } : stripCommonRoot(rawPaths);
 
     var files = [], excluded = [], rejected = [], warnings = [];
-    var seen = Object.create(null), seenLower = Object.create(null);
+    var seen = Object.create(null), seenLower = Object.create(null), seenDirectories = Object.create(null);
     var totalBytes = 0;
     var idx = 0;
     var total = entries.length;
@@ -383,6 +384,17 @@
               rejected.push({ path: path, reason: 'Differs only by letter case from "' + seenLower[lower] + '"; it would overwrite that file on case-insensitive file systems. Rename one of them.', category: 'case-collision' });
               return;
             }
+            var parts = lower.split('/'), prefix = '', conflict = !!seenDirectories[lower];
+            for (var j = 0; j < parts.length - 1; j++) {
+              prefix = prefix ? prefix + '/' + parts[j] : parts[j];
+              if (seenLower[prefix]) conflict = true;
+            }
+            if (conflict) {
+              rejected.push({ path: path, reason: 'File/directory prefix collision on a case-insensitive file system.', category: 'path-conflict' });
+              return;
+            }
+            prefix = '';
+            for (var k = 0; k < parts.length - 1; k++) { prefix = prefix ? prefix + '/' + parts[k] : parts[k]; seenDirectories[prefix] = true; }
             seenLower[lower] = path;
             totalBytes += size;
             var rec = { path: path, size: size, sha256: hash, mediaType: mediaTypeFor(path), flags: analysis.flags };

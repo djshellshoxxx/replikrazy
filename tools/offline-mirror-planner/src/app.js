@@ -31,6 +31,13 @@
   };
 
   var exportCache = null;
+  var selectionGeneration = 0;
+  var pendingDrop = null;
+  function invalidateSelection() {
+    selectionGeneration += 1;
+    if (pendingDrop) pendingDrop.cancel();
+    pendingDrop = null;
+  }
 
   // ----------------------------------------------------------- helpers
 
@@ -177,6 +184,7 @@
    */
   function loadEntries(entries, sourceOf, description) {
     if (state.busy) return;
+    invalidateSelection();
     showMessage($('site-error'), 'error', null);
     setBusy(true);
     var prog = $('inv-progress'), bar = $('inv-progress-bar'), ptext = $('inv-progress-text');
@@ -242,38 +250,74 @@
   }
 
   // Drag-and-drop of a folder (Chromium, Firefox, Safari via webkitGetAsEntry).
-  function readAllEntries(dirEntry) {
+  // Bound directory enumeration as well as accepted files. Empty directories
+  // consume work too; a stalled browser callback must not retain a pending drop.
+  var DROP_TIMEOUT_MS = 60000;
+  function readAllEntries(dirEntry, ctx) {
     return new Promise(function (resolve, reject) {
-      var reader = dirEntry.createReader();
-      var all = [];
-      (function more() {
+      var reader = dirEntry.createReader(), all = [];
+      function more() {
+        try { ctx.check(); } catch (e) { reject(e); return; }
         reader.readEntries(function (batch) {
-          if (!batch.length) resolve(all);
-          else { all = all.concat(Array.prototype.slice.call(batch)); more(); }
+          try {
+            ctx.check();
+            if (!batch.length) { resolve(all); return; }
+            ctx.count(batch.length);
+            for (var i = 0; i < batch.length; i++) all.push(batch[i]);
+            more();
+          } catch (e) { reject(e); }
         }, reject);
-      })();
+      }
+      more();
     });
   }
 
-  function walkEntries(roots) {
+  function walkEntries(roots, generation) {
+    var cancelled = false, work = 0, timer, rejectStop;
+    var deadline = Date.now() + DROP_TIMEOUT_MS;
+    function failure(code, message) { return core.PlannerError(code, message); }
+    var ctx = {
+      check: function () {
+        if (cancelled || generation !== selectionGeneration) throw failure('DROP_CANCELLED', 'Folder selection cancelled.');
+        if (Date.now() >= deadline) throw failure('DROP_TIMEOUT', 'Folder traversal exceeded 60 seconds; select a smaller folder.');
+      },
+      count: function (n) {
+        work += n;
+        if (work > L.maxFiles) throw failure('DROP_LIMIT', 'Folder traversal exceeds ' + L.maxFiles + ' entries including directories; select a smaller folder.');
+      }
+    };
+    var stop = new Promise(function (_, reject) {
+      rejectStop = reject;
+      timer = setTimeout(function () {
+        cancelled = true;
+        reject(failure('DROP_TIMEOUT', 'Folder traversal exceeded 60 seconds; select a smaller folder.'));
+      }, DROP_TIMEOUT_MS);
+    });
     var out = [];
-    var tooMany = false;
-    function visit(entry) {
-      if (tooMany) return Promise.resolve();
+    async function visit(entry, depth) {
+      ctx.check();
+      if (depth > L.maxPathDepth + 1) throw failure('DROP_DEPTH', 'Folder traversal exceeds the supported directory depth.');
       if (entry.isFile) {
-        return new Promise(function (resolve, reject) { entry.file(resolve, reject); }).then(function (file) {
-          out.push({ file: file, path: entry.fullPath.replace(/^\/+/, '') });
-          if (out.length > L.maxFiles) tooMany = true;
-        });
+        var file = await new Promise(function (resolve, reject) { entry.file(resolve, reject); });
+        ctx.check();
+        out.push({ file: file, path: entry.fullPath.replace(/^\/+/, '') });
+      } else if (entry.isDirectory) {
+        var children = await readAllEntries(entry, ctx);
+        for (var i = 0; i < children.length; i++) await visit(children[i], depth + 1);
       }
-      if (entry.isDirectory) {
-        return readAllEntries(entry).then(function (children) {
-          return children.reduce(function (p, c) { return p.then(function () { return visit(c); }); }, Promise.resolve());
-        });
-      }
-      return Promise.resolve();
     }
-    return roots.reduce(function (p, r) { return p.then(function () { return visit(r); }); }, Promise.resolve()).then(function () { return out; });
+    var run = (async function () {
+      ctx.check(); ctx.count(roots.length);
+      for (var i = 0; i < roots.length; i++) await visit(roots[i], 1);
+      ctx.check(); return out;
+    })();
+    return {
+      promise: Promise.race([run, stop]).finally(function () { clearTimeout(timer); }),
+      cancel: function () {
+        cancelled = true; clearTimeout(timer);
+        rejectStop(failure('DROP_CANCELLED', 'Folder selection cancelled.'));
+      }
+    };
   }
 
   function onDrop(e) {
@@ -293,18 +337,29 @@
       showMessage($('site-error'), 'error', 'Nothing usable was dropped. Drop a folder, or use "Choose a site folder".');
       return;
     }
-    walkEntries(roots).then(function (found) {
+    invalidateSelection();
+    var generation = selectionGeneration;
+    var operation = walkEntries(roots, generation);
+    pendingDrop = operation;
+    $('clear-site').disabled = false;
+    operation.promise.then(function (found) {
+      if (generation !== selectionGeneration) return;
+      pendingDrop = null;
       var entries = found.map(function (f) {
         return { path: f.path, size: f.file.size, read: function () { return f.file.arrayBuffer(); } };
       });
       loadEntries(entries, function (i) { return { kind: 'file', file: found[i].file }; }, 'folder');
     }, function (err) {
+      if (generation !== selectionGeneration) return;
+      pendingDrop = null;
+      $('clear-site').disabled = !state.inventory;
       showMessage($('site-error'), 'error', 'The dropped folder could not be read: ' + errorText(err));
     });
   }
 
   function clearSite() {
     if (state.busy) return;
+    invalidateSelection();
     state.inventory = null;
     state.sources = null;
     state.siteSource = '';

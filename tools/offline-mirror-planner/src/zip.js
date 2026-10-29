@@ -48,15 +48,23 @@
     if (entries.length > 65534) throw core.PlannerError('ZIP_TOO_MANY', 'Too many files for a ZIP archive.');
     var dt = dosDateTime(options.modified);
     var enc = new TextEncoder();
-    var seen = {};
+    var seen = Object.create(null), directories = Object.create(null);
     var locals = [], centrals = [];
     var offset = 0, centralSize = 0;
     entries.forEach(function (e) {
       // Headroom for the "offline-mirror-plan/site/" prefix on top of the inventory limits.
       var v = core.validateRelativePath(e.path, { extraLength: 64, extraDepth: 4 });
       if (!v.ok) throw core.PlannerError('ZIP_BAD_PATH', 'Refusing to write unsafe archive path "' + core.safeDisplay(e.path) + '": ' + v.reason);
-      if (seen[e.path]) throw core.PlannerError('ZIP_DUP', 'Duplicate archive path "' + e.path + '".');
-      seen[e.path] = true;
+      var key = e.path.toLowerCase(), parts = key.split('/'), prefix = '';
+      if (seen[key]) throw core.PlannerError('ZIP_DUP', 'Duplicate or case-colliding archive path.');
+      if (directories[key]) throw core.PlannerError('ZIP_BAD_PATH', 'Archive file/directory prefix collision.');
+      for (var j = 0; j < parts.length - 1; j++) {
+        prefix = prefix ? prefix + '/' + parts[j] : parts[j];
+        if (seen[prefix]) throw core.PlannerError('ZIP_BAD_PATH', 'Archive file/directory prefix collision.');
+      }
+      prefix = '';
+      for (var k = 0; k < parts.length - 1; k++) { prefix = prefix ? prefix + '/' + parts[k] : parts[k]; directories[prefix] = true; }
+      seen[key] = true;
       var name = enc.encode(e.path);
       var data;
       if (e.bytes instanceof Uint8Array) data = e.bytes;

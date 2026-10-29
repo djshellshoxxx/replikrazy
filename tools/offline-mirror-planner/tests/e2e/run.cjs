@@ -188,7 +188,7 @@ function writeFolder() {
 
 async function main() {
   console.log('Offline Mirror Planner e2e — ' + INDEX_URL);
-  browser = await chromium.launch();
+  browser = await chromium.launch(process.env.OMP_BROWSER_EXECUTABLE ? { executablePath: process.env.OMP_BROWSER_EXECUTABLE } : {});
   context = await browser.newContext({ acceptDownloads: true, viewport: { width: 1280, height: 900 } });
   context.on('request', (r) => allRequests.push(r.url()));
   // Defence in depth: abort anything that is not a local file, and record it.

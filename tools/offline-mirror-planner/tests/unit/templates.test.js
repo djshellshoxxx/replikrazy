@@ -199,3 +199,22 @@ test('Java I2P router gets a checklist, not a config file, and no keys line', ()
   assert.match(ts[1].content, /checklist, not a/);
   assert.ok(!/keys/i.test(ts[1].content.split('\n').filter((l) => !l.startsWith('#')).join('\n')));
 });
+
+test('cross-destination key-directory rejection reaches records and inert templates', () => {
+  const unsafe = '/opt/mirror/keys';
+  const local = dest.createDestination('local-server', { id: 'local-overlap', config: { documentRoot: '/opt/mirror' } });
+  const onion = dest.createDestination('tor-onion', { id: 'onion-overlap', config: { hiddenServiceDir: unsafe } });
+  const input = { destinations: [local, onion], settings: plan.defaultSettings(), generatedAt: GENERATED_AT };
+  const p = plan.buildPlan(input);
+  const pd = p.destinations.find(d => d.id === onion.id);
+  assert.strictEqual(pd.state, 'needs-configuration');
+  assert.ok(pd.errors.some(e => e.field === 'hiddenServiceDir'));
+  assert.strictEqual(pd.record.config.hiddenServiceDir, '');
+  assert.ok(pd.record.omittedInvalidFields.includes('hiddenServiceDir'));
+  const exports = plan.exportArtifacts(p, input);
+  const records = JSON.parse(exports.find(f => f.path.endsWith('destinations.json')).content);
+  assert.strictEqual(records.destinations.find(d => d.id === onion.id).config.hiddenServiceDir, '');
+  const template = exports.find(f => f.path.endsWith('torrc.snippet.template')).content;
+  assert.ok(!template.includes(unsafe));
+  inertCheck(template, 'overlap torrc');
+});

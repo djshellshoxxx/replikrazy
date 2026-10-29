@@ -99,18 +99,31 @@
     return out;
   }
 
+  // Cross-destination invalid fields must be omitted from records/templates,
+  // not merely reported in the plan's readiness assessment.
+  function crossFieldErrors(d, allDests) {
+    if (d.type !== 'tor-onion' || !d.config.hiddenServiceDir) return [];
+    var localRoots = (allDests || []).filter(function (x) { return x.type === 'local-server'; })
+      .map(function (x) { return (x.config.documentRoot || '').replace(/\\/g, '/').replace(/\/+$/, ''); }).filter(Boolean);
+    var hs = d.config.hiddenServiceDir.replace(/\\/g, '/').replace(/\/+$/, '');
+    if (localRoots.some(function (r) { return hs === r || hs.indexOf(r + '/') === 0 || r.indexOf(hs + '/') === 0; })) {
+      return [{ field: 'hiddenServiceDir', message: 'HiddenServiceDir overlaps the document root of a local web server in this plan; onion keys would be web-served.' }];
+    }
+    return [];
+  }
+
   /** Fields of a destination that failed validation (never written into templates/exports). */
-  function badFields(d) {
+  function badFields(d, allDests) {
     var v = dest.validateDestination(d);
     var bad = Object.create(null), missing = Object.create(null);
-    v.errors.forEach(function (e) { bad[e.field] = true; });
+    v.errors.concat(crossFieldErrors(d, allDests)).forEach(function (e) { bad[e.field] = true; });
     v.missing.forEach(function (m) { missing[m.field] = true; });
     return { bad: bad, missing: missing };
   }
 
   /** Config safe for templates: invalid or missing values become visible placeholders. */
-  function templateConfig(d) {
-    var b = badFields(d);
+  function templateConfig(d, allDests) {
+    var b = badFields(d, allDests);
     var cfg = {};
     Object.keys(d.config).forEach(function (k) {
       cfg[k] = (b.bad[k] || b.missing[k] || d.config[k] === '') ? '' : d.config[k];
@@ -139,8 +152,8 @@
 
   // Values that failed validation are omitted (they may hold injected text or
   // credentials, e.g. https://user:pass@host); credential-looking text is redacted.
-  function destinationForExport(d) {
-    var b = badFields(d);
+  function destinationForExport(d, allDests) {
+    var b = badFields(d, allDests);
     var cfg = {}, omitted = [];
     Object.keys(d.config).forEach(function (k) {
       var v = d.config[k];
@@ -195,24 +208,21 @@
     }
     var localServers = dests.filter(function (d) { return d.type === 'local-server'; });
     var localListeners = localServers.map(function (d) { return d.config.listenAddress; });
-    var localRoots = localServers.map(function (d) { return (d.config.documentRoot || '').replace(/\\/g, '/').replace(/\/+$/, ''); }).filter(Boolean);
 
     var outDests = dests.map(function (d) {
       var a = dest.assessDestination(d, ctx);
       var bp = core.normaliseBasePath(d.basePath);
       var extraWarnings = [];
-      if (d.type === 'tor-onion' && d.config.hiddenServiceDir) {
-        var hs = d.config.hiddenServiceDir.replace(/\\/g, '/').replace(/\/+$/, '');
-        if (localRoots.some(function (r) { return hs === r || hs.indexOf(r + '/') === 0 || r.indexOf(hs + '/') === 0; })) {
-          a.errors.push({ field: 'hiddenServiceDir', message: 'HiddenServiceDir overlaps the document root of a local web server in this plan; onion keys would be web-served.' });
-          a.state = dest.STATES.NEEDS_CONFIGURATION;
-          a.stateLabel = dest.STATE_LABELS[a.state];
-        }
+      var crossErrors = crossFieldErrors(d, dests);
+      if (crossErrors.length) {
+        a.errors = a.errors.concat(crossErrors);
+        a.state = dest.STATES.NEEDS_CONFIGURATION;
+        a.stateLabel = dest.STATE_LABELS[a.state];
       }
       if ((d.type === 'tor-onion' || d.type === 'i2p') && d.config.localTarget && !/^unix:/.test(d.config.localTarget) && localListeners.indexOf(d.config.localTarget) === -1) {
         extraWarnings.push({ field: 'localTarget', message: 'No "local web server" destination in this plan listens on ' + d.config.localTarget + '. Add one, or make sure the operator\'s server is configured there.' });
       }
-      var rec = destinationForExport(d);
+      var rec = destinationForExport(d, dests);
       if (a.state !== dest.STATES.READY) reasons.push('Destination "' + rec.label + '" is ' + a.state + '.');
       var addrBad = a.errors.some(function (e) { return e.field === 'address' || e.field === 'publicUrl' || e.field === 'listenAddress'; });
       var addrStatus;
@@ -451,7 +461,7 @@
   /** List of { name, content } template files for a destination. */
   function templateFiles(rawDest, settings, allDests, inv) {
     var headers = headersFor(rawDest, settings, allDests || [rawDest]);
-    var d = templateConfig(rawDest);
+    var d = templateConfig(rawDest, allDests || [rawDest]);
     var out = [{ name: 'headers.txt', content: hashBanner(['Response headers this destination must send for every site file.']) + '\n' + headerList(headers) }];
     if (d.type === 'local-server') {
       var sw = d.config.serverSoftware;
@@ -657,7 +667,7 @@
       generatedAt: generatedAt,
       notice: 'User-entered destination records. Addresses and capabilities are unverified. Contains no credentials.',
       settings: { siteLabel: redact(sanitizeSettings(settings).exportLabel), headers: sanitizeSettings(settings).validHeaders, advertiseOnionLocation: settings.advertiseOnionLocation },
-      destinations: dests.map(destinationForExport)
+      destinations: dests.map(function (d) { return destinationForExport(d, dests); })
     };
   }
 
@@ -672,11 +682,16 @@
     var data;
     // The parser's own message can quote file content (e.g. a mistakenly chosen .env), so it is not shown.
     try { data = JSON.parse(text); } catch (e) { throw core.PlannerError('BAD_JSON', 'Import file is not valid JSON. Choose a destinations.json or plan.json exported by this planner.'); }
+    if (data && (data.schema === DEST_SCHEMA || data.schema === SCHEMA) &&
+        Object.prototype.hasOwnProperty.call(data, 'schemaVersion') && data.schemaVersion !== SCHEMA_VERSION) {
+      throw core.PlannerError('BAD_SCHEMA', 'Unsupported schema version. Only version 1 and legacy records without a version are accepted.');
+    }
     var list, settings = null;
     if (Array.isArray(data)) list = data;
     else if (data && data.schema === DEST_SCHEMA) { list = data.destinations; settings = data.settings || null; }
     else if (data && data.schema === SCHEMA) {
-      list = (data.destinations || []).map(function (pd) { return pd && pd.record; });
+      if (!Array.isArray(data.destinations)) throw core.PlannerError('BAD_SCHEMA', 'The file has no destination list.');
+      list = data.destinations.map(function (pd) { return pd && pd.record; });
       settings = data.settings || null;
     } else throw core.PlannerError('BAD_SCHEMA', 'Unrecognised file. Expected a destinations.json or plan.json exported by this planner, or an array of destination records.');
     if (!Array.isArray(list)) throw core.PlannerError('BAD_SCHEMA', 'The file has no destination list.');
