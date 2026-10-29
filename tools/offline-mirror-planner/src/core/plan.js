@@ -71,7 +71,7 @@
       if (!/^[\x20-\x7e]{1,512}$/.test(value) || /["\\$`{}]/.test(value)) {
         errors.push({ index: i, message: 'Header ' + (i + 1) + ': value must be 1-512 printable ASCII characters without " \\ $ ` { }.' });
         bad = true;
-      } else if (destinations.findSecretLike(name + ': ' + value) || destinations.findSecretLike(value)) {
+      } else if (!bad && (destinations.findSecretLike(name + ': ' + value) || destinations.findSecretLike(value))) {
         errors.push({ index: i, message: 'Header ' + (i + 1) + ': value looks like a credential. Headers in a plan must not carry secrets.' });
         bad = true;
       }
