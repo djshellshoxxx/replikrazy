@@ -1,17 +1,14 @@
 {
-  "name": "offline-mirror-planner",
+  "name": "replikrazy-offline-mirror-planner",
   "version": "0.1.0",
   "private": true,
-  "description": "Browser-based offline planner and exporter for static-site mirror deployment plans. Not a publisher.",
+  "description": "Standalone, offline, browser-based mirror deployment planner. Plans only; never publishes.",
   "license": "UNLICENSED",
-  "engines": {
-    "node": ">=18"
-  },
   "scripts": {
-    "test": "node --test tests/unit/*.test.js",
-    "test:e2e": "node tests/e2e/ui.e2e.js",
-    "build:demo": "node scripts/build-demo-data.js",
-    "export:examples": "node scripts/export-examples.js",
-    "check": "npm test && npm run test:e2e"
+    "test": "node --test \"tests/unit/*.test.js\"",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "test:e2e": "node tests/e2e/run.cjs",
+    "samples": "node scripts/export-samples.cjs",
+    "demo-site": "node scripts/write-demo-site.cjs"
   }
 }

@@ -1,4 +1,0 @@
-# Lantern Field Notes (synthetic demo site)
-User-agent: *
-Disallow: /downloads/
-Allow: /
