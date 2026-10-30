@@ -1,3 +1,5 @@
+> Start here: [accepted-product completion checklist](COMPLETION_CHECKLIST.md). Completed implementation, PR/CI status, acceptance gates and optional proposals are separated here.
+
 > Latest PR6 slice: [complete bounded comparison presentation](../reviews/2026-10-30-comparison-pages.md); prior root and focus fixes retained.
 
 > Latest PR6 slice: [intake/comparison cancellation focus](../reviews/2026-10-30-analysis-focus.md); existing comparison fix retained.
