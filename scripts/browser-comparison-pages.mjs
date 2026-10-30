@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import { zipSync } from 'fflate';
+import { launchBrowser } from './browser-tools.mjs';
+const origin=process.env.TEST_ORIGIN ?? 'http://127.0.0.1:4174';
+const browser=await launchBrowser(), page=await browser.newPage();
+const errors=[],external=[];
+page.on('pageerror',e=>errors.push(e.message));
+page.on('request',r=>{if(!r.url().startsWith(origin+'/'))external.push(r.url());});
+const files={'index.html':Buffer.from('public')};
+for(let i=0;i<1000;i++)files[`file-${String(i).padStart(4,'0')}.txt`]=Buffer.from('public');
+const fixture={name:'site.zip',mimeType:'application/zip',buffer:Buffer.from(zipSync(files))};
+try {
+ await page.goto(origin);
+ await page.locator('#zip-input').setInputFiles(fixture);
+ await page.waitForFunction(()=>document.querySelector('#artifact-id').textContent.includes('sha256:'));
+ await page.locator('#cmp-zip').setInputFiles(fixture);
+ await page.waitForFunction(()=>document.querySelector('#compare-result').textContent.includes('Every file matches'));
+ const details=page.locator('#compare-result details').filter({has:page.locator('summary', {hasText:'Matching: 1001'})});
+ await details.locator('summary').click();
+ assert.match(await details.textContent(),/Showing 1–1000 of 1001/);
+ assert.equal(await details.locator('li').count(),1000);
+ await details.getByRole('button',{name:'Next page'}).click();
+ assert.match(await details.textContent(),/Showing 1001–1001 of 1001/);
+ assert.equal(await details.locator('li').count(),1);
+ assert.equal(await details.locator('li').textContent(),'index.html');
+ assert.equal(await details.getByRole('button',{name:'Next page'}).isDisabled(),true);
+ assert.equal(await details.getByRole('button',{name:'Previous page'}).evaluate(e=>e===document.activeElement),true);
+ await page.keyboard.press('Enter');
+ assert.equal(await details.locator('li').count(),1000);
+ assert.equal(await details.getByRole('button',{name:'Next page'}).evaluate(e=>e===document.activeElement),true);
+ assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+ console.log('11 comparison paging assertions passed; zero page errors/external requests.');
+} finally {await browser.close();}

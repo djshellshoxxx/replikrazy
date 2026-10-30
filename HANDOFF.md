@@ -1,3 +1,11 @@
+> Start here: [accepted-product completion checklist](docs/handoffs/COMPLETION_CHECKLIST.md). Completed implementation, PR/CI status, acceptance gates and optional proposals are separated here.
+
+> Latest PR6 slice: [complete bounded comparison presentation](docs/reviews/2026-10-30-comparison-pages.md); prior root and focus fixes retained.
+
+> Latest PR6 slice: [intake/comparison cancellation focus](docs/reviews/2026-10-30-analysis-focus.md); existing comparison fix retained.
+
+> Current continuation: [wrapped-copy comparison fix](docs/reviews/2026-10-30-comparison-root.md) on chatgpt/local-workflow-20261030, based on merged main 3ccb71a.
+
 > Latest: [2026-10-30 consolidation](docs/handoffs/CONSOLIDATION_20261030.md); earlier branch status is historical.
 
 > Current durable restart: [2026-10-28 handoff](docs/handoffs/CURRENT_20261028.md). It supersedes historical next-step/status claims below and records tested source separately from documentation heads.

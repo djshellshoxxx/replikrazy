@@ -9,7 +9,7 @@ import { artifactId, buildManifest, defaultEntrypoint, htmlCandidates, ID_RE, ty
 import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
 import type { BundleFile, IntakeIssue, IntakeResult } from "../core/intake";
-import { compareInventories, isIdentical } from "../core/compare";
+import { compareInventories, isIdentical, preferRootComparison } from "../core/compare";
 import { type AnalysisInput, type Progress } from "../core/pipeline";
 import type { Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, restorePlanStatuses, transition, type DryRunPlan } from "../core/plan";
@@ -136,10 +136,19 @@ function clearArtifact() {
   for (const id of ["inventory", "compat", "plan"]) $(id).hidden = true;
   $("root-choice").replaceChildren();
   $("compare-result").replaceChildren();
-  $("compare-cancel-btn").hidden = true;
+  hideCancel("compare-cancel-btn", "cmp-zip");
   $("artifact-id").textContent = "Artifact id: not available until the identity is valid.";
   ($("export-btn") as HTMLButtonElement).disabled = true;
   ($("payload-btn") as HTMLButtonElement).disabled = true;
+}
+
+// Hiding a focused cancel control must not drop keyboard focus onto the body.
+// Completion never steals focus from an unrelated control.
+function hideCancel(id: string, picker: string) {
+  const button = $(id);
+  const focused = document.activeElement === button;
+  button.hidden = true;
+  if (focused) $(picker).focus();
 }
 
 async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourceDigest?: string, entrypoint?: string | null) {
@@ -193,7 +202,7 @@ async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourc
     state.input = null;
     status.textContent = failureMessage(e);
   } finally {
-    if (gen === generation) cancelBtn.hidden = true;
+    if (gen === generation) hideCancel("cancel-btn", input.kind === "folder" ? "dir-input" : "zip-input");
   }
 }
 
@@ -432,12 +441,12 @@ function clearSelection() {
   ++generation; intakeTask.cancel(); clearArtifact();
   state.input = null; state.stripRoot = false; state.entrypoint = null;
   renderEntryChoices([]);
-  $("cancel-btn").hidden = true;
+  hideCancel("cancel-btn", "zip-input");
   $("intake-status").textContent = "No input selected. Previous files and plans were cleared.";
 }
 function clearComparison() {
   ++compareGeneration; compareTask.cancel();
-  $("compare-cancel-btn").hidden = true;
+  hideCancel("compare-cancel-btn", "cmp-zip");
   $("compare-result").textContent = "No copy selected.";
 }
 $("zip-input").addEventListener("change", (ev) => {
@@ -481,13 +490,14 @@ async function compareCopy(input: AnalysisInput) {
   try {
     const progress: Progress = (stage, done, total) => { if (gen === compareGeneration) out.textContent = `Copy: ${stage} ${done} / ${total}`; };
     // A copy may or may not be wrapped in one folder; keep whichever reading
-    // matches more of the original.
+    // shares more paths with the original; unchanged bytes break overlap ties.
     const plainResult = await compareTask.run(input, { stripRoot: false }, progress);
     if (gen !== compareGeneration) return;
     if (!plainResult.ok) throw plainResult.error;
     const plain = plainResult.value;
     if (plain.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
     let best = compareInventories(reference.entries, plain.inv.entries);
+    let removedRoot: string | null = null;
     if (plain.intake.candidateRoot) {
       const strippedResult = await compareTask.run(input, { stripRoot: true, expectedSourceDigest: plain.sourceDigest }, progress);
       if (gen !== compareGeneration) return;
@@ -495,17 +505,51 @@ async function compareCopy(input: AnalysisInput) {
       const stripped = strippedResult.value;
       if (stripped.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
       const c = compareInventories(reference.entries, stripped.inv.entries);
-      if (c.matching.length > best.matching.length) best = c;
+      if (preferRootComparison(best, c)) { best = c; removedRoot = plain.intake.candidateRoot; }
     }
     const list = (title: string, items: string[]) => {
       const d = el("details");
       d.append(el("summary", `${title}: ${items.length}`));
       const ul = el("ul");
-      ul.append(...items.slice(0, 1000).map((t) => { const item = el("li", t); item.dir = "auto"; return item; }));
+      const pageSize = 1000;
+      let page = 0;
+      const range = el("p");
+      range.setAttribute("role", "status");
+      const previous = el("button", "Previous page");
+      const next = el("button", "Next page");
+      previous.type = next.type = "button";
+      const render = () => {
+        const start = page * pageSize;
+        ul.replaceChildren(...items.slice(start, start + pageSize).map((t) => {
+          const item = el("li", t); item.dir = "auto"; return item;
+        }));
+        range.textContent = `Showing ${start + 1}–${Math.min(start + pageSize, items.length)} of ${items.length}`;
+        previous.disabled = page === 0;
+        next.disabled = start + pageSize >= items.length;
+      };
+      previous.addEventListener("click", () => {
+        if (page === 0) return;
+        const focused = document.activeElement === previous;
+        page--; render();
+        if (focused && previous.disabled) next.focus();
+      });
+      next.addEventListener("click", () => {
+        if ((page + 1) * pageSize >= items.length) return;
+        const focused = document.activeElement === next;
+        page++; render();
+        if (focused && next.disabled) previous.focus();
+      });
+      render();
+      if (items.length > pageSize) d.append(range, previous, next);
       d.append(ul);
       return d;
     };
+    const rootNote = el("p", removedRoot
+      ? `Comparison root: removed wrapper ${removedRoot}. Original files are unchanged.`
+      : "Comparison root: original copy paths (no wrapper removed).");
+    rootNote.dir = "auto";
     out.replaceChildren(
+      rootNote,
       el("p", isIdentical(best)
         ? "Every file matches byte for byte. This shows the copy is intact; it does not show the mirror works — open it and test it."
         : "The copy differs. Hosts can legitimately change served files (analytics, minification, injected snippets); check each difference.",
@@ -518,7 +562,7 @@ async function compareCopy(input: AnalysisInput) {
   } catch (e) {
     if (gen === compareGeneration) out.textContent = failureMessage(e);
   } finally {
-    if (gen === compareGeneration) $("compare-cancel-btn").hidden = true;
+    if (gen === compareGeneration) hideCancel("compare-cancel-btn", input.kind === "folder" ? "cmp-dir" : "cmp-zip");
   }
 }
 $("compare-cancel-btn").addEventListener("click", () => compareTask.cancel());

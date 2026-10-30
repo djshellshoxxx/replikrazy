@@ -1,0 +1,11 @@
+# Complete bounded comparison presentation — 2026-10-30
+
+Based on 8005e120b55c3d68f1d478266ef2b5adc21b7f92 on chatgpt/local-workflow-20261030 / PR6. Both prior-head CI runs 41036528623 and 41036519850 passed. Main remains 3ccb71a; no new external branch activity observed. Sole integrator, no paid calls or extra workers.
+
+Reproduced gap: the comparison summary counted 1,001 matching files but its details silently displayed only the first 1,000, leaving index.html unreachable. Original failure retained in /workspace/checkpoints/comparison-pages-original.log. The shared comparison-list renderer now pages through every matching/changed/missing/extra item, at most 1,000 rows per list. A live range reports the displayed subset; Previous/Next stay within bounds and focus moves to the available counterpart when a focused button becomes disabled. Short/empty lists retain their existing presentation. File strings remain text nodes, dir=auto; no new fetch, persistence, identity or export authority. Page selection operates only on the already validated comparison result.
+
+Validation: 395 canonical tests and 166 planner tests passed, samples unchanged; typecheck/build pass. scripts/browser-comparison-pages.mjs runs a real 1,001-file ZIP comparison on canonical localhost preview with existing Chromium: 11 assertions passed, zero page errors/external requests. Checks first and last ranges, bounded row count, final filename, disabled Next and keyboard return. This is not a manual screen-reader or independent security audit. Original thresholds preserved; no browser download/planner denial retried.
+
+Commands: npm run test:all; npm run build; BROWSER_TEST_TOOLS=/opt/codex/cua_node/lib node scripts/browser-comparison-pages.mjs against preview on 127.0.0.1:4174 (TEST_ORIGIN override supported).
+
+Current product follow-up: review PR6 (comparison root, cancellation focus and complete comparison presentation). Existing consumer packages remain optional proposals; no scope expansion here. Required qualification still depends on authoritative T-ART-08/fixtures, manual accessibility and independent security acceptance. Main's completed preflight/recovery work must not be rebuilt. Prior denials and original evidence remain preserved.

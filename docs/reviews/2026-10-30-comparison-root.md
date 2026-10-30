@@ -1,0 +1,11 @@
+# Wrapped-copy comparison — 2026-10-30
+
+Base main 3ccb71ab060718f4f2a9223d6dd8eaed448a31d9. Live refs reconciled; no open PRs or new external writer activity observed. Post-merge CI runs 41032154581 and 41032154579 passed. Sole integrator; no workers or paid calls. Branch chatgpt/local-workflow-20261030.
+
+Reproduced gap: a copy/index.html containing changed bytes had zero unchanged matches both before and after wrapper removal, so the old rule kept the wrapper and reported missing/extra rather than changed. Two regression cases failed before the fix; /workspace/checkpoints/comparison-root-original.log preserves output. Root choice now ranks shared paths (matching + changed), then byte matches; equal evidence retains the original paths. UI explicitly displays the selected comparison root. This is a comparison heuristic, not proof of owner intent or live serving. Intake/root admission, source digest binding, stale/cancel guards, artifact identity and export gates are untouched.
+
+Validation: 395 canonical tests, 166 planner tests, samples unchanged; typecheck/build pass. scripts/browser-comparison-root.mjs ran against localhost production preview with the existing installed Chromium: 10 assertions, zero page errors/external requests. Covers same-size changed hashes, wrapper disclosure, unchanged original identity and nonwrapped identical copy. No planner navigation or denied browser download was retried. Browser command: BROWSER_TEST_TOOLS=/opt/codex/cua_node/lib node scripts/browser-comparison-root.mjs (preview at 127.0.0.1:4174; TEST_ORIGIN may select an existing canonical local preview).
+
+Focused AI review: no new network, rendering uses text nodes, filenames use dir=auto, no data persistence or policy changes, existing bounded parser/collision checks retained. This is not independent security or manual screen-reader acceptance.
+
+Remaining gates unchanged: authoritative T-ART-08 and referenced fixture bytes; manual accessibility and independent security qualification. Consumer packages remain proposed optional scope, not required to finish this fix. Next ready task is review of the continuation diff; do not regenerate completed intake/recovery work or pretend missing acceptance bytes exist. Existing private archive and browser denials remain binding.
