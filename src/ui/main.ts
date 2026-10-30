@@ -9,7 +9,7 @@ import { artifactId, buildManifest, defaultEntrypoint, htmlCandidates, ID_RE, ty
 import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
 import type { BundleFile, IntakeIssue, IntakeResult } from "../core/intake";
-import { compareInventories, isIdentical } from "../core/compare";
+import { compareInventories, isIdentical, preferRootComparison } from "../core/compare";
 import { type AnalysisInput, type Progress } from "../core/pipeline";
 import type { Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, restorePlanStatuses, transition, type DryRunPlan } from "../core/plan";
@@ -481,13 +481,14 @@ async function compareCopy(input: AnalysisInput) {
   try {
     const progress: Progress = (stage, done, total) => { if (gen === compareGeneration) out.textContent = `Copy: ${stage} ${done} / ${total}`; };
     // A copy may or may not be wrapped in one folder; keep whichever reading
-    // matches more of the original.
+    // shares more paths with the original; unchanged bytes break overlap ties.
     const plainResult = await compareTask.run(input, { stripRoot: false }, progress);
     if (gen !== compareGeneration) return;
     if (!plainResult.ok) throw plainResult.error;
     const plain = plainResult.value;
     if (plain.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
     let best = compareInventories(reference.entries, plain.inv.entries);
+    let removedRoot: string | null = null;
     if (plain.intake.candidateRoot) {
       const strippedResult = await compareTask.run(input, { stripRoot: true, expectedSourceDigest: plain.sourceDigest }, progress);
       if (gen !== compareGeneration) return;
@@ -495,7 +496,7 @@ async function compareCopy(input: AnalysisInput) {
       const stripped = strippedResult.value;
       if (stripped.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
       const c = compareInventories(reference.entries, stripped.inv.entries);
-      if (c.matching.length > best.matching.length) best = c;
+      if (preferRootComparison(best, c)) { best = c; removedRoot = plain.intake.candidateRoot; }
     }
     const list = (title: string, items: string[]) => {
       const d = el("details");
@@ -505,7 +506,12 @@ async function compareCopy(input: AnalysisInput) {
       d.append(ul);
       return d;
     };
+    const rootNote = el("p", removedRoot
+      ? `Comparison root: removed wrapper ${removedRoot}. Original files are unchanged.`
+      : "Comparison root: original copy paths (no wrapper removed).");
+    rootNote.dir = "auto";
     out.replaceChildren(
+      rootNote,
       el("p", isIdentical(best)
         ? "Every file matches byte for byte. This shows the copy is intact; it does not show the mirror works — open it and test it."
         : "The copy differs. Hosts can legitimately change served files (analytics, minification, injected snippets); check each difference.",

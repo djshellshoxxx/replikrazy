@@ -31,3 +31,11 @@ export function compareInventories(expected: readonly InventoryEntry[], actual: 
 }
 
 export const isIdentical = (c: Comparison) => !c.changed.length && !c.missing.length && !c.extra.length;
+
+// Prefer the original path interpretation on ties.
+export function preferRootComparison(plain: Comparison, stripped: Comparison): boolean {
+  const plainOverlap = plain.matching.length + plain.changed.length;
+  const strippedOverlap = stripped.matching.length + stripped.changed.length;
+  return strippedOverlap > plainOverlap ||
+    (strippedOverlap === plainOverlap && stripped.matching.length > plain.matching.length);
+}

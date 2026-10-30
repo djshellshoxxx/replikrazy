@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import { zipSync } from 'fflate';
+import { launchBrowser } from './browser-tools.mjs';
+const origin = process.env.TEST_ORIGIN ?? 'http://127.0.0.1:4174';
+const browser = await launchBrowser(), page = await browser.newPage();
+const errors = [], external = [];
+page.on('pageerror', e => errors.push(e.message));
+page.on('request', r => { if (!r.url().startsWith(origin + '/')) external.push(r.url()); });
+const archive = (path, content) => ({name:'site.zip',mimeType:'application/zip',buffer:Buffer.from(zipSync({[path]:Buffer.from(content)}))});
+try {
+  await page.goto(origin);
+  await page.locator('#zip-input').setInputFiles(archive('index.html','a'));
+  await page.waitForFunction(()=>document.querySelector('#artifact-id').textContent.includes('sha256:'));
+  const identity = await page.locator('#artifact-id').textContent();
+  await page.locator('#cmp-zip').setInputFiles(archive('copy/index.html','b'));
+  await page.waitForFunction(()=>document.querySelector('#compare-result').textContent.includes('The copy differs'));
+  const result = await page.locator('#compare-result').textContent();
+  assert.match(result,/removed wrapper copy/);
+  assert.match(result,/Changed: 1/);
+  assert.match(result,/Missing from the copy: 0/);
+  assert.match(result,/Extra in the copy: 0/);
+  assert.match(result,/ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb/);
+  assert.match(result,/3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d/);
+  assert.equal(await page.locator('#artifact-id').textContent(), identity);
+  await page.locator('#cmp-zip').setInputFiles(archive('index.html','a'));
+  await page.waitForFunction(()=>document.querySelector('#compare-result').textContent.includes('Every file matches'));
+  assert.match(await page.locator('#compare-result').textContent(),/no wrapper removed/);
+  assert.deepEqual(errors,[]); assert.deepEqual(external,[]);
+  console.log('10 comparison root assertions passed; zero page errors/external requests.');
+} finally { await browser.close(); }
