@@ -136,10 +136,19 @@ function clearArtifact() {
   for (const id of ["inventory", "compat", "plan"]) $(id).hidden = true;
   $("root-choice").replaceChildren();
   $("compare-result").replaceChildren();
-  $("compare-cancel-btn").hidden = true;
+  hideCancel("compare-cancel-btn", "cmp-zip");
   $("artifact-id").textContent = "Artifact id: not available until the identity is valid.";
   ($("export-btn") as HTMLButtonElement).disabled = true;
   ($("payload-btn") as HTMLButtonElement).disabled = true;
+}
+
+// Hiding a focused cancel control must not drop keyboard focus onto the body.
+// Completion never steals focus from an unrelated control.
+function hideCancel(id: string, picker: string) {
+  const button = $(id);
+  const focused = document.activeElement === button;
+  button.hidden = true;
+  if (focused) $(picker).focus();
 }
 
 async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourceDigest?: string, entrypoint?: string | null) {
@@ -193,7 +202,7 @@ async function loadBundle(input: AnalysisInput, stripRoot = false, expectedSourc
     state.input = null;
     status.textContent = failureMessage(e);
   } finally {
-    if (gen === generation) cancelBtn.hidden = true;
+    if (gen === generation) hideCancel("cancel-btn", input.kind === "folder" ? "dir-input" : "zip-input");
   }
 }
 
@@ -432,12 +441,12 @@ function clearSelection() {
   ++generation; intakeTask.cancel(); clearArtifact();
   state.input = null; state.stripRoot = false; state.entrypoint = null;
   renderEntryChoices([]);
-  $("cancel-btn").hidden = true;
+  hideCancel("cancel-btn", "zip-input");
   $("intake-status").textContent = "No input selected. Previous files and plans were cleared.";
 }
 function clearComparison() {
   ++compareGeneration; compareTask.cancel();
-  $("compare-cancel-btn").hidden = true;
+  hideCancel("compare-cancel-btn", "cmp-zip");
   $("compare-result").textContent = "No copy selected.";
 }
 $("zip-input").addEventListener("change", (ev) => {
@@ -524,7 +533,7 @@ async function compareCopy(input: AnalysisInput) {
   } catch (e) {
     if (gen === compareGeneration) out.textContent = failureMessage(e);
   } finally {
-    if (gen === compareGeneration) $("compare-cancel-btn").hidden = true;
+    if (gen === compareGeneration) hideCancel("compare-cancel-btn", input.kind === "folder" ? "cmp-dir" : "cmp-zip");
   }
 }
 $("compare-cancel-btn").addEventListener("click", () => compareTask.cancel());
