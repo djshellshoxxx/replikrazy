@@ -78,16 +78,22 @@ See [INTEGRATION.md](INTEGRATION.md) for how this tool could later connect to th
 
 ## Combined checkout validation
 
-From the repository root, `npm run test:all` runs the canonical Vitest suite,
-this tool's Node suite and the committed sample check separately. Tests retain
-their original thresholds. `npm run build` builds the canonical app only.
+On the integration branch (`chatgpt/planner-integration-20261028`), which
+co-locates this tool with the canonical app, `npm run test:all` from the
+repository root runs the canonical Vitest suite, this tool's Node suite and the
+committed sample check separately. Tests retain their original thresholds.
+`npm run build` there builds the canonical app only. On a planner-only checkout,
+run the commands in the Tests section above from this directory.
 
 For an already installed local browser, the planner runner accepts
 `OMP_PLAYWRIGHT_MODULE` and `OMP_BROWSER_EXECUTABLE`; it never installs a browser.
 The 2026-10-28 integration executor could not navigate to this tool's file URL
-(`ERR_BLOCKED_BY_ADMINISTRATOR`). That browser gate is not treated as a pass or
-bypassed with another route. Earlier Claude browser results remain separately
-reported historical evidence.
+(`ERR_BLOCKED_BY_ADMINISTRATOR`) and did not treat that gate as passed. On
+2026-10-29 a separate environment with Playwright Chromium allowed `file://`
+navigation and ran `node tests/e2e/run.cjs` against this exact planner source
+(integration commit `5078545`): 20/20 checks passed, 40 requests recorded,
+0 non-local. That is automated browser evidence, not manual screen-reader or
+independent security acceptance.
 
 Folder-drop enumeration now has a 5,000-entry budget including directories, a
 33-level traversal cap including the selected wrapper, and a 60-second deadline.
