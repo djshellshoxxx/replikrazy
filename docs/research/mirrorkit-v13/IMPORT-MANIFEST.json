@@ -1,0 +1,184 @@
+{
+  "kind": "replikrazy-research-import",
+  "source": "MirrorKit research checkpoint v13 (2026-10-25), supplied privately by the repository owner",
+  "approvedBy": "repository owner, in the working session on 2026-10-25 (\"yes publish the research catalogue data on that repo\")",
+  "scope": [
+    "catalog/",
+    "v13/hosting-database/",
+    "v13/guest-host-catalog/"
+  ],
+  "notImported": "specs, reports, reviews, regional/expansion research, route specs, reference code copies, nested checkpoint archive",
+  "files": [
+    {
+      "path": "catalog/consolidated-leads.json",
+      "originalSha256": "f23adc6126492a666180c009f740a7719e0198d7fbcde00bf5c76938c3d6c495",
+      "publishedSha256": "f23adc6126492a666180c009f740a7719e0198d7fbcde00bf5c76938c3d6c495",
+      "packManifestSha256": "f23adc6126492a666180c009f740a7719e0198d7fbcde00bf5c76938c3d6c495",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "CHECKPOINT-MANIFEST.json"
+    },
+    {
+      "path": "catalog/consolidated-providers.json",
+      "originalSha256": "235675c53d1e67a7b813567e3c2a19832e45c08c7260436e668068891f501da8",
+      "publishedSha256": "235675c53d1e67a7b813567e3c2a19832e45c08c7260436e668068891f501da8",
+      "packManifestSha256": "235675c53d1e67a7b813567e3c2a19832e45c08c7260436e668068891f501da8",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "CHECKPOINT-MANIFEST.json"
+    },
+    {
+      "path": "catalog/country-coverage-initial.md",
+      "originalSha256": "0cc676fe74c0d19e226a7abfb9f785fc83a7750119808d6f332c1883c16c1cad",
+      "publishedSha256": "0cc676fe74c0d19e226a7abfb9f785fc83a7750119808d6f332c1883c16c1cad",
+      "packManifestSha256": "0cc676fe74c0d19e226a7abfb9f785fc83a7750119808d6f332c1883c16c1cad",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "CHECKPOINT-MANIFEST.json"
+    },
+    {
+      "path": "catalog/country-coverage-ledger.json",
+      "originalSha256": "5e6ddeb25fae47f4bcae59320552b9d1c75bf611e9f292cf7ade54422a504274",
+      "publishedSha256": "5e6ddeb25fae47f4bcae59320552b9d1c75bf611e9f292cf7ade54422a504274",
+      "packManifestSha256": "5e6ddeb25fae47f4bcae59320552b9d1c75bf611e9f292cf7ade54422a504274",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "CHECKPOINT-MANIFEST.json"
+    },
+    {
+      "path": "catalog/providers-global.json",
+      "originalSha256": "7176bce840f14daee6a7cea606c728e69663064f32d1e917bca4b8f386a0c4e6",
+      "publishedSha256": "7176bce840f14daee6a7cea606c728e69663064f32d1e917bca4b8f386a0c4e6",
+      "packManifestSha256": "7176bce840f14daee6a7cea606c728e69663064f32d1e917bca4b8f386a0c4e6",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "CHECKPOINT-MANIFEST.json"
+    },
+    {
+      "path": "catalog/providers-global.md",
+      "originalSha256": "e26143fc77f84476b97cc517f19ff4f9bcbb10eb146d2813ad1a65ef26c65da7",
+      "publishedSha256": "e26143fc77f84476b97cc517f19ff4f9bcbb10eb146d2813ad1a65ef26c65da7",
+      "packManifestSha256": "e26143fc77f84476b97cc517f19ff4f9bcbb10eb146d2813ad1a65ef26c65da7",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "CHECKPOINT-MANIFEST.json"
+    },
+    {
+      "path": "catalog/providers-local-leads.json",
+      "originalSha256": "6529db54ef84c0489d43283e3df01676af24a0413813beb3660986f6b603b56b",
+      "publishedSha256": "6529db54ef84c0489d43283e3df01676af24a0413813beb3660986f6b603b56b",
+      "packManifestSha256": "6529db54ef84c0489d43283e3df01676af24a0413813beb3660986f6b603b56b",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "CHECKPOINT-MANIFEST.json"
+    },
+    {
+      "path": "catalog/providers-local-leads.md",
+      "originalSha256": "fd56801ba120f6e8996dd0b5bbe835791c703dc8d077dfa79088a825cad0a332",
+      "publishedSha256": "fd56801ba120f6e8996dd0b5bbe835791c703dc8d077dfa79088a825cad0a332",
+      "packManifestSha256": "fd56801ba120f6e8996dd0b5bbe835791c703dc8d077dfa79088a825cad0a332",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "CHECKPOINT-MANIFEST.json"
+    },
+    {
+      "path": "v13/guest-host-catalog/README.md",
+      "originalSha256": "21b7f9e82e77b323beb67e775df5a2a07688c8b659852ebf7b8edb9f4f2d9813",
+      "publishedSha256": "21b7f9e82e77b323beb67e775df5a2a07688c8b659852ebf7b8edb9f4f2d9813",
+      "packManifestSha256": "21b7f9e82e77b323beb67e775df5a2a07688c8b659852ebf7b8edb9f4f2d9813",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/guest-host-catalog/SOURCE-MANIFEST.json",
+      "originalSha256": "f6653dc2b7dae40cff4251b2b59945cdb5c366e31da6793bcefd2fd019f71819",
+      "publishedSha256": "f6653dc2b7dae40cff4251b2b59945cdb5c366e31da6793bcefd2fd019f71819",
+      "packManifestSha256": "f6653dc2b7dae40cff4251b2b59945cdb5c366e31da6793bcefd2fd019f71819",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/guest-host-catalog/guest-hosts.csv",
+      "originalSha256": "1b9e10186eed0a2b41054fd6c718d5cb696e6ac7d9049c212111ae48cf11b38e",
+      "publishedSha256": "9e43d9c20d2030db4ec9ebb556ab7516357ad163c26e631b9cd368cf770d0f69",
+      "packManifestSha256": "1b9e10186eed0a2b41054fd6c718d5cb696e6ac7d9049c212111ae48cf11b38e",
+      "packManifestMatch": true,
+      "transformation": "one personal-looking contact email replaced with a placeholder",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/guest-host-catalog/guest-hosts.json",
+      "originalSha256": "8b509a096df94df1f6ffc1d8825893bb9b52445a1c3947dcafd1ad5f45ff66d4",
+      "publishedSha256": "820aaefe0efa8bda520c59f6328291a3b0c4373e1ef88e0c020623d4a5afa0b5",
+      "packManifestSha256": "8b509a096df94df1f6ffc1d8825893bb9b52445a1c3947dcafd1ad5f45ff66d4",
+      "packManifestMatch": true,
+      "transformation": "one personal-looking contact email replaced with a placeholder",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/hosting-database/DATABASE-PUBLICATION-MANIFEST.json",
+      "originalSha256": "53801c54a5e17305f336e47dce5467a250f018cfb70f4787bee30660628b87b7",
+      "publishedSha256": "53801c54a5e17305f336e47dce5467a250f018cfb70f4787bee30660628b87b7",
+      "packManifestSha256": "53801c54a5e17305f336e47dce5467a250f018cfb70f4787bee30660628b87b7",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/hosting-database/DATA_DICTIONARY.md",
+      "originalSha256": "87a84e233811f3b7dce3c890757a8b6ddb013eaae31800da2f8b80c7cc81f26c",
+      "publishedSha256": "87a84e233811f3b7dce3c890757a8b6ddb013eaae31800da2f8b80c7cc81f26c",
+      "packManifestSha256": "87a84e233811f3b7dce3c890757a8b6ddb013eaae31800da2f8b80c7cc81f26c",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/hosting-database/README.md",
+      "originalSha256": "5885058ae5dc707d980cc2ac6ad11d9cff2661659f7a5679370eea84fbea1c12",
+      "publishedSha256": "5885058ae5dc707d980cc2ac6ad11d9cff2661659f7a5679370eea84fbea1c12",
+      "packManifestSha256": "5885058ae5dc707d980cc2ac6ad11d9cff2661659f7a5679370eea84fbea1c12",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/hosting-database/exports/hosting-database.csv",
+      "originalSha256": "a0ba8d02a73af1435a98c04e9a225f4b1676013955970746e817189620a169f5",
+      "publishedSha256": "a0ba8d02a73af1435a98c04e9a225f4b1676013955970746e817189620a169f5",
+      "packManifestSha256": "a0ba8d02a73af1435a98c04e9a225f4b1676013955970746e817189620a169f5",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/hosting-database/hosting-database.json",
+      "originalSha256": "2f76c81874c8caca9919e8fe7d14734e8183bc43ac97b1e2f19e87e41699264d",
+      "publishedSha256": "2f76c81874c8caca9919e8fe7d14734e8183bc43ac97b1e2f19e87e41699264d",
+      "packManifestSha256": "2f76c81874c8caca9919e8fe7d14734e8183bc43ac97b1e2f19e87e41699264d",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/hosting-database/schema/hosting-database.schema.json",
+      "originalSha256": "e7693b1ad2063860c7424fe2fc2fcc058d0bba76edb47ee6fdcdc57d4e6ab88e",
+      "publishedSha256": "e7693b1ad2063860c7424fe2fc2fcc058d0bba76edb47ee6fdcdc57d4e6ab88e",
+      "packManifestSha256": "e7693b1ad2063860c7424fe2fc2fcc058d0bba76edb47ee6fdcdc57d4e6ab88e",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    },
+    {
+      "path": "v13/hosting-database/validation/VALIDATION.json",
+      "originalSha256": "358dd5ae457d7bb3d7c75f7c1eb540c96c481a8420f89670dac42a9c1e600a52",
+      "publishedSha256": "358dd5ae457d7bb3d7c75f7c1eb540c96c481a8420f89670dac42a9c1e600a52",
+      "packManifestSha256": "358dd5ae457d7bb3d7c75f7c1eb540c96c481a8420f89670dac42a9c1e600a52",
+      "packManifestMatch": true,
+      "transformation": "copied unchanged",
+      "packManifest": "V13-MANIFEST output_sha256"
+    }
+  ]
+}

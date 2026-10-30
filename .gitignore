@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.zip
+!tests/fixtures/**/*.zip
+.env*
+
+# Also ignore a local dependency-directory symlink used by isolated worktrees.
+/node_modules

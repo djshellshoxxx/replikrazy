@@ -1,0 +1,3469 @@
+{
+ "snapshotVersion": 1,
+ "source": "docs/research/mirrorkit-v13/catalog/consolidated-providers.json",
+ "sourceSha256": "235675c53d1e67a7b813567e3c2a19832e45c08c7260436e668068891f501da8",
+ "researchCheckedUtc": "2026-10-24",
+ "recordCount": 62,
+ "records": [
+  {
+   "id": "4everland",
+   "name": "4EVERLAND",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Terms identify 4EVERLAND FOUNDATION LTD, Singapore, and include sanctions/eligibility restrictions. No storage/serving region choice or full country matrix verified. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "Terms identify 4EVERLAND FOUNDATION LTD, Singapore, and include sanctions/eligibility restrictions. No storage/serving region choice or full country matrix verified. English docs.",
+   "freeModel": "Official pages conflict. Docs describe a 7-day trial with 1 GB IPFS and 10 MB Arweave, plus Standard monthly resource language; current pricing page advertises different/higher ranges. Exact current free quota is unresolved; do not rely on a specific cap until current official account/terms confirm it. Paid resources/payment are separate.",
+   "freeLimits": null,
+   "suitability": "Potential deployment convenience; protocol choice, control plane, and conflicting free-quota docs need careful verification.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0342",
+     "url": "https://docs.4everland.org/hositng/what-is-hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0343",
+     "url": "https://docs.4everland.org/hositng/hosting-api",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0344",
+     "url": "https://www.4everland.org/price/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0345",
+     "url": "https://docs.4everland.org/get-started/billing-and-pricing/pricing-model",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0346",
+     "url": "https://www.4everland.org/term-of-service/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0347",
+     "url": "https://www.4everland.org/privacy-policy/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "arweave_turbo",
+   "name": "Arweave via Turbo (+ optional AR.IO gateways / ArNS)",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "browser-compatible candidate (unvalidated)",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Data distributed on network; no region choice verified. Turbo operator country and region matrix not verified. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "Data distributed on network; no region choice verified. Turbo operator country and region matrix not verified. English docs.",
+   "freeModel": "Turbo docs describe conditional free allowance for items below 105 KiB, with 10 MiB lifetime per wallet and subnet; verify live allowance. Larger/over-quota uploads require prepaid credits, purchasable with card or supported crypto. Testnet is not permanent. ArNS naming costs separately.",
+   "freeLimits": null,
+   "suitability": "Best documented permanent-chain static site workflow; unsuitable if public irreversibility or wallet-paid updates are unacceptable.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0337",
+     "url": "https://docs.ar.io/sdks/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0338",
+     "url": "https://docs.ar.io/build/guides/using-turbo-in-a-browser/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0339",
+     "url": "https://docs.ar.io/build/upload/turbo-credits",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0340",
+     "url": "https://docs.ar.io/build/guides/hosting-decentralised-apps/deploy-permanent-dapp/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0341",
+     "url": "https://docs.ar.io/sdks/ario-deploy/single-page-apps/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "aws_amplify_hosting",
+   "name": "AWS Amplify Hosting",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://aws.amazon.com/amplify/hosting/",
+   "operator": "Amazon Web Services, Inc. / Amazon.com, Inc.",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "credit/trial/free-tier dependent; not free forever",
+   "freeLimits": "AWS Amplify Hosting free-tier offers 1,000 build minutes/month, 5 GB stored CDN data/month, 15 GB transfer/month for the 12-month free-tier period. These limits are tied to AWS Free Tier account eligibility, not a permanent Amplify free hosting plan.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0136",
+     "url": "https://aws.amazon.com/amplify/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0137",
+     "url": "https://docs.aws.amazon.com/amplify/latest/userguide/custom-domains.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0138",
+     "url": "https://docs.aws.amazon.com/amplify/latest/userguide/custom-headers.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0139",
+     "url": "https://docs.aws.amazon.com/amplify/latest/userguide/redirects.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0140",
+     "url": "https://aws.amazon.com/legal/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0141",
+     "url": "https://aws.amazon.com/amplify/hosting/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0142",
+     "url": "https://docs.aws.amazon.com/amplify/latest/userguide/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0143",
+     "url": "https://docs.aws.amazon.com/amplify/latest/userguide/getting-started.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0144",
+     "url": "https://aws.amazon.com/service-terms/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "axureshow_cn_html_demo",
+   "name": "AxureShow / 艾可秀",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Unknown; do not infer from .com or language.",
+   "operatorCountry": null,
+   "market": "Chinese-language prototype/demo service; operator jurisdiction not established",
+   "docsLanguages": null,
+   "docsLanguagesNote": "Simplified Chinese first-party product, upload guide and community/user agreements reviewed; no English docs verified.",
+   "freeModel": "2026 community agreement refers to ordinary free-hosted projects, but full free plan limits, retention/permanence guarantee, eligibility and paid fallback not found.",
+   "freeLimits": null,
+   "suitability": "LEAD only for non-sensitive prototypes if review/privacy terms accepted. UNSUITABLE for payment/token apps. PROHIBITED for content within its expressly barred categories, including illegal foreign-site mirrors.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": "Unknown; no live response or injection testing.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0278",
+     "url": "https://www.axureshow.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0279",
+     "url": "https://www.axureshow.com/resources/3.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0280",
+     "url": "https://www.axureshow.com/resources/27.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0281",
+     "url": "https://www.axureshow.com/resources/28.html",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "azure_static_web_apps",
+   "name": "Azure Static Web Apps Free",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://azure.microsoft.com/products/app-service/static/",
+   "operator": "Microsoft Corporation / Azure",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en",
+    "es",
+    "zh-CN"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring Free tier (official plan describes for personal projects)",
+   "freeLimits": "10 apps/subscription; 100 GB/month bandwidth shared per subscription; 250 MB per single environment; 500 MB total across environments; 15,000 files; 2 custom domains/app; 3 preview environments.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0066",
+     "url": "https://learn.microsoft.com/en-us/azure/static-web-apps/plans",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0067",
+     "url": "https://learn.microsoft.com/en-us/azure/static-web-apps/quotas",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0068",
+     "url": "https://learn.microsoft.com/en-us/azure/static-web-apps/configuration",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0069",
+     "url": "https://learn.microsoft.com/es-es/azure/static-web-apps/plans",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0070",
+     "url": "https://learn.microsoft.com/azure/static-web-apps/plans?WT.mc_id=javascript-150001-gllemos",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0071",
+     "url": "https://azure.microsoft.com/products/app-service/static/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0072",
+     "url": "https://www.microsoft.com/en-us/legal/intellectualproperty/copyright",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0073",
+     "url": "https://learn.microsoft.com/zh-cn/azure/static-web-apps/plans",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0074",
+     "url": "https://learn.microsoft.com/en-us/azure/static-web-apps/deploy.md",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0075",
+     "url": "https://learn.microsoft.com/en-us/azure/static-web-apps/cli",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "barkhosting_free_student_nonprofit",
+   "name": "Bark Hosting Free Student / Nonprofit Hosting",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://www.barkhosting.com/terms-of-free-web-hosting",
+   "operator": "Bark Hosting; homepage says AR Creative Ltd. is the parent concern.",
+   "operatorCountry": "Bangladesh, provider self-disclosure; legal status not independently verified in this pass.",
+   "market": null,
+   "docsLanguages": [
+    "bn",
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current $0 limited free plans. Student plan lasts through the stated student-ID validity; nonprofit plan has no specific end date on its terms page.",
+   "freeLimits": "Student 100 MB SSD, one email, one DB, one domain and provider-claimed unlimited bandwidth. Nonprofit 500 MB SSD, five emails, one DB, one domain, provider-claimed unlimited bandwidth. Free SSL claimed.",
+   "suitability": "Only for an eligible student/registered nonprofit and noncommercial educational/community content; 100-500 MB and domain eligibility are substantial restrictions.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. Commercial-use prohibition, unverified asset modification, no CORS/CSP or safe-browser deploy auth; not a candidate for payment/key UI.",
+   "servedAssetIntegrity": "unknown: No free-plan injection/served-asset integrity test or no-injection warranty verified. The provider homepage lists one-click apps and static/dynamic/CMS, but does not prove hosted assets are left unmodified.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0180",
+     "url": "https://www.barkhosting.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0181",
+     "url": "https://www.barkhosting.com/terms-of-free-web-hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0182",
+     "url": "https://www.barkhosting.com/free-web-hosting-for-student",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0183",
+     "url": "https://www.barkhosting.com/faqs",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "cloudflare_pages",
+   "name": "Cloudflare Pages",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://pages.cloudflare.com/",
+   "operator": "Cloudflare, Inc.",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring free plan; not a permanence guarantee",
+   "freeLimits": "500 builds/month; 1 concurrent build; 100 projects/account; 20,000 files/site; 25 MiB/file; 100 custom domains/project. Static asset requests documented free and unlimited; this is not a Functions allowance.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0001",
+     "url": "https://developers.cloudflare.com/pages/get-started/direct-upload/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0002",
+     "url": "https://developers.cloudflare.com/pages/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0003",
+     "url": "https://developers.cloudflare.com/pages/platform/limits/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0004",
+     "url": "https://developers.cloudflare.com/pages/functions/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0005",
+     "url": "https://developers.cloudflare.com/pages/configuration/headers/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0006",
+     "url": "https://developers.cloudflare.com/pages/configuration/serving-pages/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0007",
+     "url": "https://developers.cloudflare.com/pages/configuration/custom-domains/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0008",
+     "url": "https://www.cloudflare.com/our-story/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0009",
+     "url": "https://pages.cloudflare.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0010",
+     "url": "https://developers.cloudflare.com/data-localization/how-to/pages/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0011",
+     "url": "https://www.cloudflare.com/service-specific-terms/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "cloudfly_vn_student_hosting",
+   "name": "CloudFly Free Cloud Hosting (student eligibility)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://cloudfly.vn/en/hosting-mien-phi",
+   "operator": "CloudFly Joint Stock Company (CloudFly site footer lists address and tax code)",
+   "operatorCountry": "Vietnam (self-disclosed operator details in first-party footer/contact; no external registry check in this pass)",
+   "market": null,
+   "docsLanguages": [
+    "en",
+    "vi"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Recurring 0 VND plan for verified students; each individual can register once, on a 3-month cycle. Not a free-forever promise; renewal/verification after each cycle not described in enough detail.",
+   "freeLimits": "Free plan lists 300MB storage, 1 CPU, 1GB RAM, unlimited bandwidth, 0 addon domains, unlimited subdomains, unlimited MySQL and free SSL; HTML/CSS/JS use explicitly supported. One package, 3-month billing cycle. Official product page does not document file-count or static bandwidth cap beyond “unlimited” marketing. Use for academic learning/research, not commercial MirrorKit without permission.",
+   "suitability": "Conditional only for eligible student academic portfolios/docs, within 300MB and academic-use plan restrictions; keep independent backups.",
+   "paymentKeyUiNote": "Not vetted or approved. Academic-only student hosting, unverified payment/crypto UI permission and no verified deployment/security/integrity pipeline make it unsuitable pending explicit operator approval and controls.",
+   "servedAssetIntegrity": "unknown: No checked first-party source says the provider rewrites/injects free-host assets; no live response/body test was performed. Treat as unknown, not a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0165",
+     "url": "https://cloudfly.vn/en/hosting-mien-phi",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0166",
+     "url": "https://cloudfly.vn/hosting-mien-phi",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0167",
+     "url": "https://cloudfly.vn/en/dieu-khoan-su-dung",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0168",
+     "url": "https://cloudfly.vn/en/contact",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "codeberg_pages",
+   "name": "Codeberg Pages (current git-pages implementation)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://codeberg.page/",
+   "operator": "Codeberg e.V.",
+   "operatorCountry": "Germany",
+   "market": null,
+   "docsLanguages": [
+    "en",
+    "de"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "free community service for eligible use; donations optional",
+   "freeLimits": "No quota intended for valid use-cases, but Codeberg can deny unreasonable resource use. Request approval for large Git storage/CI; no Pages bandwidth/SLA quota confirmed.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0118",
+     "url": "https://docs.codeberg.org/codeberg-pages/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0119",
+     "url": "https://docs.codeberg.org/codeberg-pages/using-custom-domain/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0120",
+     "url": "https://docs.codeberg.org/getting-started/faq/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0121",
+     "url": "https://docs.codeberg.org/getting-started/what-is-codeberg/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0122",
+     "url": "https://docs.codeberg.org/improving-codeberg/donate/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0123",
+     "url": "https://codeberg.page/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0124",
+     "url": "https://join.codeberg.org/?lang=de",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0125",
+     "url": "https://docs.codeberg.org/codeberg-pages/advanced-usage/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "cosmopage_tw",
+   "name": "CosmoPage (CosmoGrid)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://cosmogrid.com.tw/page/cosmopage",
+   "operator": "昕容科技有限公司 (CosmoGrid Technology)",
+   "operatorCountry": "Taiwan",
+   "market": null,
+   "docsLanguages": [
+    "zh-Hant",
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Free plan shown at NT$0; official page does not state a free-forever duration or a free-trial end date, so duration/persistence is unknown.",
+   "freeLimits": "10MB storage; HTML/CSS/JavaScript/static assets; provider hostname [tenant].cosmopage.io; HTTPS; visible CosmoGrid branding and built-in CDP/traffic tracking enabled; no custom domain on free plan. Bandwidth, request limits, file-count limits, inactive-account rules not stated on the product page.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Do not recommend as a default for key/payment UI: free plan mandates visible provider branding and built-in CDP/traffic tracking, with asset-integrity implementation unknown; no explicit payment/crypto app approval verified.",
+   "servedAssetIntegrity": "confirmed_free_plan_branding_and_traffic_tracking: Official product page says provider branding and built-in CDP/traffic tracking are enabled by default and cannot be disabled in free plan; exact script/asset-level implementation not verified. This is not a clean no-tracking/no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0158",
+     "url": "https://cosmogrid.com.tw/page/cosmopage",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0159",
+     "url": "https://cosmogrid.com.tw/page/about-us",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0160",
+     "url": "https://serv.gcis.nat.gov.tw/pub/cmpy/reportAction.do?fileName=379100000Gsetup11503.pdf&method=report&reportClass=cmpyCityItem&subPath=11503",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0161",
+     "url": "https://cosmogrid.com.tw/page/about-us?lang=en",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "deno_deploy",
+   "name": "Deno Deploy (current console.deno.com service; not Deploy Classic)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://deno.com/deploy",
+   "operator": "Deno Land Inc.",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring Free plan, quotas reset by month; not unlimited",
+   "freeLimits": "Current plan page: 1m requests/month, 20 GiB egress, 10 active CPU hours, 150 GiB-hr memory, 10 GiB revision storage, 10 active apps, 1 concurrent build, 15 builds/hour, 5 custom domains. Deployment total max 1 GB.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0126",
+     "url": "https://deno.com/deploy/pricing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0127",
+     "url": "https://docs.deno.com/deploy/pricing_and_limits/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0128",
+     "url": "https://docs.deno.com/deploy/acceptable_use_policy/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0129",
+     "url": "https://docs.deno.com/deploy/reference/domains/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0130",
+     "url": "https://deno.com/company",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0131",
+     "url": "https://deno.com/deploy",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0132",
+     "url": "https://docs.deno.com/deploy/changelog/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0133",
+     "url": "https://docs.deno.com/deploy/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0134",
+     "url": "https://docs.deno.com/deploy/getting_started/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0135",
+     "url": "https://docs.deno.com/deploy/terms_and_conditions/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "dep_hosting_nepal",
+   "name": "DEP Hosting (Nepal-market shared/static hosting)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://dep.com.np/",
+   "operator": "DEP Hosting (DEP Hosting legal entity not resolved from checked first-party pages; site lists info@dep.com.np and identifies itself with Nepal digital ecosystem).",
+   "operatorCountry": "Nepal market/self-description; legal operator country not independently established. No region inferred from .np.",
+   "market": null,
+   "docsLanguages": [
+    "en",
+    "ne"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current free plan; provider says no planned charge but expressly says free service remains subject to sustainability, so not a permanence guarantee.",
+   "freeLimits": "5 GB disk, provider-claimed unlimited bandwidth, free SSL, free subdomains/custom domains, static hosting, FTP and file manager. Some limited CPU/RAM/I/O/hit/entry-process resource limit exists; thresholds not disclosed and reaching it can suspend for 24 hours. Exact durable file/hit quotas are not stated.",
+   "suitability": "Conditional research lead with static support, 5GB disk and Nepali support; resource thresholds and operator identity are unresolved. Keep export/repo independent.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. Legal operator/AUP, region, SSL hostname behavior, asset integrity, CSP/CORS and deployment auth remain unverified.",
+   "servedAssetIntegrity": "unknown: The company says it does not run ads/track behavior, but no live HTML/response integrity test or third-party-script audit was performed. Unknown is not green.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0188",
+     "url": "https://dep.com.np/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0189",
+     "url": "https://dep.com.np/about/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0190",
+     "url": "https://dep.com.np/add-your-custom-domain-to-your-account/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0191",
+     "url": "https://community.dep.com.np/d/23-daily-resource-limits",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0192",
+     "url": "https://community.dep.com.np/d/7-changes-to-ssl-for-free-subdomains",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0193",
+     "url": "https://app.dep.com.np/register",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0194",
+     "url": "https://community.dep.com.np/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0195",
+     "url": "https://dep.com.np/free-student-hosting/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "digitalocean_app_platform_static",
+   "name": "DigitalOcean App Platform static sites",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://docs.digitalocean.com/products/app-platform/",
+   "operator": "DigitalOcean, LLC",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring $0 static-only tier, limited to 3 apps",
+   "freeLimits": "Up to 3 apps containing only static site components; 1 GiB outbound data per app. Additional outbound transfer is billed at $0.02/GiB in current pricing docs. Free tier targets personal websites/portfolios/small projects.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0087",
+     "url": "https://docs.digitalocean.com/products/app-platform/details/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0088",
+     "url": "https://docs.digitalocean.com/products/app-platform/details/availability/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0089",
+     "url": "https://docs.digitalocean.com/products/app-platform/details/features/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0090",
+     "url": "https://docs.digitalocean.com/products/app-platform/how-to/manage-static-sites/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0091",
+     "url": "https://docs.digitalocean.com/products/app-platform/how-to/manage-deployments/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0092",
+     "url": "https://docs.digitalocean.com/products/app-platform/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0093",
+     "url": "https://docs.digitalocean.com/products/app-platform/how-to/deploy-from-github-actions/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0094",
+     "url": "https://www.digitalocean.com/legal/terms-of-service-agreement/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "dothome_kr_free_hosting",
+   "name": "Dothome / 닷홈 free web hosting",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Anysecure Co., Ltd. in Seongnam, South Korea.",
+   "operatorCountry": null,
+   "market": "South Korea",
+   "docsLanguages": null,
+   "docsLanguagesNote": "Korean first-party product, manuals and terms reviewed; no English documentation verified.",
+   "freeModel": "₩0 basic free hosting, 500 MB, 15 GB/month, provider subdomain, one FTP account. Free issue period is six months and can remain free by renewing. Domain Plus is ₩500/month; paid host upgrades exist.",
+   "freeLimits": null,
+   "suitability": "LEAD for simple nonfinancial site only, subject to HTTPS clarification. Not payment/token approved.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": "Unknown; no ad-injection guarantee or live response audit.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0266",
+     "url": "https://www.dothome.co.kr/web/free/index.php",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0267",
+     "url": "https://docs.dothome.co.kr/books/9bf31/page/41f1f",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0268",
+     "url": "https://docs.dothome.co.kr/books/9bf31/page/f7490",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0269",
+     "url": "https://www.dothome.co.kr/rules/service.php?part=dothome%2F",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0270",
+     "url": "https://docs.dothome.co.kr/books/9b70e/page/ftp-filezilla",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0271",
+     "url": "https://manual.dothome.co.kr/manual/info/96",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0272",
+     "url": "https://docs.dothome.co.kr/books/faq-nCD/page/7f100",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0273",
+     "url": "https://www.dothome.co.kr/index.php",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "endora_freehosting_cz",
+   "name": "Endora Free Hosting",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://www.endora.cz/hosting",
+   "operator": "Webglobe, s.r.o. (Endora brand)",
+   "operatorCountry": "Czechia (Prague registered office per provider Terms)",
+   "market": null,
+   "docsLanguages": [
+    "cs"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Recurring free tier; official product page says free for unlimited time while terms are followed; no permanence guarantee.",
+   "freeLimits": "1 GB disk, 1 DB, 1 FTP account, 1 hosted domain; low server performance; no email, no backups, no support, no external domain in Free; 64MB upload/post; traffic quota not numerically stated. SSL free when domain registered with provider; test exact free hostname.",
+   "suitability": "Candidate for only the documented static product and its explicit constraints; research seed, not endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected/rewritten assets, CSP/CORS, account/asset security, data handling, commercial/financial terms, privacy, rollback and safe deploy auth before considering.",
+   "servedAssetIntegrity": "documented_provider_injected_branding: Endora hosting terms explicitly require an automatically displayed provider branding/ad bar on every Free site and prohibit removing/modifying/covering it. No live response integrity test.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0241",
+     "url": "https://www.endora.cz/hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0242",
+     "url": "https://www.endora.cz/podminky-endora-hostingu",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0243",
+     "url": "https://www.endora.cz/vop",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "filebase_ipfs_sites",
+   "name": "Filebase IPFS Sites",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Filebase Inc. terms identify Boston, Massachusetts, United States. No serving region selection or country matrix verified. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "Filebase Inc. terms identify Boston, Massachusetts, United States. No serving region selection or country matrix verified. English docs.",
+   "freeModel": "Pricing/free-plan docs describe an ongoing $0 plan (not a trial): 5 GB pooled storage, 500 pinned files, 10 GB monthly IPFS egress, one site, one gateway, one IPNS name. Paid for custom domains; current plan caps should be rechecked.",
+   "freeLimits": null,
+   "suitability": "Best documented cheap/free static-site proof of concept in this scan, with a clear vendor-controlled serving layer.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0319",
+     "url": "https://filebase.com/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0320",
+     "url": "https://filebase.com/free/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0321",
+     "url": "https://filebase.com/docs/ipfs/sites/overview",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0322",
+     "url": "https://filebase.com/docs/ipfs/sites/custom-domains",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0323",
+     "url": "https://filebase.com/docs/legacy/sites/managing-sites",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0324",
+     "url": "https://filebase.com/terms-of-service/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0325",
+     "url": "https://filebase.com/docs/s3-api/presigned-urls",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0326",
+     "url": "https://filebase.com/docs/recipes/configure-cors-for-spa",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "filecoin_onchain_cloud_pin",
+   "name": "Filecoin Onchain Cloud / Filecoin Pin",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "browser-compatible candidate (unvalidated)",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Distributed provider network; user-selected region/country matrix not verified. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "Distributed provider network; user-selected region/country matrix not verified. English docs.",
+   "freeModel": "No free mainnet plan verified; testnet faucets are for non-persistent development. Published storage price $2.50/TiB/month per copy + $0.12/data set/month. Default two copies implies about $5/TiB/month + $0.12 per data set/month, before egress, on-chain operations and variable quotes.",
+   "freeLimits": null,
+   "suitability": "Strongest documented verifiable-storage candidate; more complex and costly than a free static site host.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0331",
+     "url": "https://docs.filecoin.cloud/getting-started/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0332",
+     "url": "https://docs.filecoin.cloud/developer-guides/storage/upload-pipeline/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0333",
+     "url": "https://docs.filecoin.cloud/introduction/about/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0334",
+     "url": "https://docs.filecoin.cloud/developer-guides/storage/storage-costs/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0335",
+     "url": "https://github.com/filecoin-project/filecoin-pin/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0336",
+     "url": "https://github.com/filecoin-project/filecoin-pin/blob/master/documentation/retrieval.md",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "firebase_hosting",
+   "name": "Firebase Hosting (Spark no-cost plan)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://firebase.google.com/products/hosting",
+   "operator": "Google LLC",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en",
+    "ja",
+    "pt-BR",
+    "es",
+    "fr",
+    "de",
+    "id",
+    "it",
+    "pl",
+    "vi",
+    "tr",
+    "ru",
+    "he",
+    "ar",
+    "fa",
+    "hi",
+    "bn",
+    "th",
+    "zh-CN",
+    "zh-TW",
+    "ko"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring no-cost Spark quota; not an unlimited/permanent-service promise",
+   "freeLimits": "10 GB Hosting storage. Current official sources vary on transfer wording: product/pricing page lists 360 MB/day (~10 GB/month), usage quota guide says 10 GB/month. Use the stricter 360 MB/day until reconciled. Max one file 2 GB; storage and transfer project-level.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0056",
+     "url": "https://firebase.google.com/docs/hosting/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0057",
+     "url": "https://firebase.google.com/docs/hosting/api-deploy",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0058",
+     "url": "https://firebase.google.com/pricing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0059",
+     "url": "https://firebase.google.com/docs/hosting/usage-quotas-pricing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0060",
+     "url": "https://firebase.google.com/products/hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0061",
+     "url": "https://firebase.google.com/docs/hosting/full-config",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0062",
+     "url": "https://firebase.google.com/docs/hosting/?hl=ja",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0063",
+     "url": "https://firebase.google.com/downloads/gdpr/DEC2021_Firebase_SOC3_Report.pdf",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0064",
+     "url": "https://firebase.google.com/docs/hosting/usage-quotas-pricing?hl=pt",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0065",
+     "url": "https://firebase.google.com/terms/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "freehost_in_th",
+   "name": "FreeHost.in.th (free hosting under STICBOX)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://freehost.in.th/freehost",
+   "operator": "FreeHost.in.th, stated as operated under STICBOX.com / STICBOX Dev Studio",
+   "operatorCountry": "Thailand (provider/operator self-disclosure; not independently confirmed as a registered legal entity in this pass)",
+   "market": null,
+   "docsLanguages": [
+    "th"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Provider advertises free-for-life plan; not a guarantee of permanence.",
+   "freeLimits": "Current Thai-language product page checked 2026-10-24: 500MB SSD, 10GB/month bandwidth, one domain/account, 5 email accounts, HTML5/CSS3/JS, PHP 7.4-8.3, TLS via Let’s Encrypt; automatic approval and no credit card stated. Page also lists both France/EU and Thailand/TH-PNA server locations, but does not confirm whether Free plan user can pick one. No automatic backups. Search snippets from a different earlier indexed state said 1GB/100GB; rely on the current direct page text (500MB/10GB) and re-check prior to use.",
+   "suitability": "Conditional local-market candidate for a small static art/docs page only if operator/domain eligibility, current quotas, terms, backups and injection are checked.",
+   "paymentKeyUiNote": "Not vetted or approved. Never deploy a signing/key-handling/payment UI here without explicit current provider/legal approval, verified response integrity, privacy/tracking, CORS, CSP, domain and recovery review. Country/terms ban some high-risk use categories; do not assume token UI permission.",
+   "servedAssetIntegrity": "unknown: Provider claims it does not display advertisements, but no live response/body test or third-party script/asset integrity audit was performed. Treat injection/tracking as unknown, not a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0162",
+     "url": "https://freehost.in.th/freehost",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0163",
+     "url": "https://freehost.in.th/faq.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0164",
+     "url": "https://sticbox.com/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "freehosting_lt",
+   "name": "FreeHosting.lt",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Lithuania-origin branding/contact context; legal operating entity not identified in checked sources",
+   "operatorCountry": null,
+   "market": "Lithuania / European market",
+   "docsLanguages": null,
+   "docsLanguagesNote": "English and Lithuanian first-party product/FAQ/terms pages reviewed; Polish/German availability links do not by themselves confirm full docs.",
+   "freeModel": "€0/month currently; one site, 300 MB, 25 GB traffic, free SSL, one FTP, w5.lt subdomain. Commercial activities are directed to Premium; no irrevocable permanence guarantee verified. Separate Premium 14-day trial requires payment method and auto-renews annually if not cancelled; no trial started.",
+   "freeLimits": null,
+   "suitability": "LEAD only for noncommercial personal/student static pages. NOT VETTED/NOT APPROVED for payment, crypto, P2P token or key-handling use.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": "Unknown; no no-injection guarantee or live page audit.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0255",
+     "url": "https://freehosting.lt/en",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0256",
+     "url": "https://freehosting.lt/lt",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0257",
+     "url": "https://freehosting.lt/en/faq",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0258",
+     "url": "https://freehosting.lt/en/tos",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0259",
+     "url": "https://freehosting.lt/en/aup",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "github_pages",
+   "name": "GitHub Pages",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://pages.github.com/",
+   "operator": "GitHub, Inc. (Microsoft subsidiary)",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en",
+    "es"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring included feature of GitHub Free for public repositories",
+   "freeLimits": "1 GiB published site; soft 100 GiB/month bandwidth; soft 10 builds/hour for repository-source builds; 10-minute deploy timeout. One user/org site/account and one project site/repository.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0012",
+     "url": "https://docs.github.com/en/rest/pages/pages",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0013",
+     "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0014",
+     "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0015",
+     "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0016",
+     "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0017",
+     "url": "https://docs.github.com/es/pages",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0018",
+     "url": "https://pages.github.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0019",
+     "url": "https://github.com/about/press",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0020",
+     "url": "https://docs.github.com/en/pages/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0021",
+     "url": "https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0022",
+     "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "gitlab_pages",
+   "name": "GitLab Pages (GitLab.com)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://docs.gitlab.com/user/project/pages/",
+   "operator": "GitLab, Inc.",
+   "operatorCountry": "United States (U.S. entity address in translated legal notice; company is remote-only)",
+   "market": null,
+   "docsLanguages": [
+    "en",
+    "fr",
+    "pt-BR",
+    "ja-JP"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring GitLab Free feature; $0 plan, no credit card stated on plan page",
+   "freeLimits": "400 free CI compute minutes/month on shared runners; GitLab.com Pages max site size 1 GiB; GitLab Pages request rate limits apply. No monthly Pages bandwidth allowance found in official docs.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0023",
+     "url": "https://about.gitlab.com/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0024",
+     "url": "https://docs.gitlab.com/user/project/pages/introduction/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0025",
+     "url": "https://docs.gitlab.com/user/project/pages/custom_domains_ssl_tls_certification/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0026",
+     "url": "https://docs.gitlab.com/user/gitlab_com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0027",
+     "url": "https://docs.gitlab.com/ci/pipelines/compute_minutes/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0028",
+     "url": "https://about.gitlab.com/fr-fr/mentions-legales/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0029",
+     "url": "https://docs.gitlab.com/ja-jp/user/gitlab_com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0030",
+     "url": "https://docs.gitlab.com/user/project/pages/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0031",
+     "url": "https://about.gitlab.com/fr-fr/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0032",
+     "url": "https://about.gitlab.com/pt-br/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0033",
+     "url": "https://docs.gitlab.com/api/pages/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0034",
+     "url": "https://docs.gitlab.com/api/pages_domains/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0035",
+     "url": "https://about.gitlab.com/terms/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "hostfly_brazil_24h_transient_upload",
+   "name": "HostFly",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "Brazil-facing Portuguese upload service",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0310",
+     "url": "https://hostfly.com.br/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0311",
+     "url": "https://www.hostfly.com.br/sobre",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "htmlbox_community_static_free",
+   "name": "HTMLBox Community",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://htmlbox.io/community",
+   "operator": "HTMLBox brand/operator named in first-party pages; legal entity not identified in checked About/Terms/Privacy page retrieval.",
+   "operatorCountry": "unknown",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Free Community and Free dashboard modes; free pricing is stated in official plan page, not a permanence/availability guarantee.",
+   "freeLimits": "Community static project: max 100 files and 1 MiB total, including ZIP upload cap 1 MiB; ZIP must have index.html at root. Rate limited. Community and Free pages include HTMLBox attribution. Free plan may display advertisements in its footer.",
+   "suitability": "Tiny, noncritical static pages/demos may be considered only if the 1 MiB/100-file limit, footer attribution/possible ads and unknown operator/region are acceptable; not an operational host recommendation.",
+   "paymentKeyUiNote": "Not vetted or approved. Possible footer ads, no HTTPS guarantee in checked docs, unknown operator/jurisdiction/asset integrity and unknown crypto/payment terms are blockers for key/payment UI.",
+   "servedAssetIntegrity": "possible: Official Free plan says HTMLBox footer attribution is present and advertisements may be displayed in that footer. No live served-page/asset integrity check was performed; provider claims do not establish absence of additional injection.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0231",
+     "url": "https://htmlbox.io/community",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0232",
+     "url": "https://htmlbox.io/help/community-publishing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0233",
+     "url": "https://htmlbox.io/plans",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0234",
+     "url": "https://htmlbox.io/terms",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "htmly_brazil_static_upload_free_conditional",
+   "name": "HTMLy",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "Brazil-focused Portuguese/BRL/PIX offer",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0289",
+     "url": "https://htmly.com.br/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0290",
+     "url": "https://htmly.com.br/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0291",
+     "url": "https://htmly.com.br/mcp",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0292",
+     "url": "https://htmly.com.br/terms",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0293",
+     "url": "https://htmly.com.br/acceptable-use",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "internet_computer_certified_assets",
+   "name": "Internet Computer certified static assets canister",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "DFINITY Foundation is Swiss non-profit; subnet nodes distributed and no serving-region selection/country matrix verified. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "DFINITY Foundation is Swiss non-profit; subnet nodes distributed and no serving-region selection/country matrix verified. English docs.",
+   "freeModel": "Cycle-funded: current docs indicate about $0.45/GiB/month storage and about $0.683 canister creation for a 13-node subnet. ICP Ninja playground is ephemeral (20 minutes, 5 MB, two canisters), not production hosting.",
+   "freeLimits": null,
+   "suitability": "Integrity-oriented static deployment, but production authoring/deploy requires CLI/controller/cycles rather than an exclusively client-side publisher.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0353",
+     "url": "https://docs.internetcomputer.org/guides/frontends/static-site/overview/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0354",
+     "url": "https://docs.internetcomputer.org/guides/frontends/asset-canister/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0355",
+     "url": "https://docs.internetcomputer.org/references/application-canisters/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0356",
+     "url": "https://docs.internetcomputer.org/references/cycle-costs/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0357",
+     "url": "https://docs.internetcomputer.org/developer-tools/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0358",
+     "url": "https://dfinity.org/about/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "iortyange_nigeria_brand_attractsoft_free_negative",
+   "name": "Iortyange Hosting",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "Nigeria-facing .com.ng branding",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0302",
+     "url": "https://www.iortyangecomputers.com.ng/terms-and-conditions.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0303",
+     "url": "https://webhosting.attractsoft.com/free-web-hosting.html",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "ipfs_browser_retrieval",
+   "name": "IPFS + Helia / inbrowser.link",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Global peer network; no selected serving region or country availability matrix. IPFS Foundation/public gateway operations described in linked sources; service stewardship is changing. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "Global peer network; no selected serving region or country availability matrix. IPFS Foundation/public gateway operations described in linked sources; service stewardship is changing. English docs.",
+   "freeModel": "No hosted storage plan at protocol/access-layer level. Public utilities are best-effort; production should not assume a gateway SLA.",
+   "freeLimits": null,
+   "suitability": "Strong browser-native content retrieval option; pair with separately verified storage/pinning.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0313",
+     "url": "https://docs.ipfs.tech/concepts/persistence/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0314",
+     "url": "https://docs.ipfs.tech/concepts/public-utilities/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0315",
+     "url": "https://blog.ipfs.tech/2026-08-beyond-sponsored-gateways/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0316",
+     "url": "https://blog.ipfs.tech/2026-10-new-stewards-public-network-services/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0317",
+     "url": "https://github.com/ipfs/in-web-browsers",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0318",
+     "url": "https://about.ipfs.io/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "lamanrasmi_malay",
+   "name": "LamanRasmi Free Hosting (Malaysia-facing Malay-language service; fulfillment by iFastNet)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://www.lamanrasmi.com/",
+   "operator": "LamanRasmi.com; its privacy page says free hosting is fulfilled by iFastNet Ltd.",
+   "operatorCountry": "Storefront legal country not verified from checked first-party pages; the provider says its clusters are in the United Kingdom. Do not label as a Malaysia operator.",
+   "market": null,
+   "docsLanguages": [
+    "ms",
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current recurring free plan; provider markets it as free for life, which is not a permanence guarantee.",
+   "freeLimits": "2 GB disk, 5 GB monthly bandwidth, 158 MB RAM, 50,000 daily hits, 50,000 inodes, 10 MB max FTP/PHP upload, no email; five addon domains listed. Provider FAQ also says at least 10 visits/month after initial month or the account may be suspended.",
+   "suitability": "Conditional manual-host research lead only: low monthly bandwidth, resource/suspension and SSL-hostname caveats; keep independent copy.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. Unknown served-asset integrity, manual/uncertain HTTPS behavior, no API/CSP/CORS verification, no explicit financial-use permission.",
+   "servedAssetIntegrity": "unknown: FAQ claims zero ads/hidden scripts, but no static response/injection test was performed; underlying fulfillment is by iFastNet. Vendor claim is not independent verification.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0169",
+     "url": "https://www.lamanrasmi.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0170",
+     "url": "https://www.lamanrasmi.com/web-hosting-plan/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0171",
+     "url": "https://www.lamanrasmi.com/faqs-contact/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0172",
+     "url": "https://www.lamanrasmi.com/tos/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0173",
+     "url": "https://www.lamanrasmi.com/privacy-policy/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0174",
+     "url": "https://hub.lamanrasmi.com/tutorial/terbaru-cara-setup-ssl-percuma-90-hari-untuk-subdomain-free-hosting-anda/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "lighthouse",
+   "name": "Lighthouse Storage",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "No precise legal operator country or region selection verified from cited terms. Distributed storage providers may be global. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "No precise legal operator country or region selection verified from cited terms. Distributed storage providers may be global. English docs.",
+   "freeModel": "Homepage advertises 5 GB free IPFS hot storage with Filecoin backup and paid plans (e.g., $12/500 GB and $49/2.5 TB as listed at check); exact retention and quota eligibility should be rechecked. Gateway docs restrict gateway.lighthouse.storage to premium users.",
+   "freeLimits": null,
+   "suitability": "Potential file pin/backup service, not a verified static website/domain product.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0348",
+     "url": "https://lighthouse.storage/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0349",
+     "url": "https://docs.lighthouse.storage/quick-start",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0350",
+     "url": "https://lighthouse.storage/faq",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0351",
+     "url": "https://docs.lighthouse.storage/ipfs-walrus/how-to/upload-data/file",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0352",
+     "url": "https://lighthouse.storage/terms",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "livops_uz_static",
+   "name": "Livops Static Sites (Uzbekistan)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://livops.uz/",
+   "operator": "Livops (official pages use brand only; no legal entity/address identified in documents opened)",
+   "operatorCountry": "Uzbekistan (provider claims platform/server operation in Uzbekistan; legal entity country not independently verified)",
+   "market": null,
+   "docsLanguages": [
+    "uz-Latn",
+    "ru",
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Recurring no-cost tier for static sites. Public Offer dated 2026-09-25 says static sites are free without a trial clock; official homepage calls up to 30 static sites free. No permanence guarantee.",
+   "freeLimits": "Official homepage currently shows up to 30 static sites; 40 builds/month, up to 30/day, 2 concurrent builds, 3 team seats, 100 form submissions/month; no explicit per-site static storage/bandwidth figure found. Static host may build from folder/ZIP or Git. Limits can change.",
+   "suitability": "Promising local free static deployment for public art/docs with repo/ZIP workflow, rollback, custom domain and HTTPS, provided missing bandwidth/storage/header/CORS/SPA behavior is acceptable. Keep local source and an independent mirror.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. Mining is explicitly banned but transaction/payment UI is not explicitly addressed. Customer asset integrity and CSP/CORS are unknown; paid-compute terms and policy should be confirmed before a financial product. Never store secrets in static code.",
+   "servedAssetIntegrity": "unknown: No customer-site live integrity check or explicit no-injection warranty found. Provider’s privacy policy says Yandex Metrica/Webvisor run only on its public product pages and says no analytics in customer dashboard; this does not establish whether scripts are ever injected into hosted sites.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0206",
+     "url": "https://livops.uz/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0207",
+     "url": "https://livops.uz/oferta",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0208",
+     "url": "https://livops.uz/maxfiylik",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "momo_tanzania_student_offer_price_conflict",
+   "name": "Momo Cloud",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "Tanzania",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0305",
+     "url": "https://momo.tz/students",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0306",
+     "url": "https://momo.tz/cloud",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0307",
+     "url": "https://www.cloud.momo.tz/wordpress-hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0308",
+     "url": "https://www.cloud.momo.tz/knowledge-base/upload-your-website-cpanel-file-manager-ftp",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "neocities",
+   "name": "Neocities",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://neocities.org/",
+   "operator": "Neocities (legal name in terms; country not established by checked official source)",
+   "operatorCountry": "unknown/not verified",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring free plan supported by community, paid supporter option exists; not a permanence guarantee",
+   "freeLimits": "Free: 1 GB storage, 200 GB bandwidth per supporter page; no ads; global Anycast CDN; free subdomain and SSL. File-type restrictions differ by tier; exact free allowlist not exhaustively checked.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0113",
+     "url": "https://neocities.org/cli",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0114",
+     "url": "https://neocities.org/api",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0115",
+     "url": "https://neocities.org/supporter",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0116",
+     "url": "https://neocities.org/terms",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0117",
+     "url": "https://neocities.org/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "netlify",
+   "name": "Netlify",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://www.netlify.com/",
+   "operator": "Netlify, Inc.",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring free plan, $0/month forever as current plan states; hard monthly credit ceiling",
+   "freeLimits": "300 credits/month. Production deploy=15 credits; 1 GB web bandwidth=20 credits; 10,000 web requests=2 credits. Credit consumption applies across account features.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0036",
+     "url": "https://docs.netlify.com/deploy/create-deploys/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0037",
+     "url": "https://docs.netlify.com/api-and-cli-guides/api-guides/get-started-with-api/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0038",
+     "url": "https://www.netlify.com/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0039",
+     "url": "https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/credit-based-pricing-plans/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0040",
+     "url": "https://docs.netlify.com/manage/routing/headers/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0041",
+     "url": "https://docs.netlify.com/manage/routing/redirects/overview/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0042",
+     "url": "https://www.netlify.com/legal/terms-of-use/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0043",
+     "url": "https://www.netlify.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0044",
+     "url": "https://docs.netlify.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0045",
+     "url": "https://docs.netlify.com/domains-https/custom-domains/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "octenium_algeria_startup_1yr_free_upload_unknown",
+   "name": "Octenium",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "Algeria",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0299",
+     "url": "https://octenium.com/en/startups",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0300",
+     "url": "https://www.forumdz.com/profile/29060-tlemceni13/content/page/16/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0301",
+     "url": "https://octenium.com/en/hebergement-web",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "onebit_deploy_nigeria",
+   "name": "OneBit Deploy (Free plan)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://deploy.onebit.ng/",
+   "operator": "Onebit Technology Solutions Limited (operator self-identification; RC1919657 is provider-claimed)",
+   "operatorCountry": "Nigeria (company self-identifies in Abuja; markets service across Nigeria and West Africa)",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current free tier, explicitly “side projects and demos”; not marketed as free forever or for commercial production. Docs say free apps sleep after 15 minutes idle. No card needed to start per official product page; permanence/continuity not guaranteed.",
+   "freeLimits": "Free plan: 5 apps, 1 GB memory, 5 GB storage, shared CPU, 1 seat, one replica/app; free apps sleep after 15 minutes idle (docs say all Free apps; applicability to static site serving not clarified). Static sites can be deployed from GitHub or ZIP. No static-specific transfer/build quota was found.",
+   "suitability": "Conditional free candidate for Nigeria-focused static demos/art/docs requiring HTTPS and easy ZIP or GitHub deploy; free tier is limited to five apps/5GB storage, 15-minute idle sleep is documented for free apps, no managed backups, and data centres are in Europe. Keep an independent source copy.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. The Terms/AUP could not be read (official link returned Cache miss); Free is for side projects/demos; served-asset integrity, headers/CSP/CORS and explicit finance/UI policy unknown. Never ship secrets in static client code.",
+   "servedAssetIntegrity": "unknown: No asset rewrite/ad insertion statement or live response integrity test was found in sources checked. Unknown is not an ad-free guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0209",
+     "url": "https://deploy.onebit.ng/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0210",
+     "url": "https://docs.onebit.ng/docs",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0211",
+     "url": "https://docs.onebit.ng/docs/deploying",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0212",
+     "url": "https://docs.onebit.ng/docs/concepts/plans-and-quotas",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0213",
+     "url": "https://docs.onebit.ng/docs/deploying/github",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0214",
+     "url": "https://docs.onebit.ng/docs/deploying/custom-domains-ssl",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0215",
+     "url": "https://deploy.onebit.ng/legal/terms",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "persianmizban_free_iran",
+   "name": "Persian Mizban Free Hosting (Iran)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://www.persianmizban.com/web-hosting/free",
+   "operator": "Mizban Data Fidar (Persian Mizban); the provider lists Iranian national identifier 14009145337 and head office in Hashtgerd, Alborz.",
+   "operatorCountry": "Iran (first-party company/office disclosures; corporate registry not independently queried).",
+   "market": null,
+   "docsLanguages": [
+    "fa"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Provider advertises a no-expiry/free-forever tier; this remains a provider claim, not a guarantee.",
+   "freeLimits": "1 GB NVMe, 100 MB RAM and one CPU core; provider claims unlimited traffic; one site only; no automatic backup; no free domain; only PHP active (no Python/Node).",
+   "suitability": "Conditional candidate for small non-revenue HTML/CSS/JS projects with a separate domain, local backup, and region/legal constraints understood.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. No explicit financial UI permission; free plan warns against revenue-bearing site; no served-asset verification, CSP/CORS or browser deployment authentication.",
+   "servedAssetIntegrity": "unknown: Provider claims it adds no banner or script, but no live response or asset-integrity test was performed. Claim is not independent verification.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0196",
+     "url": "https://www.persianmizban.com/web-hosting/free",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0197",
+     "url": "https://www.persianmizban.com/terms",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0198",
+     "url": "https://www.persianmizban.com/about-us/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0199",
+     "url": "https://www.persianmizban.com/privacy-policy",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "pinata",
+   "name": "Pinata",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Pinata Inc. terms identify Omaha, Nebraska, United States. Serving region/country matrix not verified. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "Pinata Inc. terms identify Omaha, Nebraska, United States. Serving region/country matrix not verified. English docs.",
+   "freeModel": "Pricing page currently lists $0: 1 GB storage, 500 files, 10 GB bandwidth, 10,000 requests, one gateway; paid tiers available. Recheck eligibility/limits.",
+   "freeLimits": null,
+   "suitability": "Good managed pinning option for modest static assets; no static-site deploy/SPA product verified.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0313",
+     "url": "https://docs.ipfs.tech/concepts/persistence/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0327",
+     "url": "https://pinata.cloud/pricing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0328",
+     "url": "https://pinata.cloud/blog/how-to-upload-to-ipfs-from-the-frontend-with-signed-jwts/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0329",
+     "url": "https://knowledge.pinata.cloud/en/articles/5506024-what-does-unpinning-a-file-mean",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0330",
+     "url": "https://pinata.cloud/terms",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "render_static_sites",
+   "name": "Render Static Sites (Hobby workspace)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://render.com/docs/static-sites",
+   "operator": "Render Services, Inc.",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring free static-site deployment on Hobby workspace",
+   "freeLimits": "Hobby workspace includes 5 GB/month outbound bandwidth shared across services and 500 build pipeline minutes; 2 custom domains/workspace listed on new workspace plan. Static sites do not sleep, but all site egress counts.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0076",
+     "url": "https://render.com/docs/static-sites",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0077",
+     "url": "https://render.com/docs/free",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0078",
+     "url": "https://render.com/docs/outbound-bandwidth",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0079",
+     "url": "https://render.com/docs/build-pipeline",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0080",
+     "url": "https://render.com/docs/new-workspace-plans",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0081",
+     "url": "https://render.com/docs/static-site-headers",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0082",
+     "url": "https://render.com/docs/redirects-rewrites",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0083",
+     "url": "https://render.com/terms",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0084",
+     "url": "https://render.com/acceptable-use",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0085",
+     "url": "https://render.com/docs/deploys",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0086",
+     "url": "https://render.com/docs/rollbacks",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "saytuz_free_uzbekistan",
+   "name": "Sayt.uz Free Hosting",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://sayt.uz/bepul-hosting",
+   "operator": "Sayt.uz; local business directories identify it as SAYT INFO LLC (not independently registry-verified)",
+   "operatorCountry": "Uzbekistan (provider self-description and Tashkent contact; directory corroboration is third-party)",
+   "market": null,
+   "docsLanguages": [
+    "uz-Latn",
+    "uz-Cyrl",
+    "ru",
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current recurring no-cost tier; official page says no trial period/card and that it stays free while within plan limits. This is not a guarantee of permanence.",
+   "freeLimits": "500 MB SSD; one domain (own .uz/international or provider subdomain); 10 GB monthly traffic (Tas-IX traffic described as not counted, but free-plan applicability of that condition was not separately clarified); one MySQL database up to 100 MB; free page lists PHP 7.4 or 8.0; free page says >100 concurrent visitors may slow. Manual backup only. Exceeding limits may cause slowdown or temporary 503.",
+   "suitability": "Conditional for very small static HTML/JS experiments with 10GB/month and 500MB cap, external local backups and manual-only deployment. Check currently applicable ToS/AUP and test JS/deep paths/service workers before reliance.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. The ToS/AUP and explicit financial-app permissions were not verified; served-asset integrity, headers/CSP, CORS, SPA/PWA support and backups are unknown. Do not put secrets in hosted files or embed panel credentials.",
+   "servedAssetIntegrity": "unknown: Official free-plan page claims no advertising appears on the user’s website, but no live asset/response integrity test or independent rewrite audit was performed. Operator marketing pages load Yandex Metrica; do not infer that it is inserted into hosted user content. Treat customer-site asset modification as unknown.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0200",
+     "url": "https://sayt.uz/bepul-hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0201",
+     "url": "https://sayt.uz/about",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0202",
+     "url": "https://sayt.uz/kontakt",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0203",
+     "url": "https://sayt.uz/hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0204",
+     "url": "https://www.yellowpages.uz/kompaniya/55459",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0205",
+     "url": "https://sayt.uz/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "shin_free_server_japan",
+   "name": "Shin Free Server (シンフリーサーバー; current product, formerly XFREE-related free hosting)",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Japan; XServer Inc. offices listed in Osaka/Tokyo.",
+   "operatorCountry": null,
+   "market": "Japan",
+   "docsLanguages": null,
+   "docsLanguagesNote": "Japanese first-party product, manuals, FAQ and terms reviewed; no English technical docs verified.",
+   "freeModel": "Current free plan lists 10 GB SSD, no web-page ads, up to 10 custom domains and 50 subdomains, free SSL. Paid Shin Free Server Plus is ¥495/month. Free tier currently offered; permanence guarantee not verified. Free plan lists no support.",
+   "freeLimits": null,
+   "suitability": "LEAD for lawful, nonfinancial personal/demo sites. NOT VETTED/NOT APPROVED for payment/token/key use.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": "Plan says no ads; provider claim only, no live asset integrity test.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0260",
+     "url": "https://www.xfree.ne.jp/functions/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0261",
+     "url": "https://www.xfree.ne.jp/support/faq/ssl_spec.php",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0262",
+     "url": "https://www.xfree.ne.jp/manual/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0263",
+     "url": "https://www.xfree.ne.jp/company.php",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0264",
+     "url": "https://www.xfree.ne.jp/rule/rule.php",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0265",
+     "url": "https://www.xfree.ne.jp/support/faq/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "siteperto_brazil_static_free",
+   "name": "SitePerto Free (Brazil)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://siteperto.com/",
+   "operator": "Store Experts Soluções Digitais LTDA; CNPJ 54.208.354/0001-55, Indaial, Santa Catarina (self-disclosed in official terms; no independent registry lookup in this pass).",
+   "operatorCountry": "Brazil (official terms identify Brazilian legal entity/address and Brazilian law).",
+   "market": null,
+   "docsLanguages": [
+    "pt-BR"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current official Partner Free tier is R$0 and includes one guaranteed simultaneous hosted site, not a permanence or uptime guarantee; no card or paid auto-renewal for Free.",
+   "freeLimits": "Free includes one hosted site and 100 MB shared account storage. ZIP import is limited to 100 MB compressed, 100 MB extracted and 600 files; 20 sites may be in development at once, but hosted Free sites are one unless additional individual slots are shown in account. Up to 3 themes/site; no unlimited service claim. Terms state active Free hosting is not subject to draft inactivity auto-expiry; no promise of service permanence or uninterrupted availability.",
+   "suitability": "Conditional candidate for one public, non-sensitive static art/docs site if limits and intended use fit; Brazil-based Portuguese service, manually published through dashboard, custom domain/HTTPS supported and commercial use expressly allowed. Keep external source/export. The terms prohibit mass file repositories/file mirrors, so the MirrorKit multiple-mirror use must be checked with the provider before deployment; unknown asset integrity and limited rollback remain.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. No explicit financial/token UI permission or asset-integrity/no-injection guarantee; terms bar fraud/financial scams and ambiguous file mirroring, CSP/SPA/CORS are unknown, and beta MCP key must never be put in browser code. Provider terms say commercial use is allowed generally but do not approve regulated financial activities.",
+   "servedAssetIntegrity": "unknown: Terms say optional form/click-measurement scripts require explicit inclusion/configuration by the site owner; the platform marketing site uses analytics, but this does not prove analytics are injected into hosted customer assets. Cloudflare protection is documented. No live response/integrity test or explicit no-injection warranty was performed; treat third-party asset modification as unknown.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0220",
+     "url": "https://siteperto.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0221",
+     "url": "https://siteperto.com/guias/hospedar-site-ia",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0222",
+     "url": "https://siteperto.com/guias/publicar-site-localhost",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0223",
+     "url": "https://siteperto.com/termos",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0224",
+     "url": "https://siteperto.com/privacidade",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0225",
+     "url": "https://siteperto.com/sobre",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "smarthostbd_free_banner",
+   "name": "SmartHostBD Free Hosting (required provider banner)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://smarthostbd.com/Free-Hosting",
+   "operator": "Smart Host BD / SmartHostBD.com; formal legal entity is not stated in checked pages.",
+   "operatorCountry": "Bangladesh service/market evidenced by BDT prices and Bangla/English policy pages; legal company country/registration not verified.",
+   "market": null,
+   "docsLanguages": [
+    "bn",
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Free/lifetime package claimed on plan table, but value is conditional on provider banner ad and paid custom domain. This is not an unrestricted/free-for-everyone static platform.",
+   "freeLimits": "Basic free plan lists 100 MB storage, 2 GB bandwidth, one required banner; next tiers 250 MB/5GB/two banners and 500MB/10GB/three banners. Exact SSL assignment to the free plans is not clear in the page extraction; do not assume HTTPS.",
+   "suitability": "Possible only for non-sensitive, non-financial content if the mandatory banner, custom-domain cost, and uncertain HTTPS are acceptable.",
+   "paymentKeyUiNote": "NOT SUITABLE BY DEFAULT. Required provider ad/tracking, ambiguous HTTPS, explicit restrictions on investment/dollar-purchase trading sites and unknown served-asset integrity.",
+   "servedAssetIntegrity": "provider_banner_embed_required: The host does not explicitly document automatic HTML rewriting; it requires the website owner to add banner/tracking image code and says it will monitor compliance. No response integrity test was done. This required third-party ad is unsuitable for key/payment UI by default.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0184",
+     "url": "https://smarthostbd.com/Free-Hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0185",
+     "url": "https://smarthostbd.com/TOS",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0186",
+     "url": "https://smarthostbd.com/Cheap-Shared-Hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0187",
+     "url": "https://smarthostbd.com/Contact-Us",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "sourcecraft_sites_ru",
+   "name": "SourceCraft Sites (Yandex)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://sourcecraft.site/",
+   "operator": "Yandex Cloud LLC / ООО «Яндекс.Облако» per official SourceCraft Sites page footer; Yandex official legal terms also apply",
+   "operatorCountry": "Russia (operator legal country from Yandex official privacy/terms; site does not identify an independent data-center country for Sites)",
+   "market": null,
+   "docsLanguages": [
+    "ru"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current SourceCraft Sites page says static hosting is completely free for all users under fair-use constraints. However, generic SourceCraft Terms state “Service use is paid,” so plan-specific applicability/price for Sites must be reconciled before relying on a $0 promise; not a permanence guarantee.",
+   "freeLimits": "Landing page says no site count or traffic limits within reasonable fair use; no byte/build cap stated. Product terms say Yandex can change tariffs, and generic SourceCraft service terms say paid; resolve exact Sites-specific price and limits before reliance.",
+   "suitability": "Conditional for public portfolio/docs/static demos that do not need Service Workers, custom domains, framing, private source, or unverified limits. Keep independent Git copy. Verify Sites-specific pricing/ToS due generic paid-terms contradiction.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. Public source required; service workers and frames are explicitly blocked, CSP is fixed, commercial/financial permission and asset integrity unknown, and free-vs-paid terms conflict. Not suitable for PWA/offline or key/payment UI without independent clearance.",
+   "servedAssetIntegrity": "unknown: No live served response/integrity test or explicit no-injection warranty found. Fixed CSP restriction is documented; this does not prove no other asset modification.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0216",
+     "url": "https://sourcecraft.site/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0217",
+     "url": "https://sourcecraft.dev/portal/docs/ru/sourcecraft/tutorials/sites",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0218",
+     "url": "https://yandex.ru/legal/cloud_terms_sourcecraft/ru/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0219",
+     "url": "https://yandex.ru/legal/confidential/ru/?lang=ru",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "storacha_provisional",
+   "name": "Storacha (provisional; hosted status unresolved)",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Current operator, jurisdiction, storage regions and country availability not verified. English historical/current repo docs observed.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "Current operator, jurisdiction, storage regions and country availability not verified. English historical/current repo docs observed.",
+   "freeModel": "Current plan, price, quotas, and payment terms not verified from accessible current first-party docs. Do not reuse historic free quota claims.",
+   "freeLimits": null,
+   "suitability": "Potential browser-friendly option if service endpoints are confirmed; excluded from shortlist pending an official status/endpoint clarification.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0365",
+     "url": "https://storacha.network",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0366",
+     "url": "https://docs.storacha.network",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0367",
+     "url": "https://console.storacha.network",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0368",
+     "url": "https://github.com/storacha/upload-service",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0369",
+     "url": "https://github.com/storacha",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0370",
+     "url": "https://docs.filecoin.io/reference/general",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "surge",
+   "name": "Surge",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://surge.sh/",
+   "operator": "Chloi, Inc.",
+   "operatorCountry": "Canada (British Columbia), per provider Terms",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring free tier; no trial clock/project cap stated on plans page",
+   "freeLimits": "Free: unlimited projects/publishes, custom domains, managed SSL, CDN, revisions/collaborators. No free bandwidth/filesize figure found; fair-use terms allow shutdown for unreasonable burden.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0103",
+     "url": "https://surge.sh/pricing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0104",
+     "url": "https://surge.sh/docs/platform/custom-domains",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0105",
+     "url": "https://surge.sh/docs/guides/spa",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0106",
+     "url": "https://surge.sh/help/enabling-cross-origin-resource-sharing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0107",
+     "url": "https://surge.sh/terms",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0108",
+     "url": "https://surge.sh/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0109",
+     "url": "https://surge.sh/help/upgrading-to-surge-plus",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0110",
+     "url": "https://surge.sh/docs/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0111",
+     "url": "https://surge.sh/cli",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0112",
+     "url": "https://surge.sh/api",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "swarm_bee",
+   "name": "Swarm / Bee",
+   "recordClass": "protocol_or_decentralized_adapter_option",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "research option; product layer/status/browser fitness are not equivalent to a qualified static host",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "No single operator/country; no selectable region or country availability matrix verified. English docs.",
+   "operatorCountry": null,
+   "market": null,
+   "docsLanguages": null,
+   "docsLanguagesNote": "No single operator/country; no selectable region or country availability matrix verified. English docs.",
+   "freeModel": "No free plan verified. Upload requires postage batch; batch purchase uses xDAI gas and xBZZ. Stamp lifetime is dynamic based on time, storage and price; no fixed total cost verified.",
+   "freeLimits": null,
+   "suitability": "Poor fit for exclusive browser-only operation unless the application explicitly accepts user-installed node or trusted hosted Bee boundary.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0359",
+     "url": "https://docs.ethswarm.org/docs/develop/upload-and-download/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0360",
+     "url": "https://docs.ethswarm.org/docs/develop/host-your-website/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0361",
+     "url": "https://github.com/ethersphere/bee-js",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0362",
+     "url": "https://docs.ethswarm.org/docs/bee/working-with-bee/bee-api/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0363",
+     "url": "https://docs.ethswarm.org/docs/develop/tools-and-features/buy-a-stamp-batch/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0364",
+     "url": "https://docs.ethswarm.org/docs/develop/tools-and-features/postage-stamps/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "tencent_edgeone_makers",
+   "name": "Tencent EdgeOne Makers (international/global Pages product; verify product match by account region)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://pages.edgeone.ai/",
+   "operator": "Tencent Cloud contracting entity depends on user registration location",
+   "operatorCountry": "Conditional: Netherlands (EEA/UK/CH), United States (North America), South Korea (South Korea), Singapore (rest of world), PRC-specific entity for PRC region",
+   "market": null,
+   "docsLanguages": [
+    "en",
+    "zh-CN"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring long-term free plan according to current Makers pages; terms/quotas may change",
+   "freeLimits": "Free edition currently 40 projects, 500 builds/month, 20,000 files/project, max 25 MB/file, 5 GB total project storage, 200 custom domains, free SSL. Makers quotas can change after commercialization. No static egress allowance confidently attributed to this exact product in this pass.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0095",
+     "url": "https://pages.edgeone.ai/pricing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0096",
+     "url": "https://edgeone.ai/document/211893332490612736",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0097",
+     "url": "https://edgeone.ai/document/160427672877883392",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0098",
+     "url": "https://intl.cloud.tencent.com/document/product/1145/70405?lang=en",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0099",
+     "url": "https://www-sg.tencentcloud.com/pt/document/product/301/9248",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0100",
+     "url": "https://cloud.tencent.cn/document/product/1552/132789",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0101",
+     "url": "https://pages.edgeone.ai/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0102",
+     "url": "https://indonesia.tencentcloud.com/document/product/1145/69440",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0282",
+     "url": "https://pages.edgeone.ai/document/faqs",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0283",
+     "url": "https://pages.edgeone.ai/use-cases/free-html-hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0284",
+     "url": "https://pages.edgeone.ai/document/limits-and-quotas",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0285",
+     "url": "https://pages.edgeone.ai/document/importing-a-git-repository",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0286",
+     "url": "https://pages.edgeone.ai/resources/how-to-enable-cors",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0287",
+     "url": "https://cloud.tencent.com/document/product/301/55716",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0288",
+     "url": "https://intl.cloud.tencent.com/pt/document/product/301/9245",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "tiiny_host_static_free",
+   "name": "Tiiny Host (global static hosting; Spanish/Mexico localized product page)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://tiiny.host/",
+   "operator": "Tiiny Labs Limited (company number 12977077), registered in England and Wales; official Tiiny Host terms were last revised 2022-04-11, so recheck legal docs before reliance.",
+   "operatorCountry": "United Kingdom (official terms identify England/Wales company and UK address; this is not the hosting data-center location).",
+   "market": null,
+   "docsLanguages": [
+    "es-MX",
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current recurring $0 Free plan with no expiry date while the user logs into account at least once every 3 months; explicit small banner and quotas mean this is not a clean/no-ad or permanent guarantee.",
+   "freeLimits": "One published site, up to 3 MB per site, 5,000 visits/month and 5 GB transfer/month; URL under tiiny.site with SSL. Small Tiiny Host banner appears on free page. Account must be accessed at least every three months to keep the site online per localized page.",
+   "suitability": "Suitable only conditionally for small, non-sensitive public static demos/docs: 3 MB, 5 GB/5,000 visits monthly, one site, recurring account login and Tiiny banner. Free URL uses tiiny.site; custom domain and API require paid tier. Keep external copy.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. Free plan includes provider banner, no current financial-use approval or asset-integrity guarantee, and API requires privileged paid-account key; no CSP/CORS/service-worker compatibility verified.",
+   "servedAssetIntegrity": "confirmed_provider_ads_some_tiers: The Free plan page explicitly states a small Tiiny Host banner is shown on a hosted page and removed on paid plan. Exact injection mechanism, other third-party scripts and response rewriting were not independently tested; because a provider advertisement is served, treat free asset presentation as altered/unsafe for key-critical UI.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0226",
+     "url": "https://tiiny.host/es-mx/hosting-gratis/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0227",
+     "url": "https://api-docs.tiiny.host/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0228",
+     "url": "https://tiiny.host/termsofservice.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0229",
+     "url": "https://tiiny.host/privacypolicy.html",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0230",
+     "url": "https://tiiny.host/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "tuke_university_webhosting",
+   "name": "TUKE University Webhosting",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://wiki.cloud.tuke.sk/webhosting/",
+   "operator": "Technical University of Košice (TUKE) cloud/infrastructure team",
+   "operatorCountry": "Slovakia (public university at Košice per official university page)",
+   "market": null,
+   "docsLanguages": [
+    "sk",
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Restricted institutional free service, no charge for TUKE students and employees; not general public free hosting.",
+   "freeLimits": "No storage, file count, bandwidth, domain or concurrency quota published in checked docs. Documents FTP/SFTP, HTTPS, Git deploy, daily backups and HTML/CSS/JS.",
+   "suitability": "Candidate for only the documented static product and its explicit constraints; research seed, not endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected/rewritten assets, CSP/CORS, account/asset security, data handling, commercial/financial terms, privacy, rollback and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: Provider/institutional page describes firewall/account isolation but does not say whether site files are modified or third-party scripts injected. No live asset test.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0244",
+     "url": "https://wiki.cloud.tuke.sk/webhosting/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0245",
+     "url": "https://wiki.cloud.tuke.sk/en/webhosting/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0246",
+     "url": "https://www.tuke.sk/en/basic-information",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "uk_static_host_free",
+   "name": "Static Site Hosting UK (Static Host)",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://www.statichost.uk/",
+   "operator": "be braver Ltd, trading as Static Host UK",
+   "operatorCountry": "United Kingdom (England and Wales; company registered there per Terms)",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Recurring free static-hosting tier; current Terms state it remains free with no time limit and no card; not a permanence guarantee. Homepage presents service in beta; future feature changes possible.",
+   "freeLimits": "No published static storage, transfer, file-count, site-count or build quotas found in checked pages. AUP says unusually high traffic/storage may lead to discussion of a paid arrangement; build containers have CPU/memory/time limits.",
+   "suitability": "Candidate for only the documented static product and its explicit constraints; research seed, not endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected/rewritten assets, CSP/CORS, account/asset security, data handling, commercial/financial terms, privacy, rollback and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: About page says zero third-party trackers/scripts are loaded on customer sites (provider disclosure); no live served-asset or integrity test was performed. Treat as unknown until independently verified.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0235",
+     "url": "https://www.statichost.uk/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0236",
+     "url": "https://www.statichost.uk/legal/terms/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0237",
+     "url": "https://www.statichost.uk/legal/aup/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0238",
+     "url": "https://www.statichost.uk/about/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0239",
+     "url": "https://www.statichost.uk/features/git-deploy/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0240",
+     "url": "https://www.statichost.uk/features/custom-domains/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "unlimitedpk_free_charity",
+   "name": "Unlimited.pk Free Charity Hosting",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://unlimited.pk/charity-hosting",
+   "operator": "Unlimited.pk (self-disclosed legal business name Munir Trader; site states affiliation with HAW Company since May 2021)",
+   "operatorCountry": "Pakistan (first-party self-description; legal registration not independently verified in this pass).",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current $0/month restricted charitable plan; duration/term not explicitly stated on plan page.",
+   "freeLimits": "One website, 1 GB SSD, provider claims unlimited bandwidth, three email accounts, free SSL and cPanel. No free domain included.",
+   "suitability": "Research lead only for an eligible registered charitable or community organization; otherwise ineligible.",
+   "paymentKeyUiNote": "NOT VETTED / NOT APPROVED. Community/non-revenue eligibility; no explicit token/payment UI permission; asset integrity/CSP/CORS/deploy auth unknown.",
+   "servedAssetIntegrity": "unknown: No ad-free/asset integrity guarantee or response test verified for this specific plan; unknown, not green.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0175",
+     "url": "https://unlimited.pk/charity-hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0176",
+     "url": "https://unlimited.pk/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0177",
+     "url": "https://unlimited.pk/faq",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0178",
+     "url": "https://unlimited.pk/hosting-status",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0179",
+     "url": "https://unlimited.pk/contact",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "upma_cn_static_lead",
+   "name": "Upma / 上码",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": "Unknown; Chinese-language site/domain does not establish legal operator country.",
+   "operatorCountry": null,
+   "market": "Chinese-language product; HK/US/EU edge markets claimed",
+   "docsLanguages": null,
+   "docsLanguagesNote": "Simplified Chinese first-party product/pricing/docs reviewed; no verified English/localized technical documentation.",
+   "freeModel": "Pricing page says ¥0 Free, 2 projects, 1 GB/month, 100 MB total, 10 MB/file, 5 Mbps, project badge; Pro is ¥19.9/month. Home says permanently free/no card but no irrevocable guarantee or service terms found. Custom domain conflicts: homepage implies available for all, pricing says free requires paid add-on.",
+   "freeLimits": null,
+   "suitability": "LEAD for non-sensitive demos only; NOT VETTED/NOT APPROVED for financial, token, payment or key-handling UI.",
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": "Unknown; no live page or script-injection audit. Analytics/features and free scope statements are inconsistent.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0274",
+     "url": "https://www.upma.cn/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0275",
+     "url": "https://www.upma.cn/pricing",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0276",
+     "url": "https://www.upma.cn/docs",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0277",
+     "url": "https://www.upma.cn/deploy/deploy-html",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "vercel_hobby",
+   "name": "Vercel Hobby",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "documented API but browser unverified",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://vercel.com/",
+   "operator": "Vercel Inc.",
+   "operatorCountry": "United States",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "recurring free Hobby plan; non-commercial personal use only",
+   "freeLimits": "100 GB fast transfer; 1m edge requests; 200 projects; 100 deployments/day; 100 MB static file upload; 50 domains/project (check current limits page).",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: No live page/response integrity or script-injection audit was performed in this research pass. Unless provider-specific first-party terms/docs here explicitly document an outcome, treat third-party script insertion/rewrites as unknown, not as a no-injection guarantee.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0046",
+     "url": "https://vercel.com/docs/deployments/overview",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0047",
+     "url": "https://vercel.com/docs/rest-api",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0048",
+     "url": "https://vercel.com/docs/plans/hobby",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0049",
+     "url": "https://vercel.com/docs/limits",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0050",
+     "url": "https://vercel.com/docs/limits/fair-use-guidelines",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0051",
+     "url": "https://vercel.com/docs/regions",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0052",
+     "url": "https://vercel.com/legal/terms",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0053",
+     "url": "https://vercel.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0054",
+     "url": "https://vercel.com/docs/routing/rewrites",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0055",
+     "url": "https://vercel.com/docs/headers",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "voroa_india_static",
+   "name": "Voroa Static Sites",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://getvoroa.com/static-sites/",
+   "operator": "Web Tech Digital Work (sole proprietorship), trading as Voroa",
+   "operatorCountry": "India",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Free forever per pricing page, subject to limits and ToS; no credit card required.",
+   "freeLimits": "Free workspace ₹0/month: up to 15 services, 5GB bandwidth total, 500 build minutes/month, 1 team member, 2 custom domains; static asset hosting itself requires no compute size and serves committed files without a build. The free-service bandwidth row states free services stop at 5GB. SPA direct routes/refresh return 404; hash routing supported by service-page guidance.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Not vetted or approved. Require explicit current provider/TOS compatibility for actual app function, verify no injected assets/tracking, CSP/CORS, account/asset security, data handling, commercial/financial status and safe deploy auth before considering.",
+   "servedAssetIntegrity": "unknown: Provider page says it serves the repository files as committed, with no build step. This is a provider statement, not independent asset-integrity verification; no live response test performed.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0154",
+     "url": "https://getvoroa.com/static-sites/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0155",
+     "url": "https://getvoroa.com/pricing/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0156",
+     "url": "https://getvoroa.com/terms/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0157",
+     "url": "https://getvoroa.com/privacy/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "vuw_ecs_new_zealand_institutional_webspace",
+   "name": "Victoria University of Wellington ECS homepages",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "New Zealand / university-IT institutional service",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0309",
+     "url": "https://ecs.wgtn.ac.nz/Support/TechNoteWebSite",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "webhostingkashmir_static_india",
+   "name": "WebHostingKashmir Free Static Hosting",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://www.webhostingkashmir.com/free-static-hosting",
+   "operator": "Web Hosting Kashmir (WHK; brand/site legal entity not independently verified)",
+   "operatorCountry": "India is claimed on product page; terms choose Indian law and Srinagar/Jammu & Kashmir courts and display Srinagar address. Corporate registration not independently verified.",
+   "market": null,
+   "docsLanguages": [
+    "en"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current recurring free plan; product page says no time limit/no card, but not a permanence guarantee.",
+   "freeLimits": "50 MB storage; free subdomain (yourname.aikashmir.in); free SSL; fair-use bandwidth up to 10 GB/month; beyond this operator says it will ask for upgrade, no surprise overage; custom domain not on free tier. Product page lists React/Vite/Next static build output, Astro/Hugo/Eleventy/Jekyll, and static SPAs.",
+   "suitability": "Potential candidate for small, non-sensitive art/docs/static demos if operator/terms/region and manual deployment are acceptable; retain own copy and keep within 50 MB/10 GB fair-use. New/limited provider; operator and performance claims not independently verified.",
+   "paymentKeyUiNote": "Not vetted or approved. No explicit permission for transaction/token UI; served-asset integrity, CSP/CORS, service-worker, security/privacy and SLA unknown. Manual account-based uploads create supply-chain/account risk. Provider no-ads statement is unverified. Require explicit product-specific terms and independent controls before any payment/key use.",
+   "servedAssetIntegrity": "provider_claim_no_ads_unverified: Product page explicitly claims “zero ads, zero branding” and no injected ads; no live served response was tested and no independent integrity guarantee found. Treat provider statement as claim; not green for key/payment UI.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0253",
+     "url": "https://www.webhostingkashmir.com/free-static-hosting",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0254",
+     "url": "https://www.webhostingkashmir.com/terms-of-service",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "webhostingrd_dominican_temporary_free_ftp_unknown_retention",
+   "name": "WebHosting RD",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "Dominican Republic-facing shared hosting",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0312",
+     "url": "https://webhostingrd.com/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "weezy_brazil_free_cpanel_domain_gate",
+   "name": "Weezy Soluções Digitais",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "unsupported",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": false,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "Brazil-focused Portuguese hosting",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0304",
+     "url": "https://weezy.com.br/hospedagem/gratis.html",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "xrea_free",
+   "name": "XREA Free",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://www.xrea.com/",
+   "operator": "GMO DigiRock, Inc. (GMOデジロック株式会社)",
+   "operatorCountry": "Japan",
+   "market": null,
+   "docsLanguages": [
+    "ja"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Recurring free plan; official XREA landing page says “free plan available ongoingly/forever”; not a permanence guarantee.",
+   "freeLimits": "Current plan table lists 10GB web storage, 5GB/day transfer, 100,000 max files, ads on free, 20 domains and 15-generation backups. Separate older generic spec page says 1GB (or 50MB for s600-and-earlier accounts), so treat 10GB as current plan table and verify account-specific capacity. Landing page warns inactivity/no access or login for extended period may result in suspension.",
+   "suitability": "Candidate status is only for the specific static-hosting use and constraints noted above; research seed, not an endorsement.",
+   "paymentKeyUiNote": "Do not recommend as a default for key/signing/payment UI: the provider documents ad-code insertion/required advertising on free plan, and commercial use wording conflicts across official pages. No explicit payment/crypto UI approval or ad-safe mitigation verified.",
+   "servedAssetIntegrity": "confirmed_provider_ads_in_some_file_types: Official XREA spec says ad code is automatically inserted in default/HTML/CGI/SSI file types, with an option to choose formats/locations but requirement to carry provider ads; on free plan this is not a clean asset-integrity guarantee. Prevents default recommendation for key/payment UI unless behavior and permissions are explicitly resolved.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0145",
+     "url": "https://www.xrea.com/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0146",
+     "url": "https://www.xrea.com/lp/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0147",
+     "url": "https://www.xrea.com/plan/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0148",
+     "url": "https://www.xrea.com/spec/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0149",
+     "url": "https://www.xrea.com/rules/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0150",
+     "url": "https://www.xrea.com/freeze/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0151",
+     "url": "https://help.xrea.com/manual/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0152",
+     "url": "https://www.digirock.co.jp/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0153",
+     "url": "https://www.digirock.co.jp/about/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "xserver_static_japan",
+   "name": "XServer Static",
+   "recordClass": "static_host_candidate",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "first-party source review; bounded candidate only; not user-eligibility verified, tested, vetted or approved",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": "https://static.xserver.ne.jp/",
+   "operator": "XServer Inc. (エックスサーバー株式会社)",
+   "operatorCountry": "Japan; operator page lists Osaka HQ and Tokyo office. This is operator-country evidence, not serving-region selection.",
+   "market": null,
+   "docsLanguages": [
+    "ja"
+   ],
+   "docsLanguagesNote": null,
+   "freeModel": "Current recurring free static-hosting service per official site/terms; no permanence guarantee.",
+   "freeLimits": "1 GB SSD storage, custom domain supported, free SSL and HTTP/2. Egress/bandwidth, request, file count/size and concurrency quotas not found in checked official docs. Terms say provider backup data not included.",
+   "suitability": "Localized candidate for permitted, non-sensitive static art/docs for eligible Japan-resident users/JP-based organizations; requires independent backups and current account/service status review. Not a global option.",
+   "paymentKeyUiNote": "Not vetted or approved. Strict resident/network restrictions, broad content clauses, unknown asset integrity and response headers, no provider backups, current third-party newsletter-list incident and service/admin suspension history require further review. Confirm business/financial permission and security posture before considering; do not deploy secrets or privileged tokens in browser.",
+   "servedAssetIntegrity": "unknown: Free SSL and static-content hosting are documented, but no independent served-content integrity test was performed; no explicit no-injection guarantee verified.",
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0247",
+     "url": "https://static.xserver.ne.jp/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0248",
+     "url": "https://static.xserver.ne.jp/rule/rule.php",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0249",
+     "url": "https://static.xserver.ne.jp/company.php",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0250",
+     "url": "https://static.xserver.ne.jp/support/manual/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0251",
+     "url": "https://static.xserver.ne.jp/news/detail.php?view_id=19734",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0252",
+     "url": "https://static.xserver.ne.jp/news/detail.php?view_id=19739",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  },
+  {
+   "id": "yegara_ethiopia_free_pro_et_static_1birr_gated",
+   "name": "Yegara HOST",
+   "recordClass": "regional_static_host_lead",
+   "adapterTier": "export/manual",
+   "evidenceStatus": "second-pass lead only; not promoted to verified/eligible candidate; consult source access status and profile unknowns",
+   "directBrowserPublishVerified": false,
+   "manualExportFallback": true,
+   "deploymentApiCorsStatus": "unknown/not verified in a controlled browser-origin test",
+   "canonicalUrl": null,
+   "operator": null,
+   "operatorCountry": null,
+   "market": "Ethiopia-oriented hosting with free .pro.et name",
+   "docsLanguages": null,
+   "docsLanguagesNote": null,
+   "freeModel": null,
+   "freeLimits": null,
+   "suitability": null,
+   "paymentKeyUiNote": null,
+   "servedAssetIntegrity": null,
+   "checkedUtc": "2026-10-24",
+   "sourcePins": [
+    {
+     "pinId": "S0294",
+     "url": "https://yegara.com/free",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0295",
+     "url": "https://yegara.com/en/guide/what-each-hosting-plan-can-run/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0296",
+     "url": "https://yegara.com/en/guide/upload-website-directadmin/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0297",
+     "url": "https://yegara.com/en/guide/pro-et-dns-setup/",
+     "checkedUtc": "2026-10-24"
+    },
+    {
+     "pinId": "S0298",
+     "url": "https://yegara.com/en/guide/ssl-and-https-free-certificate-and-not-secure/",
+     "checkedUtc": "2026-10-24"
+    }
+   ]
+  }
+ ]
+}

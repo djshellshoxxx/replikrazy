@@ -1,0 +1,208 @@
+{
+  "validation_kind": "mechanical_structure_and_provenance_only",
+  "checked_utc_date": "2026-10-25",
+  "json_parses": true,
+  "schema_file_present": true,
+  "source_input_hashes_captured": true,
+  "catalog_leads_rows": 311,
+  "provider_profile_rows": 62,
+  "provider_profile_kind_counts": {
+    "provider": 59,
+    "protocol": 3
+  },
+  "regional_offer_rows": 20,
+  "regional_offer_ids_unique": true,
+  "regional_offer_id_collisions_with_v11": 0,
+  "lead_profile_crosslisted_id_count": 14,
+  "distinct_record_ids_across_three_csv_collections": 379,
+  "csv_rows": 393,
+  "record_enrichment_rows": 2,
+  "market_sweep_rows": 25,
+  "workflow_route_rows": 8,
+  "workflow_route_ids_resolve_to_provider_profiles": true,
+  "workflow_direct_publish_qualified": 0,
+  "route_spec_index_rows": 62,
+  "route_spec_provider_ids_resolve": true,
+  "route_spec_status_counts": {
+    "linked-example-unapproved": 8,
+    "pending-route-adoption": 54
+  },
+  "source_url_checked_date_pair_count": 1002,
+  "undated_source_url_pair_count": 0,
+  "source_url_pin_gaps_in_primary_rows": [
+    {
+      "record_kind": "lead",
+      "record_id": "paraguay_local_hosting_unresolved",
+      "source_collection": "v11_catalog_leads",
+      "source_evidence_checked_utc": "2026-10-24"
+    },
+    {
+      "record_kind": "lead",
+      "record_id": "denmark_paid_webhost_not_open",
+      "source_collection": "v11_catalog_leads",
+      "source_evidence_checked_utc": "2026-10-24"
+    },
+    {
+      "record_kind": "lead",
+      "record_id": "poland_provider_search_outcome",
+      "source_collection": "v11_catalog_leads",
+      "source_evidence_checked_utc": "2026-10-24"
+    },
+    {
+      "record_kind": "lead",
+      "record_id": "serbia_provider_search_outcome",
+      "source_collection": "v11_catalog_leads",
+      "source_evidence_checked_utc": "2026-10-24"
+    },
+    {
+      "record_kind": "lead",
+      "record_id": "sweden_provider_search_outcome",
+      "source_collection": "v11_catalog_leads",
+      "source_evidence_checked_utc": "2026-10-24"
+    }
+  ],
+  "malformed_http_source_urls": [],
+  "runtime_tests_or_provider_probes": false,
+  "claim_of_operational_success": false,
+  "limitations": [
+    "Source URL structure was syntax-checked only; primary-source contents were not re-audited in this integration.",
+    "No account eligibility or current availability was tested.",
+    "Company/entity identities were not globally resolved; record counts are not unique company counts.",
+    "No browser API, CORS, authorization, upload, modern JavaScript, or onion/I2P runtime test occurred."
+  ],
+  "json_schema_validation": "pass",
+  "schema_id": null,
+  "exact_source_record_reconciliation": {
+    "catalog_leads": 311,
+    "provider_profiles": 62,
+    "regional_offers": 20,
+    "record_enrichments": 2,
+    "market_sweeps": 25,
+    "browser_workflow_routes": 8,
+    "hosting_route_spec_index": 62,
+    "all_source_record_objects_match_input_rows": true
+  },
+  "csv_validation": {
+    "rows": 393,
+    "record_kind_counts": {
+      "lead": 311,
+      "provider": 59,
+      "protocol": 3,
+      "offer": 20
+    },
+    "required_columns_present": true
+  },
+  "source_hash_validation": {
+    "source_count": 11,
+    "all_match": true,
+    "per_source": [
+      {
+        "source_key": "v11_catalog_leads",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "v11_provider_profiles",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "expansion_africa_middleeast",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "expansion_latin_america_caribbean",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "expansion_asia_europe",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "browser_workflow_routes",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "hosting_route_spec_coverage_index",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "hosting_route_registry_reference",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "tor_onion_route_reference",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "i2p_route_reference",
+        "hash_match": true,
+        "size_match": true
+      },
+      {
+        "source_key": "workflow_report_reference",
+        "hash_match": true,
+        "size_match": true
+      }
+    ]
+  },
+  "source_pin_validation": {
+    "unique_url_date_pairs": 1002,
+    "undated_url_pairs": 0,
+    "malformed_urls": 0,
+    "url_gap_rows": [
+      {
+        "record_id": "paraguay_local_hosting_unresolved",
+        "record_date": "2026-10-24",
+        "status": "gap: no source URL recorded; source check date exists"
+      },
+      {
+        "record_id": "denmark_paid_webhost_not_open",
+        "record_date": "2026-10-24",
+        "status": "gap: no source URL recorded; source check date exists"
+      },
+      {
+        "record_id": "poland_provider_search_outcome",
+        "record_date": "2026-10-24",
+        "status": "gap: no source URL recorded; source check date exists"
+      },
+      {
+        "record_id": "serbia_provider_search_outcome",
+        "record_date": "2026-10-24",
+        "status": "gap: no source URL recorded; source check date exists"
+      },
+      {
+        "record_id": "sweden_provider_search_outcome",
+        "record_date": "2026-10-24",
+        "status": "gap: no source URL recorded; source check date exists"
+      }
+    ]
+  },
+  "foreign_key_validation": {
+    "browser_route_catalog_ids_resolve": true,
+    "route_spec_provider_ids_resolve": true,
+    "enrichment_target_ids_resolve": true
+  },
+  "markdown_local_links": {
+    "checked": 5,
+    "broken": []
+  },
+  "privacy_secret_scan": {
+    "local_absolute_paths_found": false,
+    "library_or_file_ids_found": false,
+    "credential_pattern_matches": 0
+  },
+  "count_integrity": {
+    "lead_profile_overlap_ids": 14,
+    "new_offer_id_collisions": 0,
+    "distinct_ids_across_core_collections": 379,
+    "unique_legal_company_count": null
+  }
+}

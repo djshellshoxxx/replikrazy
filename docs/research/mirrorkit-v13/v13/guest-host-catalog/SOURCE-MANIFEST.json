@@ -1,0 +1,134 @@
+{
+  "catalog": "Replikrazy guest HTML/paste-to-web host catalog staging manifest",
+  "created_utc": "2026-10-25",
+  "staging_only": true,
+  "input_files": [
+    {
+      "path": "mirrorkit-research/v13/guest-routes/publishing-routes.json",
+      "sha256": "42f935d07aa0ab229e8aa7807c8b26253bc7cc5dff037d0e22938f8ee4b4c50e",
+      "bytes": 16740,
+      "checked_utc": "2026-10-25",
+      "raw_candidate_rows": 6,
+      "row_array": "routes"
+    },
+    {
+      "path": "mirrorkit-research/v13/guest-routes/discovery/asia/evidence.json",
+      "sha256": "0f3914bc7bdfec80dc9edec47ad7836f0c77a79f14eeab9cabcd46fdeeb8180d",
+      "bytes": 68166,
+      "checked_utc": "2026-10-25",
+      "raw_candidate_rows": 4,
+      "row_array": "routes"
+    },
+    {
+      "path": "mirrorkit-research/v13/guest-routes/discovery/multilingual/evidence.json",
+      "sha256": "d1e49edaad1b084297b2c931ebb0a019b421e6d3392d1c1b63a0ccccb7eb426b",
+      "bytes": 59137,
+      "checked_utc": "2026-10-25",
+      "raw_candidate_rows": 14,
+      "row_array": "routes"
+    },
+    {
+      "path": "mirrorkit-research/v13/guest-routes/discovery/legacy/evidence.json",
+      "sha256": "166756b9f11ba7d5247f26c97ac552b9a22b5c944cded6c046372042ca9906de",
+      "bytes": 27621,
+      "checked_utc": "2026-10-25",
+      "raw_candidate_rows": 5,
+      "row_array": "route_records"
+    },
+    {
+      "path": "mirrorkit-research/v13/research/search-methods/alternate-search-methods.json",
+      "sha256": "363b2cb5686bd2879623786a4c5af723aa08308fef22ff96b2a9ef8f3be1563c",
+      "bytes": 18370,
+      "checked_utc": "2026-10-25",
+      "raw_candidate_rows": 3,
+      "row_array": "first_party_leads"
+    }
+  ],
+  "crosscheck_baselines": [
+    {
+      "path": "mirrorkit-research/catalog/consolidated-leads.json",
+      "sha256": "f23adc6126492a666180c009f740a7719e0198d7fbcde00bf5c76938c3d6c495",
+      "bytes": 1692424,
+      "checked_utc": "2026-10-24",
+      "role": "read-only cross-check baseline; not an input to new route facts",
+      "row_count": 311
+    },
+    {
+      "path": "mirrorkit-research/catalog/consolidated-providers.json",
+      "sha256": "235675c53d1e67a7b813567e3c2a19832e45c08c7260436e668068891f501da8",
+      "bytes": 639414,
+      "checked_utc": "2026-10-24",
+      "role": "read-only cross-check baseline; not an input to new route facts",
+      "row_count": 62
+    }
+  ],
+  "row_lineage": {
+    "raw_candidate_rows_by_source": {
+      "guest_six": 6,
+      "asia": 4,
+      "multilingual": 14,
+      "legacy": 5,
+      "alternate": 3
+    },
+    "raw_candidate_rows_total": 32,
+    "supplementary_enrichment_and_disposition_rows_by_source": {
+      "asia_existing_profile_evidence_enrichments": 1,
+      "multilingual_existing_catalog_enrichments": 2,
+      "asia_discovery_dispositions": 6,
+      "legacy_adjacent_and_excluded": 3
+    },
+    "supplementary_enrichment_and_disposition_rows_total": 12,
+    "normalized_route_records": 31,
+    "unique_route_ids": 31,
+    "unique_provider_identities_in_route_records": 30,
+    "existing_catalog_enrichment_records_not_counted_as_routes_or_new_providers": 3,
+    "unique_provider_identities_across_routes_and_enrichments": 33,
+    "related_excluded_or_nonqualifying_records": 13,
+    "route_row_resolution": "The 32 raw candidate rows include one second-batch HDply duplicate (merged into one provider/route) and one 123HOST paid-only row (moved to related/excluded). Convika has one raw row with two independently described locale/version paths, split into two stable route IDs. HTMLDrop .com and .link are separate provider identities because no equivalence evidence exists. HTMLBox, HTMLy, and dochost updates are listed as existing-catalog enrichments, not new routes/providers.",
+    "lineage_count_definition": "Raw candidate row = one object in a route-record or first_party_leads array of the five named input JSON files. Supplementary rows are tracked separately. Unique provider identity is normalized domain identity, not legal-entity resolution. A route is a documented route/mode/locale record; related exclusions are separate."
+  },
+  "search_accounting": {
+    "accessible_named_engine_interfaces": [
+      "Bing",
+      "Naver",
+      "Cốc Cốc",
+      "Yahoo Search"
+    ],
+    "accessible_named_engine_interface_count": 4,
+    "yahoo_dependency": "Yahoo Search explicitly reported Powered by Bing.",
+    "index_independence": "Not assessed for Bing, Naver, or Cốc Cốc.",
+    "qwant": "Attempt failed to provide accessible page content; not counted as an accessible interface.",
+    "web_search_tool_provider": "Unspecified; not counted as an additional verified engine.",
+    "raw_query_routes_preserved_in": "guest-hosts.json search_method_accounting raw_engine_query_routes and raw_directory_query_routes."
+  },
+  "source_batch_counts": {
+    "guest_six": 6,
+    "asia": 4,
+    "multilingual": 14,
+    "legacy": 5,
+    "alternate": 3
+  },
+  "support_row_counts": {
+    "asia_existing_profile_evidence_enrichments": 1,
+    "multilingual_existing_catalog_enrichments": 2,
+    "asia_discovery_dispositions": 6,
+    "legacy_adjacent_and_excluded": 3
+  },
+  "outputs": [
+    {
+      "path": "mirrorkit-research/v13/guest-host-catalog/guest-hosts.json",
+      "bytes": 309464,
+      "sha256": "09fb5c304da8bdc2b5d1e0e342325945d58d6440bfa8dfb6553e7428fcdc4ca8"
+    },
+    {
+      "path": "mirrorkit-research/v13/guest-host-catalog/README.md",
+      "bytes": 3420,
+      "sha256": "21b7f9e82e77b323beb67e775df5a2a07688c8b659852ebf7b8edb9f4f2d9813"
+    },
+    {
+      "path": "mirrorkit-research/v13/guest-host-catalog/guest-hosts.csv",
+      "bytes": 180415,
+      "sha256": "1b9e10186eed0a2b41054fd6c718d5cb696e6ac7d9049c212111ae48cf11b38e"
+    }
+  ]
+}

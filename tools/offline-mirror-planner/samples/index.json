@@ -1,0 +1,60 @@
+{
+  "generatedAt": "2026-10-27T00:00:00.000Z",
+  "notice": "PLANNING ARTIFACT ONLY. Generated offline by the Replikrazy Offline Mirror Planner. Nothing was uploaded, published, registered, deployed or verified. No network request was made. Every address and capability in this plan was entered by a person and is unverified.",
+  "samples": [
+    {
+      "name": "demo-draft",
+      "description": "Built-in demo as shipped: bait files excluded, two unsafe paths rejected, mixed destination states. planState = draft.",
+      "planState": "draft",
+      "destinations": [
+        {
+          "label": "Operator laptop nginx (demo)",
+          "type": "local-server",
+          "state": "ready-for-manual-review"
+        },
+        {
+          "label": "Example static host (fictional)",
+          "type": "generic-static",
+          "state": "unverified"
+        },
+        {
+          "label": "Onion mirror (address pending)",
+          "type": "tor-onion",
+          "state": "ready-for-manual-review"
+        },
+        {
+          "label": "I2P mirror (needs tunnel name)",
+          "type": "i2p",
+          "state": "needs-configuration"
+        }
+      ]
+    },
+    {
+      "name": "clean-ready-for-manual-review",
+      "description": "Clean demo site with fully declared operator-managed destinations. planState = ready-for-manual-review (still unverified).",
+      "planState": "ready-for-manual-review",
+      "destinations": [
+        {
+          "label": "Operator nginx on loopback (sample)",
+          "type": "local-server",
+          "state": "ready-for-manual-review"
+        },
+        {
+          "label": "Operator Caddy under /library/ (sample)",
+          "type": "local-server",
+          "state": "ready-for-manual-review"
+        },
+        {
+          "label": "Onion mirror, address pending (sample)",
+          "type": "tor-onion",
+          "state": "ready-for-manual-review"
+        },
+        {
+          "label": "I2P mirror via Java I2P, address pending (sample)",
+          "type": "i2p",
+          "state": "ready-for-manual-review"
+        }
+      ]
+    }
+  ]
+}

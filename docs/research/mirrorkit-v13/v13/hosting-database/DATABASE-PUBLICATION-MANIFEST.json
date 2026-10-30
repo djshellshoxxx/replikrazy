@@ -1,0 +1,149 @@
+{
+  "manifest": "Replikrazy hosting database derived staging publication manifest",
+  "manifest_version": "1.0.0",
+  "generated_utc_date": "2026-10-25",
+  "status": "local_public_ready_staging_not_uploaded",
+  "source_input_snapshots": [
+    {
+      "source_key": "v11_catalog_leads",
+      "logical_path": "v11/catalog/consolidated-leads.json",
+      "sha256": "f23adc6126492a666180c009f740a7719e0198d7fbcde00bf5c76938c3d6c495",
+      "size_bytes": 1692424,
+      "input_role": "primary catalog data",
+      "transformation_note": "All source rows are preserved under source_record in their separate collections; record-level IDs and source pins remain intact."
+    },
+    {
+      "source_key": "v11_provider_profiles",
+      "logical_path": "v11/catalog/consolidated-providers.json",
+      "sha256": "235675c53d1e67a7b813567e3c2a19832e45c08c7260436e668068891f501da8",
+      "size_bytes": 639414,
+      "input_role": "primary catalog data",
+      "transformation_note": "All source rows are preserved under source_record in their separate collections; record-level IDs and source pins remain intact."
+    },
+    {
+      "source_key": "expansion_africa_middleeast",
+      "logical_path": "expansions/replikrazy-catalog-expansion-africa-20261025.json",
+      "sha256": "2f789f65119229c0a8d54b43003606f22f53c44aba99c3bfb2ad79154a4b0b65",
+      "size_bytes": 56912,
+      "input_role": "primary expansion data",
+      "transformation_note": "Selected offer, enrichment and market-sweep source objects are preserved under source_record; nonselected envelope fields are not copied. Local-only source-envelope path metadata is omitted."
+    },
+    {
+      "source_key": "expansion_latin_america_caribbean",
+      "logical_path": "expansions/replikrazy-catalog-expansion-latin-20261025.json",
+      "sha256": "32396b6866b062fca1de062e7b4366b4b8c4cd43c8652633a977b98d751258dc",
+      "size_bytes": 77431,
+      "input_role": "primary expansion data",
+      "transformation_note": "Selected offer, enrichment and market-sweep source objects are preserved under source_record; nonselected envelope fields are not copied. Local-only source-envelope path metadata is omitted."
+    },
+    {
+      "source_key": "expansion_asia_europe",
+      "logical_path": "expansions/replikrazy-catalog-expansion-asia-20261025.json",
+      "sha256": "937d9100b6d7c57b5e72587d727366451e2c9731bc64140cdab104ecafeef967",
+      "size_bytes": 45105,
+      "input_role": "primary expansion data",
+      "transformation_note": "Selected offer, enrichment and market-sweep source objects are preserved under source_record; nonselected envelope fields are not copied. Local-only source-envelope path metadata is omitted."
+    },
+    {
+      "source_key": "browser_workflow_routes",
+      "logical_path": "workflow-inputs/replikrazy-free-host-browser-routes-20261025.json",
+      "sha256": "aa9a9f6730ee34c7181156d1aa280d12334d1829bf15f09992680066b0b795b9",
+      "size_bytes": 73851,
+      "input_role": "structured workflow crosswalk",
+      "transformation_note": "All eight route objects and source registry objects are included as source_record/crosswalk data; no route is qualified or enabled."
+    },
+    {
+      "source_key": "hosting_route_spec_coverage_index",
+      "logical_path": "workflow-inputs/hosting-route-specs/providers/catalog-coverage-index.json",
+      "sha256": "bb0c700c6eb9ecbe5d5237c5c69ddbc8a7430f8748fc08af8a6a19ef0aee60a4",
+      "size_bytes": 29275,
+      "input_role": "route specification index crosswalk",
+      "transformation_note": "All 62 index rows are copied as documentation adoption references; they are not provider approvals or executable routing instructions."
+    },
+    {
+      "source_key": "hosting_route_registry_reference",
+      "logical_path": "workflow-inputs/hosting-route-specs/ROUTE_REGISTRY.md",
+      "sha256": "8608b9bc6495a01d41e34e1e0b428ad55d7819328d20b50d189269b364d39d2c",
+      "size_bytes": 4534,
+      "input_role": "documentation reference only",
+      "transformation_note": "Source bytes are hashed for provenance; the document body is not copied into this dataset. Only the explicitly summarized route prerequisites/limitations are represented."
+    },
+    {
+      "source_key": "tor_onion_route_reference",
+      "logical_path": "workflow-inputs/hosting-route-specs/routes/10_TOR_ONION.md",
+      "sha256": "9f8d407bb4c0e4538e4c87996db37f1f47150b776240f8cce1976896794a325a",
+      "size_bytes": 2433,
+      "input_role": "documentation reference only",
+      "transformation_note": "Source bytes are hashed for provenance; the document body is not copied into this dataset. Only the explicitly summarized route prerequisites/limitations are represented."
+    },
+    {
+      "source_key": "i2p_route_reference",
+      "logical_path": "workflow-inputs/hosting-route-specs/routes/11_I2P.md",
+      "sha256": "384b6325b4a120d9215f134c8af6d102ebf6cad63b5d3baacb18a3b3a4167ca4",
+      "size_bytes": 2429,
+      "input_role": "documentation reference only",
+      "transformation_note": "Source bytes are hashed for provenance; the document body is not copied into this dataset. Only the explicitly summarized route prerequisites/limitations are represented."
+    },
+    {
+      "source_key": "workflow_report_reference",
+      "logical_path": "workflow-inputs/replikrazy-free-host-browser-workflows-20261025.md",
+      "sha256": "957d9d87dd75262636e19d010ca8cc73d6b85cb3a99dd555b4afc5ca3ed7990a",
+      "size_bytes": 34924,
+      "input_role": "documentation reference only",
+      "transformation_note": "Source bytes are hashed for provenance; the document body is not copied into this dataset. Only the explicitly summarized route prerequisites/limitations are represented."
+    }
+  ],
+  "transformation_scope": {
+    "base_catalog": "All 311 consolidated lead rows and 62 provider/protocol profiles are copied as `source_record` objects into separate collections; no source rows edited.",
+    "regional_inputs": "All 20 offer objects, 2 existing-record enrichment objects, and 25 country/market sweep objects are extracted from the three source JSON files and preserved exactly as parsed JSON values. The rest of the source envelopes are not copied; source hashes preserve provenance.",
+    "routes": "Eight browser workflow routes are included unchanged as route records and joined only by exact catalog_id. Workflow report Markdown is listed as a documentation reference but is not copied into the database folder.",
+    "route_spec": "The 62-record catalog coverage index is included as an exact route-spec crosswalk only; pending records do not become provider-specific instructions or approvals.",
+    "path_metadata": "Local-only path metadata inside the three regional source envelopes is excluded from this derived output; selected record values, IDs, cited URLs, check dates and unknowns are retained.",
+    "csv": "Flat export contains one row for every lead/profile/offer record, preserving record kind/status and separate source collection; nested facts are compact JSON strings."
+  },
+  "output_files": [
+    {
+      "path": "DATA_DICTIONARY.md",
+      "sha256": "87a84e233811f3b7dce3c890757a8b6ddb013eaae31800da2f8b80c7cc81f26c",
+      "size_bytes": 4541
+    },
+    {
+      "path": "README.md",
+      "sha256": "5885058ae5dc707d980cc2ac6ad11d9cff2661659f7a5679370eea84fbea1c12",
+      "size_bytes": 4091
+    },
+    {
+      "path": "exports/hosting-database.csv",
+      "sha256": "a0ba8d02a73af1435a98c04e9a225f4b1676013955970746e817189620a169f5",
+      "size_bytes": 1019293
+    },
+    {
+      "path": "hosting-database.json",
+      "sha256": "2f76c81874c8caca9919e8fe7d14734e8183bc43ac97b1e2f19e87e41699264d",
+      "size_bytes": 3620420
+    },
+    {
+      "path": "schema/hosting-database.schema.json",
+      "sha256": "e7693b1ad2063860c7424fe2fc2fcc058d0bba76edb47ee6fdcdc57d4e6ab88e",
+      "size_bytes": 5219
+    },
+    {
+      "path": "validation/VALIDATION.json",
+      "sha256": "358dd5ae457d7bb3d7c75f7c1eb540c96c481a8420f89670dac42a9c1e600a52",
+      "size_bytes": 6237
+    }
+  ],
+  "expected_content_boundary": [
+    "No repository source code",
+    "No credentials/secrets",
+    "No private preparation notes",
+    "No GitHub write/publication",
+    "No runtime/provider qualification"
+  ],
+  "output_file_count": 6,
+  "quality_validation": {
+    "status": "mechanical_pass",
+    "report": "validation/VALIDATION.json",
+    "scope": "JSON schema, source-record/hash reconciliation, counts, exact foreign keys, citations, local links, public-safe path/secret pattern scan; not an evidence re-audit or operational test."
+  }
+}

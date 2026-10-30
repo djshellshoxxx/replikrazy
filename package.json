@@ -1,0 +1,29 @@
+{
+  "name": "replikrazy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-only static-site mirroring planner (formerly MirrorKit).",
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:planner": "npm --prefix tools/offline-mirror-planner test",
+    "test:all": "npm test && npm run test:planner && node tools/offline-mirror-planner/scripts/export-samples.cjs --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djshellshoxxx/replikrazy.git"
+  },
+  "dependencies": {
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.1",
+    "typescript": "5.6.3",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  }
+}

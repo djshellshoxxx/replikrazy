@@ -1,0 +1,127 @@
+{
+  "schema": "replikrazy.offline-mirror-destinations",
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-27T00:00:00.000Z",
+  "notice": "User-entered destination records. Addresses and capabilities are unverified. Contains no credentials.",
+  "settings": {
+    "siteLabel": "Lantern Community Library (fictional demo)",
+    "headers": [
+      {
+        "name": "X-Content-Type-Options",
+        "value": "nosniff"
+      },
+      {
+        "name": "Referrer-Policy",
+        "value": "no-referrer"
+      },
+      {
+        "name": "Content-Security-Policy",
+        "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'"
+      },
+      {
+        "name": "Permissions-Policy",
+        "value": "camera=(), microphone=(), geolocation=()"
+      },
+      {
+        "name": "Cross-Origin-Opener-Policy",
+        "value": "same-origin"
+      }
+    ],
+    "advertiseOnionLocation": false
+  },
+  "destinations": [
+    {
+      "id": "ready-local",
+      "type": "local-server",
+      "label": "Operator nginx on loopback (sample)",
+      "basePath": "/",
+      "notes": "Fictional sample. Every capability declared by the (fictional) operator.",
+      "config": {
+        "serverSoftware": "nginx",
+        "listenAddress": "127.0.0.1:8080",
+        "documentRoot": "/srv/replikrazy-mirror",
+        "publicUrl": ""
+      },
+      "capabilities": {
+        "byte-exact-delivery": "yes",
+        "custom-headers": "yes",
+        "content-type-control": "yes",
+        "directory-index": "yes",
+        "subdirectory-base-path": "unknown",
+        "custom-404": "yes",
+        "tls-https": "unknown",
+        "log-retention-control": "yes"
+      }
+    },
+    {
+      "id": "ready-caddy",
+      "type": "local-server",
+      "label": "Operator Caddy under /library/ (sample)",
+      "basePath": "/library/",
+      "notes": "",
+      "config": {
+        "serverSoftware": "caddy",
+        "listenAddress": "127.0.0.1:8081",
+        "documentRoot": "/srv/replikrazy-mirror-caddy",
+        "publicUrl": ""
+      },
+      "capabilities": {
+        "byte-exact-delivery": "yes",
+        "custom-headers": "yes",
+        "content-type-control": "yes",
+        "directory-index": "yes",
+        "subdirectory-base-path": "yes",
+        "custom-404": "yes",
+        "tls-https": "unknown",
+        "log-retention-control": "yes"
+      }
+    },
+    {
+      "id": "ready-onion",
+      "type": "tor-onion",
+      "label": "Onion mirror, address pending (sample)",
+      "basePath": "/",
+      "notes": "",
+      "config": {
+        "addressMode": "pending-operator",
+        "address": "",
+        "localTarget": "127.0.0.1:8080",
+        "virtualPort": "80",
+        "hiddenServiceDir": "/var/lib/tor/replikrazy-mirror/"
+      },
+      "capabilities": {
+        "byte-exact-delivery": "yes",
+        "custom-headers": "yes",
+        "content-type-control": "yes",
+        "directory-index": "yes",
+        "subdirectory-base-path": "unknown",
+        "custom-404": "yes",
+        "log-retention-control": "yes"
+      }
+    },
+    {
+      "id": "ready-i2p",
+      "type": "i2p",
+      "label": "I2P mirror via Java I2P, address pending (sample)",
+      "basePath": "/",
+      "notes": "",
+      "config": {
+        "router": "java-i2p",
+        "addressMode": "pending-operator",
+        "address": "",
+        "localTarget": "127.0.0.1:8080",
+        "tunnelName": "replikrazy-mirror",
+        "keysFile": ""
+      },
+      "capabilities": {
+        "byte-exact-delivery": "yes",
+        "custom-headers": "yes",
+        "content-type-control": "yes",
+        "directory-index": "yes",
+        "subdirectory-base-path": "unknown",
+        "custom-404": "yes",
+        "log-retention-control": "yes"
+      }
+    }
+  ]
+}
