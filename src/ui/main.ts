@@ -511,7 +511,36 @@ async function compareCopy(input: AnalysisInput) {
       const d = el("details");
       d.append(el("summary", `${title}: ${items.length}`));
       const ul = el("ul");
-      ul.append(...items.slice(0, 1000).map((t) => { const item = el("li", t); item.dir = "auto"; return item; }));
+      const pageSize = 1000;
+      let page = 0;
+      const range = el("p");
+      range.setAttribute("role", "status");
+      const previous = el("button", "Previous page");
+      const next = el("button", "Next page");
+      previous.type = next.type = "button";
+      const render = () => {
+        const start = page * pageSize;
+        ul.replaceChildren(...items.slice(start, start + pageSize).map((t) => {
+          const item = el("li", t); item.dir = "auto"; return item;
+        }));
+        range.textContent = `Showing ${start + 1}–${Math.min(start + pageSize, items.length)} of ${items.length}`;
+        previous.disabled = page === 0;
+        next.disabled = start + pageSize >= items.length;
+      };
+      previous.addEventListener("click", () => {
+        if (page === 0) return;
+        const focused = document.activeElement === previous;
+        page--; render();
+        if (focused && previous.disabled) next.focus();
+      });
+      next.addEventListener("click", () => {
+        if ((page + 1) * pageSize >= items.length) return;
+        const focused = document.activeElement === next;
+        page++; render();
+        if (focused && next.disabled) previous.focus();
+      });
+      render();
+      if (items.length > pageSize) d.append(range, previous, next);
       d.append(ul);
       return d;
     };

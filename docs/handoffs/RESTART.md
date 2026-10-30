@@ -1,3 +1,5 @@
+> Latest PR6 slice: [complete bounded comparison presentation](../reviews/2026-10-30-comparison-pages.md); prior root and focus fixes retained.
+
 > Latest PR6 slice: [intake/comparison cancellation focus](../reviews/2026-10-30-analysis-focus.md); existing comparison fix retained.
 
 > Current continuation: [wrapped-copy comparison fix](../reviews/2026-10-30-comparison-root.md) on chatgpt/local-workflow-20261030, based on merged main 3ccb71a.
