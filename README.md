@@ -21,8 +21,7 @@ dated research leads, not qualified providers. See
 
 ## Status: browser-only planner with local reliability checks
 
-This branch adds the first application implementation on top of the
-research-only landing page on `main`. No provider qualification, live
+This checkout contains the browser-only application and the separate offline planner. No provider qualification, live
 deployment or production readiness is claimed.
 
 | Area | State |

@@ -1,3 +1,5 @@
+> Latest: [2026-10-30 consolidation](docs/handoffs/CONSOLIDATION_20261030.md); earlier branch status is historical.
+
 # Integration update — 2026-10-28
 
 This branch combines canonical app a09d7b1 and planner CI abb7c31 in an isolated

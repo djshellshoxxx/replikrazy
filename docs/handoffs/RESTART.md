@@ -1,3 +1,5 @@
+> Latest: [2026-10-30 consolidation](CONSOLIDATION_20261030.md); earlier branch status is historical.
+
 > Current durable restart: [2026-10-28 handoff](CURRENT_20261028.md). It supersedes historical next-step/status claims below and records tested source separately from documentation heads.
 
 ## 2026-10-28 isolated standalone planner integration
