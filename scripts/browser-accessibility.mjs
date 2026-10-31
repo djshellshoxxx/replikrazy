@@ -49,10 +49,13 @@ try {
     assert.equal(await page.locator('#artifact-id').evaluate(e => getComputedStyle(e).direction), 'ltr');
     const ul = await page.locator('#issues').evaluate(e => ({ start: getComputedStyle(e).paddingInlineStart, end: getComputedStyle(e).paddingInlineEnd }));
     assert.deepEqual(ul, { start: '20px', end: '0px' });
+    // Open optional controls before checking their keyboard reachability.
+    // Newer Chromium can return rectangles for closed-details descendants.
+    await page.locator('#recovery-profile').evaluate(e => { e.closest('details').open = true; });
     // Give every visible control a stable testing-only token and traverse Tab.
     const expected = await page.evaluate(() => {
       let i = 0;
-      return [...document.querySelectorAll('input,select,button,summary,a[href]')].filter(e => e.getClientRects().length && !e.disabled).map(e => { e.dataset.tabCheck = String(i++); return e.dataset.tabCheck; });
+      return [...document.querySelectorAll('input,select,button,summary,a[href]')].filter(e => e.checkVisibility() && e.getClientRects().length && !e.disabled).map(e => { e.dataset.tabCheck = String(i++); return e.dataset.tabCheck; });
     });
     await page.locator('body').click({ position: { x: 1, y: 1 } });
     const reached = new Set();
