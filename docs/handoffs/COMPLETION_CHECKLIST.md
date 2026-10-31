@@ -1,3 +1,5 @@
+> Update: comparison reports and canonical bundle checking are now implemented as approved local modules; see [milestone](../reviews/2026-10-30-local-consumers.md). What-if, CLI, planner reader and UI wiring remain deferred. PR6 is merged; older status below is historical.
+
 # Accepted local-product completion checklist
 
 Implementation source: 4be1a4d21d43cf5fd4812b7911d7d7328521ce04 on chatgpt/local-workflow-20261030, draft PR6 into main 3ccb71ab060718f4f2a9223d6dd8eaed448a31d9. This checklist changes documentation only, not the tested implementation. Recheck live refs/ownership. Older branch tips are incorporated into main; no duplicate consolidation is needed. One integrator, no extra workers or paid calls. Source was clean and pushed before this update.
