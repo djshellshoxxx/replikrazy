@@ -10,6 +10,7 @@ import { analyze, factIssues } from "../core/analyze";
 import { buildExport, buildPayloadZip } from "../core/exporter";
 import type { BundleFile, IntakeIssue, IntakeResult } from "../core/intake";
 import { compareInventories, isIdentical, preferRootComparison } from "../core/compare";
+import { validatePath } from "../core/paths";
 import { type AnalysisInput, type Progress } from "../core/pipeline";
 import type { Inventory } from "../core/inventory";
 import { allowedTransitions, buildPlan, restorePlanStatuses, transition, type DryRunPlan } from "../core/plan";
@@ -489,23 +490,22 @@ async function compareCopy(input: AnalysisInput) {
   $("compare-cancel-btn").hidden = false;
   try {
     const progress: Progress = (stage, done, total) => { if (gen === compareGeneration) out.textContent = `Copy: ${stage} ${done} / ${total}`; };
-    // A copy may or may not be wrapped in one folder; keep whichever reading
-    // shares more paths with the original; unchanged bytes break overlap ties.
-    const plainResult = await compareTask.run(input, { stripRoot: false }, progress);
+    // Admit the payload after safe wrapper removal, just as original intake
+    // does. Derive both path interpretations from this one byte snapshot:
+    // a wrapper can push otherwise valid payload paths over the length limit.
+    const result = await compareTask.run(input, { stripRoot: true }, progress);
     if (gen !== compareGeneration) return;
-    if (!plainResult.ok) throw plainResult.error;
-    const plain = plainResult.value;
-    if (plain.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
-    let best = compareInventories(reference.entries, plain.inv.entries);
-    let removedRoot: string | null = null;
-    if (plain.intake.candidateRoot) {
-      const strippedResult = await compareTask.run(input, { stripRoot: true, expectedSourceDigest: plain.sourceDigest }, progress);
-      if (gen !== compareGeneration) return;
-      if (!strippedResult.ok) throw strippedResult.error;
-      const stripped = strippedResult.value;
-      if (stripped.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
-      const c = compareInventories(reference.entries, stripped.inv.entries);
-      if (preferRootComparison(best, c)) { best = c; removedRoot = plain.intake.candidateRoot; }
+    if (!result.ok) throw result.error;
+    const copy = result.value;
+    if (copy.intake.issues.some((i) => i.severity === "error")) throw new Error("invalid copy");
+    let best = compareInventories(reference.entries, copy.inv.entries);
+    let removedRoot = copy.intake.strippedRoot;
+    if (removedRoot) {
+      const originalPaths = copy.inv.entries.map((e) => ({ ...e, path: `${removedRoot}/${e.path}` }));
+      if (originalPaths.every((e) => validatePath(e.path).ok)) {
+        const plain = compareInventories(reference.entries, originalPaths);
+        if (!preferRootComparison(plain, best)) { best = plain; removedRoot = null; }
+      }
     }
     const list = (title: string, items: string[]) => {
       const d = el("details");
