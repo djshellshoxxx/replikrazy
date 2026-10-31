@@ -1,3 +1,5 @@
+> Latest continuation: [local defect fixes and fresh verification](../reviews/2026-10-30-local-verification.md), tested source 576473a. PR6 is merged; fixes in this continuation remain local. Start with the current completion checklist below. Older status entries are historical.
+
 > Start here: [accepted-product completion checklist](COMPLETION_CHECKLIST.md). Completed implementation, PR/CI status, acceptance gates and optional proposals are separated here.
 
 > Latest PR6 slice: [complete bounded comparison presentation](../reviews/2026-10-30-comparison-pages.md); prior root and focus fixes retained.

@@ -1,6 +1,6 @@
 # Accepted local-product completion checklist
 
-Implementation source: 4be1a4d21d43cf5fd4812b7911d7d7328521ce04 on chatgpt/local-workflow-20261030, draft PR6 into main 3ccb71ab060718f4f2a9223d6dd8eaed448a31d9. This checklist changes documentation only, not the tested implementation. Recheck live refs/ownership. Older branch tips are incorporated into main; no duplicate consolidation is needed. One integrator, no extra workers or paid calls. Source was clean and pushed before this update.
+Current tested implementation: 576473ad050fbd5cf50622e8c1a739c78f793336 on local branch `work`, based on merged main ee90c88de73b4d49698a3575d73373007d41c51f. PR6 merged on 2026-10-30; GitHub CI 41045376609 passed at that merge. Two local fixes address wrapped-copy path admission and dark-mode link contrast. [Evidence and restart](../reviews/2026-10-30-local-verification.md). No push, PR, merge, release or deployment occurred in this continuation. Earlier integration claims below are superseded by this paragraph.
 
 ## Implemented with recorded evidence
 
@@ -18,19 +18,18 @@ Implementation source: 4be1a4d21d43cf5fd4812b7911d7d7328521ce04 on chatgpt/local
 
 ## Known reproducible defects still open
 
-None identified in this bounded follow-up; this is not a defect-free warranty. PR6's three reproduced defects are fixed on the branch, not yet main. Original logs remain under /workspace/checkpoints: comparison-root-original.log, analysis-focus-original.log and comparison-pages-original.log. Committed regression scripts/tests preserve reproduction logic.
+None remain from this bounded follow-up; this is not a defect-free warranty. PR6's fixes are merged in main. The two additional defects reproduced during this continuation are fixed locally, with regression evidence in the linked review. Earlier logs and committed regressions remain preserved.
 
 Focused AI review at unchanged implementation source covered comparison selection/paging and focus changes, text rendering, worker result bounds, repeated-read digest binding, recovery payload binding, record-parser limits and manual export layout. It found no new reproduced defect. This reuses earlier reviews, not a fresh independent audit. Synchronous export is bounded by admitted input, but maximum-capacity responsiveness is not newly measured.
 
 ## Exact verification status
 
-- Local at 4be1a4d: 395 canonical tests, 166 planner tests, samples unchanged, typecheck/build passed.
-- Paging browser fixture at that source: 11 assertions, zero page errors/external requests.
-- Earlier slices separately passed 10 comparison-root assertions and eight LTR/RTL focus assertions; not a fresh combined browser run.
-- PR CI 41042004227 succeeded at 4be1a4d.
-- Separate push CI 41041995994 was still queued at review. Cause unknown; neither passed nor failed. No duplicate dispatch/cancellation/retry.
-- Main CI 41032154581 and 41032154579 passed at 3ccb71a.
-- No tests rerun solely for this documentation update; automatic CI for its head must be reported separately.
+- Canonical tests: 395 passed; standalone planner: 166 passed; committed samples unchanged. Full suites ran after the comparison fix; subsequent product change is one CSS rule only.
+- Final build/typecheck passed at source 576473a.
+- Chromium comparison-root regression: 20 assertions; main regressions: 46 checks; comparison paging: 11 assertions; cancellation focus: 8 checks. Zero page errors/external requests.
+- Final accessibility run: 16 axe scans, 16 reflow checks, 184 keyboard controls; zero violations/page errors/external requests. It explicitly opens optional controls before traversing them; hidden controls are excluded using visibility checks.
+- Separate AI reviewer: 57 focused tests passed and no remaining actionable findings in comparison fix. This is focused AI evidence, not independent human security acceptance.
+- Remote main CI 41045376609 passed at ee90c88. New local fixes are not pushed and have no remote CI result.
 
 ## Acceptance and access gates
 
@@ -38,7 +37,7 @@ Focused AI review at unchanged implementation source covered comparison selectio
 2. Human qualification: manual screen-reader/accessibility and independent security acceptance. AI checks cannot close these.
 3. Environment: local planner file navigation administratively denied; Firefox downloads denied. No retries/alternate routes. Claude browser evidence stays attributed. Real suspended-tab/OS and broader browser qualification remain unexecuted here.
 4. Private archive transfer retry allowance exhausted; full archive never recovered here. Do not retry or publish private source text.
-5. Integration: PR6 remains draft/unmerged. Creation approved; do not infer ready/merge/review authority from earlier PR-specific approvals or bypass denials. Verify current head, CI and applicable authority.
+5. Integration: PR6 is merged. This continuation has local commits only; no new remote integration or publication is claimed. Preserve unrelated remote consumer work (988b721), which is not main or an approved replacement scope.
 
 ## Optional/deferred
 
@@ -46,10 +45,8 @@ Consumer comparison reports, what-if and offline bundle packages remain proposal
 
 ## Next actions and restart
 
-1. Reconcile PR6/main and existing CI; preserve failure evidence if any. Review the complete diff and fix concrete findings only. Integrate when evidence and applicable authority permit.
-2. Obtain exact missing acceptance inputs and arrange human qualification. Continue independent engineering if a concrete defect is found; otherwise report implementation present with acceptance incomplete rather than inventing features.
-3. Keep tested source and documentation-only heads distinct in handoffs. Older contradictory next steps are historical.
+1. Review local commits 37553f6 and 576473a against main ee90c88. No unresolved finding remains from this slice. Remote publication/integration is separate.
+2. Obtain exact missing acceptance inputs and arrange human qualification. Continue independent engineering when a concrete defect is found; otherwise report implementation present with acceptance incomplete.
+3. Keep tested source and documentation-only heads distinct. See the linked latest review for exact commands, coordination and resource cleanup. Older contradictory next steps are historical.
 
-Executor: /workspace/replikrazy-integration, branch chatgpt/local-workflow-20261030. Original worktree /workspace/replikrazy preserved. Reuse installed dependencies and lockfile. Commands: npm run test:all; npm run build. Local preview: npm exec vite preview -- --host 127.0.0.1 --port 4174 --strictPort. Verify served build; old process may have expired.
-
-Existing browser tooling: BROWSER_TEST_TOOLS=/opt/codex/cua_node/lib node scripts/browser-comparison-pages.mjs; also browser-comparison-root.mjs and browser-analysis-focus.mjs. TEST_ORIGIN selects a canonical localhost preview only, never a workaround for the denied standalone planner. No downloads to recreate old results.
+Executor: /workspace/replikrazy, branch `work`. Dependencies installed using /workspace/scratch/npm-cache. Run `npm run test:all` and `npm run build`. Browser scripts use installed Chromium; no browser download needed. Use /workspace/scratch/browser-check-tools for BROWSER_TEST_TOOLS. Main regressions/accessibility expect a canonical preview at localhost:4173; root/focus/paging scripts default to localhost:4174. No alternate route to the denied standalone planner is authorized.
