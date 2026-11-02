@@ -1,3 +1,5 @@
+> Current source reconciliation: [PR7 + consumer consolidation](CONSOLIDATION_20261101.md). Earlier branch/status notes below are preserved history.
+
 > Update: comparison reports and canonical bundle checking are now implemented as approved local modules; see [milestone](../reviews/2026-10-30-local-consumers.md). What-if, CLI, planner reader and UI wiring remain deferred. PR6 is merged; older status below is historical.
 
 # Accepted local-product completion checklist

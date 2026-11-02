@@ -1,3 +1,5 @@
+> Current source reconciliation: [PR7 + consumer consolidation](docs/handoffs/CONSOLIDATION_20261101.md). Earlier branch/status notes below are preserved history.
+
 > Latest approved feature milestone: [local comparison reports and canonical bundle checking](docs/reviews/2026-10-30-local-consumers.md) on chatgpt/local-consumers-20261030. No UI/CLI/what-if integration.
 
 > Start here: [accepted-product completion checklist](docs/handoffs/COMPLETION_CHECKLIST.md). Completed implementation, PR/CI status, acceptance gates and optional proposals are separated here.
