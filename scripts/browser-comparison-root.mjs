@@ -25,6 +25,39 @@ try {
   await page.locator('#cmp-zip').setInputFiles(archive('index.html','a'));
   await page.waitForFunction(()=>document.querySelector('#compare-result').textContent.includes('Every file matches'));
   assert.match(await page.locator('#compare-result').textContent(),/no wrapper removed/);
+  // Payload paths at the 240-byte limit remain valid under a safe wrapper.
+  // Comparing the identical selection must apply the same admission rules.
+  const longPath = 'a'.repeat(115) + '/' + 'b'.repeat(113) + '/index.html';
+  assert.equal(Buffer.byteLength(longPath), 240);
+  const wrapped = {name:'wrapped.zip',mimeType:'application/zip',buffer:Buffer.from(zipSync({
+    'site/index.html':Buffer.from('public'), ['site/' + longPath]:Buffer.from('nested'),
+  }))};
+  await page.locator('#zip-input').setInputFiles(wrapped);
+  await page.locator('#root-choice input').check();
+  await page.waitForFunction(()=>document.querySelector('#artifact-id').textContent.includes('sha256:'));
+  const longIdentity = await page.locator('#artifact-id').textContent();
+  await page.locator('#cmp-zip').setInputFiles(wrapped);
+  await page.waitForFunction(()=>document.querySelector('#compare-cancel-btn').hidden);
+  assert.match(await page.locator('#compare-result').textContent(), /Every file matches/);
+  assert.match(await page.locator('#compare-result').textContent(), /Matching: 2/);
+  assert.match(await page.locator('#compare-result').textContent(), /removed wrapper site/);
+  assert.equal(await page.locator('#artifact-id').textContent(), longIdentity);
+  // Keep an existing nested path when that interpretation matches better.
+  await page.locator('#zip-input').setInputFiles({name:'plain.zip',mimeType:'application/zip',buffer:Buffer.from(zipSync({
+    'index.html':Buffer.from('a'), 'site/index.html':Buffer.from('b'),
+  }))});
+  await page.waitForFunction(()=>document.querySelector('#artifact-id').textContent.includes('sha256:'));
+  await page.locator('#cmp-zip').setInputFiles(archive('site/index.html','b'));
+  await page.waitForFunction(()=>document.querySelector('#compare-cancel-btn').hidden);
+  assert.match(await page.locator('#compare-result').textContent(), /no wrapper removed/);
+  assert.match(await page.locator('#compare-result').textContent(), /Matching: 1/);
+  assert.match(await page.locator('#compare-result').textContent(), /Changed: 0/);
+  // A safe wrapper cannot launder traversal or overlong payload paths.
+  for (const path of ['site/../index.html', 'site/' + longPath + 'x']) {
+    await page.locator('#cmp-zip').setInputFiles(archive(path, 'hostile'));
+    await page.waitForFunction(()=>document.querySelector('#compare-cancel-btn').hidden);
+    assert.match(await page.locator('#compare-result').textContent(), /Could not read this input/);
+  }
   assert.deepEqual(errors,[]); assert.deepEqual(external,[]);
-  console.log('10 comparison root assertions passed; zero page errors/external requests.');
+  console.log('20 comparison root assertions passed; zero page errors/external requests.');
 } finally { await browser.close(); }
