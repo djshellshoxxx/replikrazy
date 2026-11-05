@@ -1,3 +1,8 @@
+> Current source reconciliation: [PR7 + consumer consolidation](CONSOLIDATION_20261101.md). Earlier branch/status notes below are preserved history.
+
+> Latest approved feature milestone: [local comparison reports and canonical bundle checking](../reviews/2026-10-30-local-consumers.md) on chatgpt/local-consumers-20261030. No UI/CLI/what-if integration.
+> Current continuation: PR8 on `chatgpt/consolidation-20261101`, tested integrated source `1fc62cfd99801d50285e85902f8c6a5d497e6b0b`; reliability fixes and approved local consumer modules are pushed, not yet merged. Historical reliability source `576473a` and its [verification](../reviews/2026-10-30-local-verification.md) remain evidence only. Start with the current completion checklist below; older status entries are historical.
+
 > Start here: [accepted-product completion checklist](COMPLETION_CHECKLIST.md). Completed implementation, PR/CI status, acceptance gates and optional proposals are separated here.
 
 > Latest PR6 slice: [complete bounded comparison presentation](../reviews/2026-10-30-comparison-pages.md); prior root and focus fixes retained.
